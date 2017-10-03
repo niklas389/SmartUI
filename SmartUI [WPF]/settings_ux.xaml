@@ -3,23 +3,21 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:SmartUI__WPF_"
-        xmlns:Custom="http://metro.mahapps.com/winfx/xaml/controls" xmlns:Dialogs="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro" x:Name="settings_ux" x:Class="wnd_settings"
+        xmlns:Custom="http://metro.mahapps.com/winfx/xaml/controls" x:Name="settings_ux" x:Class="wnd_settings"
         mc:Ignorable="d"
-        Title="Einstellungen" Height="383" Width="550" Background="#B2000000" Foreground="White" AllowsTransparency="True" WindowStyle="None" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+        Title="Einstellungen" Height="383" Width="550" Background="#B2000000" Foreground="White" AllowsTransparency="True" WindowStyle="None" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" Topmost="True">
     <Window.Resources>
         <SolidColorBrush x:Key="MainColorBtn">#0CFFFFFF</SolidColorBrush>
     </Window.Resources>
+
     <Grid x:Name="grd_main">
         <Label x:Name="label" Content="Info: Designtest - Die &quot;Sonstiges&quot; Einstellungen haben keine funktion" HorizontalAlignment="Left" Margin="0,357,0,0" VerticalAlignment="Top" Width="390" Foreground="#33FFFFFF" Visibility="Hidden"/>
         <Button x:Name="btn_wnd_minimize" Content="0" HorizontalAlignment="Left" Margin="480,0,0,0" VerticalAlignment="Top" Width="35" Foreground="#3FFFFFFF" Background="#00000000" BorderBrush="#00707070" Height="25" FontFamily="Webdings"/>
         <Button x:Name="btn_wnd_hide" Content="r" Margin="515,0,0,358" VerticalAlignment="Bottom" Foreground="#3FFFFFFF" Background="#00000000" BorderBrush="#00707070" Height="25" FontFamily="Webdings"/>
         <Custom:MetroContentControl x:Name="lbl_header" Content="EINSTELLUNGEN" HorizontalAlignment="Center" Margin="0,8,0,0" VerticalAlignment="Top" Foreground="White" FontSize="18.667" FontFamily="Segoe UI Light" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
-        <Custom:Flyout x:Name="flyout_settings_saved" VerticalAlignment="Bottom" CloseButtonVisibility="Collapsed" Position="Bottom" TitleVisibility="Collapsed" HorizontalAlignment="Center" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="65" Background="#19FFFFFF" AnimateOpacity="True" AnimateOnPositionChange="False" AutoCloseInterval="2000" IsAutoCloseEnabled="True">
-            <Label x:Name="lbl_flyout_settings_text" Content="Ihre Änderungen wurden gespeichert!" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="White" Background="{x:Null}" Width="550" VerticalContentAlignment="Center" FontSize="14.5" HorizontalContentAlignment="Center" Height="65" FontFamily="Segoe UI Light" TextOptions.TextHintingMode="Fixed"/>
-        </Custom:Flyout>
+
         <Custom:MetroAnimatedTabControl x:Name="matc_tabctrl" Margin="0,25,0,0">
-            <TabItem x:Name="matc_main" Header="Settings Main" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}">
+            <TabItem x:Name="matc_main" Header="Settings Main" Background="{x:Null}" Foreground="#FF838383" BorderBrush="{x:Null}">
                 <Grid x:Name="matc_tab_main">
                     <Grid HorizontalAlignment="Left" Height="155" VerticalAlignment="Top" Width="550" Margin="0">
                         <Grid.ColumnDefinitions>
@@ -83,12 +81,9 @@
                         <Label Content="Sonstiges" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light" Margin="10,5,0,0"/>
                         <Separator HorizontalAlignment="Left" Height="10" Margin="15,30,0,0" VerticalAlignment="Top" Width="525" Foreground="#FF13EAAC" Background="#3FFFFFFF"/>
                         <Button x:Name="btn_changelog" Content="Changelog" HorizontalAlignment="Left" Margin="465,45,0,0" VerticalAlignment="Top" Width="75" Foreground="#7FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25"/>
-                        <Label x:Name="lbl_spotifyCheck" Content="Spotify Version:" HorizontalAlignment="Left" Margin="10,44,0,0" VerticalAlignment="Top" Width="315" Foreground="#3FFFFFFF" Height="30"/>
                         <Button x:Name="btn_credits" Content="Credits" HorizontalAlignment="Left" Margin="465,105,0,0" VerticalAlignment="Top" Width="75" Foreground="#3FFFFFFF" Background="#00000000" BorderBrush="#00707070" Height="25" Visibility="Hidden"/>
-                        <Button x:Name="btn_info_3rdpty" Content="Drittanbieter Software" HorizontalAlignment="Left" Margin="330,45,0,0" VerticalAlignment="Top" Width="135" Foreground="#7FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25"/>
-                        <Button x:Name="btn_cache_reset" Content="Cache löschen" HorizontalAlignment="Left" Margin="446,76,0,0" VerticalAlignment="Top" Width="94" Foreground="#7FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25"/>
-                        <Label x:Name="lbl_cacheSize" Content="&lt;cache_size&gt;" HorizontalAlignment="Left" Margin="10,75,0,0" VerticalAlignment="Top" Width="341" Foreground="#3FFFFFFF" Height="30"/>
-                        <Button x:Name="btn_cache_refresh" Content="Aktualisieren" HorizontalAlignment="Left" Margin="361,76,0,0" VerticalAlignment="Top" Width="85" Foreground="#7FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25"/>
+                        <Button x:Name="btn_info_3rdpty" Content="Drittanbieter Software" HorizontalAlignment="Left" Margin="405,75,0,0" VerticalAlignment="Top" Width="135" Foreground="#7FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25"/>
+                        <Button x:Name="btn_spotify" Content="Spotify" HorizontalAlignment="Left" Margin="390,45,0,0" VerticalAlignment="Top" Width="75" Foreground="#7FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25"/>
                     </Grid>
                     <Grid x:Name="grd_bottom_strip" Height="28" VerticalAlignment="Bottom" Margin="0">
                         <Button x:Name="btn_settings_save" Content="Speichern" HorizontalAlignment="Right" Margin="0,-6,10,10" VerticalAlignment="Center" Width="85" Foreground="#7FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="24"/>
@@ -96,7 +91,7 @@
                     </Grid>
                 </Grid>
             </TabItem>
-            <TabItem x:Name="matc_weather" Header="Weather" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
+            <TabItem x:Name="matc_weather" Header="Weather" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF898989">
                 <Grid x:Name="matc_tab_weather">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
@@ -112,27 +107,47 @@
                     <TextBox x:Name="txtBx_weather_zipcode" HorizontalAlignment="Center" Height="23" Margin="211,240,219,0" TextWrapping="Wrap" Text="&lt;City ID&gt;" VerticalAlignment="Top" Width="120" Background="#0CFFFFFF" BorderBrush="#0CFFFFFF" Foreground="White"/>
                     <Label x:Name="lbl_overlay_description_Copy" Content="Hier fügen Sie die ID ihrer Stadt ein" HorizontalAlignment="Left" Margin="15,201,0,0" VerticalAlignment="Top" Width="221" Foreground="#7FFFFFFF" Height="34"/>
                     <Label x:Name="lbl_wcom_check" Content="&lt;wcom_check&gt;" HorizontalAlignment="Left" Margin="10,268,0,0" VerticalAlignment="Top" Width="530" Foreground="#3FFFFFFF" Height="30"/>
-                    <Button x:Name="btn_weather_back" Content="Zurück" HorizontalAlignment="Left" Margin="10,0,0,10" VerticalAlignment="Bottom" Width="85" Foreground="#3FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25"/>
                 </Grid>
             </TabItem>
-            <TabItem x:Name="matc_changelog" Header="Changelog" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" Width="54" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
+            <TabItem x:Name="matc_changelog" Header="Changelog" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" Width="54" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF707070">
                 <Grid x:Name="matc_tab_changelog">
                     <Label x:Name="lbl_header_Copy2" Content="Was ist neu in dieser Version?" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light" Margin="10,5,0,0"/>
                     <Separator Height="10" Margin="15,30,15,0" VerticalAlignment="Top" Foreground="#FF13EAAC" Background="#3FFFFFFF"/>
                     <RichTextBox x:Name="rtb_chLog" Margin="15,45,15,40" Background="Transparent" BorderBrush="#00ABADB3" Foreground="White" BorderThickness="0" IsReadOnlyCaretVisible="True" SelectionBrush="#FF00F19F" Block.LineHeight="7" SelectionOpacity="0.3" IsDocumentEnabled="True" IsReadOnly="True">
                         <FlowDocument IsColumnWidthFlexible="False" AllowDrop="False" Language="de-de" IsEnabled="False"/>
                     </RichTextBox>
-                    <Button x:Name="btn_changelog_back" Content="Zurück" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="85" Foreground="#7FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25" Margin="10,0,0,10"/>
+                </Grid>
+            </TabItem>
+            <TabItem x:Name="matc_spotify" Header="Spotify" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" Width="54" Foreground="#FF767676" Background="{x:Null}" BorderBrush="{x:Null}">
+                <Grid x:Name="matc_tab_spotify">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Label x:Name="lbl_spotifyCheck" Content="Spotify Version:" HorizontalAlignment="Left" Margin="15,45,0,0" VerticalAlignment="Top" Width="520" Foreground="#3FFFFFFF" Height="30"/>
+                    <Label x:Name="lbl_cacheSize" Content="&lt;cache_size&gt;" HorizontalAlignment="Left" Margin="15,80,0,0" VerticalAlignment="Top" Width="331" Foreground="#3FFFFFFF" Height="30"/>
+                    <Button x:Name="btn_cache_reset" Content="Cache löschen" Margin="441,81,15,0" VerticalAlignment="Top" Foreground="#7FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25"/>
+                    <Button x:Name="btn_cache_refresh" Content="Aktualisieren" HorizontalAlignment="Left" Margin="351,81,0,0" VerticalAlignment="Top" Width="85" Foreground="#7FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25"/>
+                    <Label x:Name="lbl_header_spfy" Content="Alles zur Spotify Integration" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light" Margin="10,5,0,0"/>
+                    <Separator Height="10" Margin="15,30,15,0" VerticalAlignment="Top" Foreground="#FF13EAAC" Background="#3FFFFFFF"/>
+                    <Button x:Name="btn_restart_spotify" Content="Force Restart Spotify" Margin="351,111,15,0" VerticalAlignment="Top" Foreground="#7FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25"/>
                 </Grid>
             </TabItem>
         </Custom:MetroAnimatedTabControl>
-        <Custom:Flyout x:Name="flyout_cache_reset" Header="" HorizontalAlignment="Left" Height="125" VerticalAlignment="Bottom" Background="#33FFFFFF" Margin="0" AnimateOpacity="True" AutoCloseInterval="0" CloseButtonVisibility="Collapsed" Position="Bottom" IsOpen="True">
+        <Custom:Flyout x:Name="flyout_cache_reset" Header="" HorizontalAlignment="Left" Height="125" VerticalAlignment="Bottom" Background="#33FFFFFF" Margin="0" AnimateOpacity="True" AutoCloseInterval="0" CloseButtonVisibility="Collapsed" Position="Bottom">
             <Grid x:Name="grd_reset_cache_confirmation_Copy" Margin="0,12,35,0">
                 <Custom:MetroContentControl x:Name="lbl_reset_cache_header" Content="Sind Sie sicher?" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Top" Foreground="White" FontSize="18.667" FontFamily="Segoe UI Light" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
                 <Button x:Name="btn_reset_cache_confirm" Content="Löschen" HorizontalAlignment="Right" Margin="0,0,-27,5" VerticalAlignment="Bottom" Width="85" Foreground="White" Background="#66000000" BorderBrush="{x:Null}" Height="26"/>
                 <Button x:Name="btn_reset_cache_cancel" Content="Abbrechen" HorizontalAlignment="Right" Margin="0,0,63,5" VerticalAlignment="Bottom" Width="85" Foreground="White" Background="#66000000" BorderBrush="{x:Null}" Height="26"/>
-                <Label x:Name="lbl_reset_cache_msg" Content="Alle Zwischengespeicherten Album-Cover werden entfernt, sodass &#xD;&#xA;diese  erneut heruntergeladen werden müssen. " HorizontalAlignment="Center" Margin="58,30,58,34" VerticalAlignment="Center" Foreground="White" Height="49" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Background="{x:Null}"/>
+                <Label x:Name="lbl_reset_cache_msg" Content="Alle Zwischengespeicherten Album-Cover werden entfernt, sodass &#xA;diese  erneut heruntergeladen werden müssen. " HorizontalAlignment="Center" Margin="58,30,58,34" VerticalAlignment="Center" Foreground="White" Height="49" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Background="{x:Null}"/>
+            </Grid>
+        </Custom:Flyout>
+        <Image x:Name="ico_backToStart" HorizontalAlignment="Left" Height="25" VerticalAlignment="Top" Width="25" Margin="12,10,0,0" Source="Resources/ic_arrow_back_white_24dp.png"/>
+        <Custom:Flyout x:Name="flyout_settings_saved" VerticalAlignment="Bottom" CloseButtonVisibility="Collapsed" Position="Bottom" TitleVisibility="Collapsed" HorizontalAlignment="Center" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="65" Background="#19FFFFFF" AnimateOpacity="True" AnimateOnPositionChange="False" AutoCloseInterval="2500" IsAutoCloseEnabled="True">
+            <Grid x:Name="grd_flyout_settings_saved" HorizontalAlignment="Center" Height="30" Margin="-27,0,0,0" VerticalAlignment="Center">
+                <Label x:Name="lbl_flyout_settings_text" Content="Ihre Änderungen wurden gespeichert!" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Background="{x:Null}" VerticalContentAlignment="Center" FontSize="14.5" HorizontalContentAlignment="Center" FontFamily="Segoe UI Light" TextOptions.TextHintingMode="Fixed" Margin="27,0,0,0"/>
+                <Custom:ProgressRing x:Name="pring_flyout_settings_saved" HorizontalAlignment="Left" Margin="0,3,0,0" VerticalAlignment="Top" Width="23" Height="23"/>
             </Grid>
         </Custom:Flyout>
     </Grid>
+
 </Window>

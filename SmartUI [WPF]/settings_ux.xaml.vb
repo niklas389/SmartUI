@@ -89,6 +89,7 @@ Public Class wnd_settings
         matc_main.Visibility = Visibility.Hidden
         matc_weather.Visibility = Visibility.Hidden
         matc_changelog.Visibility = Visibility.Hidden
+        matc_spotify.Visibility = Visibility.Hidden
         flyout_cache_reset.IsOpen = False
 
         'Spotify Check
@@ -249,6 +250,15 @@ Public Class wnd_settings
 
 #End Region
 
+    Private Sub btn_changelog_back_Click(sender As Object, e As RoutedEventArgs) Handles ico_backToStart.MouseLeftButtonDown
+        matc_tabctrl.SelectedIndex = 0
+        lbl_header.Content = "EINSTELLUNGEN"
+    End Sub
+
+    Private Sub flyout_settings_saved_closed(sender As Object, e As RoutedEventArgs) Handles flyout_settings_saved.ClosingFinished
+        pring_flyout_settings_saved.Visibility = Visibility.Hidden
+    End Sub
+
 #Region "Weather & API-Key Overlay"
     Private Sub cb_wndmain_weather_enabled_Checked(sender As Object, e As RoutedEventArgs) Handles cb_wndmain_weather_enabled.Click
         If txtBx_weather_zipcode.Text = "<City ID>" Or txtBx_weather_APIkey.Text = "<API Key>" Then
@@ -262,7 +272,6 @@ Public Class wnd_settings
     Private Async Sub weather_api_test()
         lbl_wcom_check.Visibility = Visibility.Hidden
         btn_ovlay_setKey.Visibility = Visibility.Hidden
-        btn_weather_back.Visibility = Visibility.Hidden
 
         flyout_settings_saved.IsAutoCloseEnabled = False
         flyout_settings_saved.IsOpen = True
@@ -299,7 +308,6 @@ Public Class wnd_settings
 
             lbl_wcom_check.Visibility = Visibility.Visible
             btn_ovlay_setKey.Visibility = Visibility.Visible
-            btn_weather_back.Visibility = Visibility.Visible
 
         Catch ex As WebException
             api_errmsg("API-Key & City-ID prüfen (PE)")
@@ -313,7 +321,6 @@ Public Class wnd_settings
         flyout_settings_saved.IsOpen = False
         lbl_wcom_check.Visibility = Visibility.Visible
         btn_ovlay_setKey.Visibility = Visibility.Visible
-        btn_weather_back.Visibility = Visibility.Visible
     End Sub
 
     'API Overlay
@@ -323,76 +330,12 @@ Public Class wnd_settings
 
     Private Sub btn_overlay_show_Click(sender As Object, e As RoutedEventArgs) Handles btn_overlay_show.Click
         matc_tabctrl.SelectedIndex = 1
+        lbl_header.Content = "WETTER"
     End Sub
 
     Private Sub btn_oww_getKey_Click(sender As Object, e As RoutedEventArgs) Handles btn_oww_getKey.Click
-        System.Diagnostics.Process.Start("http://openweathermap.org/appid")
+        Process.Start("http://openweathermap.org/appid")
     End Sub
-
-    Private Sub btn_weather_back_Click(sender As Object, e As RoutedEventArgs) Handles btn_weather_back.Click
-        matc_tabctrl.SelectedIndex = 0
-    End Sub
-
-#End Region
-
-#Region "AlbumArt Cache"
-    Private Sub cache_getSize()
-
-        Dim cache_size As Int64
-        Dim files_count As Integer
-        If IO.Directory.Exists(AppDomain.CurrentDomain.BaseDirectory & "cache\media\") Then
-            For Each file As String In System.IO.Directory.EnumerateFiles(AppDomain.CurrentDomain.BaseDirectory & "cache\media\", "*.*", System.IO.SearchOption.AllDirectories)
-                cache_size += My.Computer.FileSystem.GetFileInfo(file).Length
-                files_count += 1
-            Next
-
-            If cache_size = 0 Then
-                lbl_cacheSize.Content = "Keine Album-Cover zwischengespeichert"
-            ElseIf cache_size < 1048576 Then
-                'lbl_cacheSize.Content = "Zwischengespeicherte Album-Cover: " & (cache_size / 1024).ToString("0") & "KB (" & files_count & ")"
-                lbl_cacheSize.Content = "Album-Cover zwischengespeichert: " & files_count & " (" & (cache_size / 1024).ToString("0") & "KB)"
-            Else
-                'lbl_cacheSize.Content = "Zwischengespeicherte Album-Cover: " & (cache_size / 1048576).ToString("0.0") & "MB (" & files_count & ")"
-                lbl_cacheSize.Content = "Album-Cover zwischengespeichert: " & files_count & " (" & (cache_size / 1048576).ToString("0.0") & "MB)"
-            End If
-        Else
-            lbl_cacheSize.Content = "Keine Album-Cover zwischengespeichert"
-        End If
-
-    End Sub
-
-    Private Sub btn_cache_refresh_Click(sender As Object, e As RoutedEventArgs) Handles btn_cache_refresh.Click
-        cache_getSize()
-    End Sub
-
-    Private Sub btn_cache_reset_Click(sender As Object, e As RoutedEventArgs) Handles btn_cache_reset.Click
-        'grd_msg_bg.Visibility = Visibility.Visible
-        flyout_cache_reset.IsOpen = True
-        Dim c_blur As New Effects.BlurEffect
-        c_blur.Radius = 10
-        matc_tabctrl.Effect = c_blur
-    End Sub
-
-    Private Sub btn_reset_cache_confirm_Click(sender As Object, e As RoutedEventArgs) Handles btn_reset_cache_confirm.Click
-        If IO.Directory.Exists(AppDomain.CurrentDomain.BaseDirectory & "cache\media\") Then
-            For Each file As String In System.IO.Directory.EnumerateFiles(AppDomain.CurrentDomain.BaseDirectory & "cache\media\", "*.*", System.IO.SearchOption.AllDirectories)
-                Try
-                    IO.File.Delete(file)
-                Catch ex As Exception
-                End Try
-            Next
-        End If
-
-        cache_getSize()
-        flyout_cache_reset.IsOpen = False
-        matc_tabctrl.Effect = Nothing
-    End Sub
-
-    Private Sub btn_reset_cache_cancel_Click(sender As Object, e As RoutedEventArgs) Handles btn_reset_cache_cancel.Click
-        flyout_cache_reset.IsOpen = False
-        matc_tabctrl.Effect = Nothing
-    End Sub
-
 
 #End Region
 
@@ -425,10 +368,6 @@ Public Class wnd_settings
         End If
     End Sub
 
-    Private Sub btn_changelog_back_Click(sender As Object, e As RoutedEventArgs) Handles btn_changelog_back.Click
-        matc_tabctrl.SelectedIndex = 0
-        lbl_header.Content = "EINSTELLUNGEN"
-    End Sub
 
     '3rd PTY
     Private Sub btn_info_3rdpty_Click(sender As Object, e As RoutedEventArgs) Handles btn_info_3rdpty.Click
@@ -441,6 +380,91 @@ Public Class wnd_settings
             Me.Visibility = Visibility.Visible
         End If
     End Sub
+#End Region
+
+#Region "Spotify"
+    Private Sub btn_spotify_Click(sender As Object, e As RoutedEventArgs) Handles btn_spotify.Click
+        matc_tabctrl.SelectedIndex = 3
+        lbl_header.Content = "SPOTIFY"
+    End Sub
+
+    Private Sub matc_tabctrl_SelectionChanged(sender As Object, e As SelectionChangedEventArgs) Handles matc_tabctrl.SelectionChanged
+        If Not matc_tabctrl.SelectedIndex = 0 Then
+            ico_backToStart.Visibility = Visibility.Visible
+        Else
+            ico_backToStart.Visibility = Visibility.Hidden
+        End If
+    End Sub
+
+    Private Sub btn_restart_spotify_Click(sender As Object, e As RoutedEventArgs) Handles btn_restart_spotify.Click
+        flyout_settings_saved.IsOpen = True
+        lbl_flyout_settings_text.Content = "Spotify wird neu-gestartet..."
+        pring_flyout_settings_saved.Visibility = Visibility.Visible
+
+        For Each prog As Process In Process.GetProcesses
+            If prog.ProcessName = "Spotify" Or prog.ProcessName = "SpotifyWebHelper" Then
+                prog.Kill()
+            End If
+        Next
+
+        Process.Start(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Spotify\Spotify.exe")
+    End Sub
+
+#Region "AlbumArt Cache"
+    Private Sub cache_getSize()
+        Dim cache_size As Int64
+        Dim files_count As Integer
+        If IO.Directory.Exists(AppDomain.CurrentDomain.BaseDirectory & "cache\media\") Then
+            For Each file As String In System.IO.Directory.EnumerateFiles(AppDomain.CurrentDomain.BaseDirectory & "cache\media\", "*.*", System.IO.SearchOption.AllDirectories)
+                cache_size += My.Computer.FileSystem.GetFileInfo(file).Length
+                files_count += 1
+            Next
+
+            If cache_size = 0 Then
+                lbl_cacheSize.Content = "Keine Album-Cover zwischengespeichert"
+            ElseIf cache_size < 1048576 Then
+                lbl_cacheSize.Content = "Album-Cover zwischengespeichert: " & files_count & " (" & (cache_size / 1024).ToString("0") & "KB)"
+            Else
+                lbl_cacheSize.Content = "Album-Cover zwischengespeichert: " & files_count & " (" & (cache_size / 1048576).ToString("0.0") & "MB)"
+            End If
+        Else
+            lbl_cacheSize.Content = "Keine Album-Cover zwischengespeichert"
+        End If
+
+    End Sub
+
+    Private Sub btn_cache_refresh_Click(sender As Object, e As RoutedEventArgs) Handles btn_cache_refresh.Click
+        cache_getSize()
+    End Sub
+
+    Private Sub btn_cache_reset_Click(sender As Object, e As RoutedEventArgs) Handles btn_cache_reset.Click
+        flyout_cache_reset.IsOpen = True
+        Dim c_blur As New Effects.BlurEffect
+        c_blur.Radius = 10
+        matc_tabctrl.Effect = c_blur
+    End Sub
+
+    Private Sub btn_reset_cache_confirm_Click(sender As Object, e As RoutedEventArgs) Handles btn_reset_cache_confirm.Click
+        If IO.Directory.Exists(AppDomain.CurrentDomain.BaseDirectory & "cache\media\") Then
+            For Each file As String In System.IO.Directory.EnumerateFiles(AppDomain.CurrentDomain.BaseDirectory & "cache\media\", "*.*", System.IO.SearchOption.AllDirectories)
+                Try
+                    IO.File.Delete(file)
+                Catch ex As Exception
+                End Try
+            Next
+        End If
+
+        cache_getSize()
+        flyout_cache_reset.IsOpen = False
+        matc_tabctrl.Effect = Nothing
+    End Sub
+
+    Private Sub btn_reset_cache_cancel_Click(sender As Object, e As RoutedEventArgs) Handles btn_reset_cache_cancel.Click
+        flyout_cache_reset.IsOpen = False
+        matc_tabctrl.Effect = Nothing
+    End Sub
+#End Region
+
 #End Region
 
 End Class
