@@ -1,0 +1,20 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SmartUI__WPF_"
+        xmlns:Custom="http://metro.mahapps.com/winfx/xaml/controls" x:Name="wnd_flyout_weather" x:Class="wnd_flyout_weather"
+        mc:Ignorable="d"
+        Title="Wetter Flyout" Height="135" Width="350" Background="#59000000" Foreground="Black" AllowsTransparency="True" WindowStyle="None" ShowInTaskbar="False" ResizeMode="NoResize" Topmost="True">
+    <Grid x:Name="grd_main">
+        <Label x:Name="lbl_weather_condition" Content="&lt;weather condition&gt;" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="330" Foreground="White" FontSize="18" FontFamily="Segoe UI Light" Background="{x:Null}"/>
+        <Label x:Name="lbl_weather_humidity" Content="&lt;humidity&gt;" Margin="10,50,180,0" VerticalAlignment="Top" Foreground="White" Background="{x:Null}"/>
+        <Label x:Name="lbl_weather_winddir" Content="&lt;wind direction&gt;" Margin="10,80,170,0" VerticalAlignment="Top" Foreground="White" Background="{x:Null}"/>
+        <Label x:Name="lbl_weather_windspeed" Content="&lt;wind speed&gt;" Margin="180,80,10,0" VerticalAlignment="Top" Foreground="White" Background="{x:Null}"/>
+        <Label x:Name="lbl_weather_airPressure" Content="&lt;air pressure&gt;" Margin="180,50,10,0" VerticalAlignment="Top" Foreground="White" HorizontalAlignment="Center" Width="160" Background="{x:Null}"/>
+        <Label x:Name="lbl_weather_info" Content="&lt;weather info&gt;" Margin="10,0" VerticalAlignment="Bottom" Foreground="#4CFFFFFF" HorizontalAlignment="Center" Width="330" Background="{x:Null}"/>
+        <Separator Margin="0" VerticalAlignment="Top" Foreground="{x:Null}" Background="#19FFFFFF" Height="1"/>
+
+    </Grid>
+</Window>

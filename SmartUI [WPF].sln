@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26724.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "SmartUI [WPF]", "SmartUI [WPF]\SmartUI [WPF].vbproj", "{3F12FA04-1F3E-47FE-82CA-0B0F0A8D9C3F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3F12FA04-1F3E-47FE-82CA-0B0F0A8D9C3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F12FA04-1F3E-47FE-82CA-0B0F0A8D9C3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F12FA04-1F3E-47FE-82CA-0B0F0A8D9C3F}.Release|Any CPU.ActiveCfg = Release v2|Any CPU
+		{3F12FA04-1F3E-47FE-82CA-0B0F0A8D9C3F}.Release|Any CPU.Build.0 = Release v2|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9871B1A0-0A87-423F-AF05-0912E6034465}
+	EndGlobalSection
+EndGlobal
