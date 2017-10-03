@@ -357,7 +357,7 @@ Class MainWindow
     End Sub
 
     Private Sub ca_update(ByVal e_volume As Double, ByVal e_muted As Boolean)
-        If e_muted = True Then
+        If e_volume < 1 Or e_muted = True Then
             helper_image(icn_volume, "pack://application:,,,/Resources/snd_off.png")
             helper_label(lbl_volume, "Mute")
 
@@ -365,8 +365,6 @@ Class MainWindow
             helper_label(lbl_volume, e_volume & "%")
 
             Select Case e_volume
-                Case < 1
-                    helper_image(icn_volume, "pack://application:,,,/Resources/snd_off.png")
                 Case < 10
                     helper_image(icn_volume, "pack://application:,,,/Resources/snd_vLow.png")
                 Case < 30
@@ -952,7 +950,7 @@ Class MainWindow
         icn_network_receive.Margin = New Thickness(icn_network_send.RenderSize.Width + lbl_network_traffic_send.RenderSize.Width, 0, 0, 0)
         lbl_network_traffic_receive.Margin = New Thickness(icn_network_send.RenderSize.Width + lbl_network_traffic_send.RenderSize.Width + icn_network_receive.RenderSize.Width, -1, 0, 0)
 
-        icn_network_state.Margin = New Thickness((icn_network_send.RenderSize.Width + lbl_network_traffic_send.RenderSize.Width + icn_network_receive.RenderSize.Width + lbl_network_traffic_receive.RenderSize.Width) + 3, 3, 0, 0)
+        icn_network_state.Margin = New Thickness((icn_network_send.RenderSize.Width + lbl_network_traffic_send.RenderSize.Width + icn_network_receive.RenderSize.Width + lbl_network_traffic_receive.RenderSize.Width + 3), 3, 0, 0)
     End Sub
 
 
