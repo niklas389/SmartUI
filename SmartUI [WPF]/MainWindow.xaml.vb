@@ -216,11 +216,11 @@ Class MainWindow
         'Weather
         oww_update() 'openweather
 
-        'If IO.File.Exists(".\config\wcom_allowed") Then
-        '    wnd_log.AddLine(log_cat & "-WEATHER", "wetter.com is allowed")
-        '    wConf_useWcom = True
-        '    wcom_update()
-        'End If
+        If IO.File.Exists(".\config\wcom_allowed") Then
+            wnd_log.AddLine(log_cat & "-WEATHER", "wetter.com is allowed")
+            wConf_useWcom = True
+            wcom_update()
+        End If
 
         tmr_clock.Start()
         tmr_network.Start()
@@ -443,8 +443,8 @@ Class MainWindow
             Else
                 wnd_log.AddLine(log_cat & "-MEDIA", "Couldn't connect - API disabled until next start!")
                 sAPI_error = True
-                helper_grid(grd_spotify, False) 'grid is only visible if Spotify is playing something.
-                helper_grid(grd_link, False)
+                'helper_grid(grd_spotify, False) 'grid is only visible if Spotify is playing something. | it's working without this
+                'helper_grid(grd_link, False)
             End If
 
         Catch ex As Exception
@@ -501,10 +501,26 @@ Class MainWindow
 
     Public Shared e_playing As Boolean
     Private Sub spotifyapi_OnPlayStateChange(sender As Object, e As PlayStateEventArgs)
-        helper_grid(grd_spotify, e.Playing) 'grid is only visible if Spotify is playing something.
-        helper_grid(grd_link, Not e.Playing)
         e_playing = e.Playing
+
+        If e.Playing = False Then
+            tmr_mediaInfo_delay.Start()
+            helper_image(icn_spotify, "pack://application:,,,/Resources/ic_pause_white_24dp.png")
+        Else
+            tmr_mediaInfo_delay.Stop()
+            helper_image(icn_spotify, "pack://application:,,,/Resources/spotify_notification.png")
+            helper_grid(grd_spotify, e.Playing) 'grid is only visible if Spotify is playing something.
+            helper_grid(grd_link, Not e.Playing)
+        End If
     End Sub
+
+    Private WithEvents tmr_mediaInfo_delay As New System.Windows.Threading.DispatcherTimer With {.Interval = New TimeSpan(0, 0, 3), .IsEnabled = False}
+    Private Sub tmr_mediaInfo_delay_Tick(ByVal sender As Object, ByVal e As System.EventArgs) Handles tmr_mediaInfo_delay.Tick
+        helper_grid(grd_spotify, e_playing) 'delayed hiding after playing is paused
+        helper_grid(grd_link, Not e_playing)
+        tmr_mediaInfo_delay.Stop()
+    End Sub
+
 
 #End Region
 
@@ -520,7 +536,7 @@ Class MainWindow
 
     Private Sub sui_media_update(ByVal e_title As String, ByVal e_artist As String, ByVal e_Tremaining As String, ByVal e_pb_val As Double, ByVal e_pb_max As Double, ByVal e_playing As Boolean)
         'Title ------------------
-        'If title didn't change - don't update label and stop further processing
+        'If title didn't change - don't update label
         If Not e_title = media_last_title Or helper_label_gc(lbl_spotify) = "Spotify" Then
             media_last_title = e_title
 
@@ -561,7 +577,7 @@ Class MainWindow
         End If
 
         If Not media_trktype & e_artist & " -" & e_Tremaining = media_last_artist_time Or helper_label_gc(lbl_spotify_remaining) = " " Then
-            media_last_artist_time = test_trk_rest & e_artist & " ٠ " & e_Tremaining 'Orig
+            media_last_artist_time = test_trk_rest & e_artist & " ٠ " & e_Tremaining
             wnd_flyout_media.str_media_time = e_pb_val & "%" & e_pb_max & "#" & e_Tremaining
 
             If Not media_widget_opened = 1 Then helper_label(lbl_spotify_remaining, media_last_artist_time)
