@@ -1,5 +1,4 @@
 ﻿Imports System.Runtime.InteropServices
-Imports System.Threading
 Imports System.Windows.Interop
 
 Public Class wnd_flyout_weather
@@ -110,10 +109,6 @@ Public Class wnd_flyout_weather
     End Sub
 
     Private Sub wnd_flyout_volume_LostFocus(sender As Object, e As RoutedEventArgs) Handles Me.MouseLeave
-        Do Until Me.Height < 5
-            Me.Height -= 3
-
-        Loop
         Me.Hide()
     End Sub
 

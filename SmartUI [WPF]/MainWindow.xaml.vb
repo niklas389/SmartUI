@@ -11,8 +11,7 @@ Imports CoreAudioApi
 'Imports nSpotify
 
 'Imports for SPOTIFY-API .NET
-Imports SpotifyAPI.Local 'Base Namespace
-Imports SpotifyAPI.Local.Enums 'Enums
+Imports SpotifyAPI.Local 'Enums
 Imports SpotifyAPI.Local.Models 'Models for the JSON-responses
 
 Class MainWindow
@@ -149,7 +148,6 @@ Class MainWindow
         InitializeComponent()
 
         ' Fügen Sie Initialisierungen nach dem InitializeComponent()-Aufruf hinzu.
-        'nSpotify_init()
     End Sub
 
     '------------------------------------------------------------------------------------------
@@ -218,11 +216,11 @@ Class MainWindow
         'Weather
         oww_update() 'openweather
 
-        If IO.File.Exists(".\config\wcom_allowed") Then
-            wnd_log.AddLine(log_cat & "-WEATHER", "wetter.com is allowed")
-            wConf_useWcom = True
-            wcom_update()
-        End If
+        'If IO.File.Exists(".\config\wcom_allowed") Then
+        '    wnd_log.AddLine(log_cat & "-WEATHER", "wetter.com is allowed")
+        '    wConf_useWcom = True
+        '    wcom_update()
+        'End If
 
         tmr_clock.Start()
         tmr_network.Start()
@@ -242,7 +240,7 @@ Class MainWindow
         tmr_aInit.Stop()
     End Sub
 
-#End Region'ReWork version date !!!
+#End Region
 
 #Region "Clock"
     Private WithEvents tmr_clock As New System.Windows.Threading.DispatcherTimer With {.Interval = New TimeSpan(0, 0, 1), .IsEnabled = False}
@@ -310,7 +308,7 @@ Class MainWindow
             End If
 
         Else
-                sAPI_error_count = 0
+            sAPI_error_count = 0
         End If
 
         dbg_sptfy = dbg_sptfy_2
@@ -592,9 +590,9 @@ Class MainWindow
                 Return e_fs.Substring(0, 30) & "..."
             End If
         ElseIf e_fs.Length > 30 Then
-                Return e_fs.Substring(0, 30) & "..."
-            Else
-                Return e_fs
+            Return e_fs.Substring(0, 30) & "..."
+        Else
+            Return e_fs
         End If
     End Function
 
@@ -969,9 +967,9 @@ Class MainWindow
     'Dim oww_data_location As String = ""
     'Dim oww_data_country As String = ""
 
-    'Dim oww_data_Tmin As Integer = 0
-    'Dim oww_data_Tmax As Integer = 0
-    Public Shared oww_data_temp As Double = 0.0
+    Dim oww_data_Tmin As String = "0"
+    Dim oww_data_Tmax As String = "0"
+    Public Shared oww_data_temp As String = "0"
     Public Shared oww_data_humidity As Integer = 0
     Public Shared oww_data_pressure As Integer = 0
     Public Shared oww_data_windspeed As Integer = 0
@@ -1047,10 +1045,9 @@ Class MainWindow
                             ' Es sind noch weitere Attribute vorhanden 
                             While .MoveToNextAttribute ' nächstes 
                                 'If xmlid = "city" And .Name = "name" Then oww_data_location = .Value
-                                If xmlid = "temperature" And .Name = "value" Then oww_data_temp = Math.Round(CDbl(.Value), 1)
-
-                                'If xmlid = "temperature" And .Name = "max" Then oww_data_Tmax = CInt(.Value)
-                                'If xmlid = "temperature" And .Name = "min" Then oww_data_Tmin = CInt(.Value)
+                                If xmlid = "temperature" And .Name = "value" Then oww_data_temp = .Value.Remove(.Value.Length - 1, 1)
+                                If xmlid = "temperature" And .Name = "max" Then oww_data_Tmax = .Value.Remove(.Value.Length - 1, 1)
+                                If xmlid = "temperature" And .Name = "min" Then oww_data_Tmin = .Value.Remove(.Value.Length - 1, 1)
                                 If xmlid = "humidity" And .Name = "value" Then oww_data_humidity = CInt(.Value)
                                 If xmlid = "pressure" And .Name = "value" Then oww_data_pressure = CInt(.Value)
                                 If xmlid = "wind" And .Name = "value" Then oww_data_windspeed = CInt(.Value)
@@ -1163,7 +1160,6 @@ Class MainWindow
         Dim wStationData_reader As New StreamReader(wStationData_dataStream)
         ' Read the content.
         Dim wStationData_data As String = wStationData_reader.ReadToEnd()
-        ' Clean up the streams and the response.
 
         Dim int As Integer = 0
         For Each data_set As String In wStationData_data.Split(CType("}", Char()))
