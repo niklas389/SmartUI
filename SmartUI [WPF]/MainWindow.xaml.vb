@@ -150,8 +150,6 @@ Class MainWindow
         ' Fügen Sie Initialisierungen nach dem InitializeComponent()-Aufruf hinzu.
     End Sub
 
-    '------------------------------------------------------------------------------------------
-
     Private Sub MainWindow_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
         DockToTop()
         EnableBlur()
@@ -173,9 +171,9 @@ Class MainWindow
 
         settings_load()
 
-        ''Add log entry if this is this versions first run
+        'Add log entry if this is this versions first run
         If Not My.Application.Info.Version.ToString = ini.ReadValue("app", "firstrun", "") Then
-            wnd_log.AddLine(log_cat & "-INFO", "First start after updating the app")
+            wnd_log.AddLine("INFO", "First start after updating the app")
         End If
     End Sub
 
@@ -244,8 +242,8 @@ Class MainWindow
 
 #Region "Clock"
     Private WithEvents tmr_clock As New System.Windows.Threading.DispatcherTimer With {.Interval = New TimeSpan(0, 0, 1), .IsEnabled = False}
-    Public ui_clock_weekday As String = "Mo"
-    Public ui_clock_style As Integer = -1
+    Private ui_clock_weekday As String = "Mo"
+    Private ui_clock_style As Integer = -1
     Dim clock_date As Boolean = False
 
     Private Sub tmr_clock_Tick(ByVal sender As Object, ByVal e As System.EventArgs) Handles tmr_clock.Tick
@@ -296,14 +294,11 @@ Class MainWindow
                 helper_image(icn_run_spotify, "pack://application:,,,/Resources/ic_error_outline_white_24dp.png")
             Else
 
-                wnd_log.AddLine(log_cat & "-MEDIA", "-------------------")
                 flyout_media.Close() 'close media widget
                 media_widget_opened = -1
 
-
                 init_spotifyAPI()
                 wnd_log.AddLine(log_cat & "-MEDIA", " - Spotify API restarted")
-                wnd_log.AddLine(log_cat & "-MEDIA", "-------------------")
                 sAPI_error = True
             End If
 
@@ -651,6 +646,15 @@ Class MainWindow
     Private Sub icn_spotify_MouseLeave(sender As Object, e As MouseEventArgs) Handles icn_spotify.MouseLeave
         helper_image(icn_spotify, "pack://application:,,,/Resources/spotify_notification.png")
     End Sub
+
+    'positioning labels - left
+    Private Sub lbl_weather_SizeChanged(sender As Object, e As SizeChangedEventArgs) Handles lbl_weather.SizeChanged, icn_weather.SizeChanged, grd_weather.SizeChanged, grd_spotify.SizeChanged
+        If grd_weather.Visibility = Visibility.Visible Then
+            grd_spotify.Margin = New Thickness(grd_weather.RenderSize.Width, 0, 0, 0)
+        Else
+            grd_spotify.Margin = New Thickness(3, 0, 0, 0)
+        End If
+    End Sub
 #End Region
 
 
@@ -955,15 +959,6 @@ Class MainWindow
 
 
 #End Region
-
-    'positioning labels - left
-    Private Sub lbl_weather_SizeChanged(sender As Object, e As SizeChangedEventArgs) Handles lbl_weather.SizeChanged, icn_weather.SizeChanged, grd_weather.SizeChanged, grd_spotify.SizeChanged
-        If grd_weather.Visibility = Visibility.Visible Then
-            grd_spotify.Margin = New Thickness(grd_weather.RenderSize.Width, 0, 0, 0)
-        Else
-            grd_spotify.Margin = New Thickness(3, 0, 0, 0)
-        End If
-    End Sub
 
 #Region "Weather"
     Dim weather_flyout As New wnd_flyout_weather
