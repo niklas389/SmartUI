@@ -138,8 +138,8 @@ Class MainWindow
 
 #Region "MyBase & Startup"
     Public Sub New()
-        wnd_log.outputBox.AppendText("<< SmartUI LOG >>")
-        wnd_log.outputBox.AppendText(vbNewLine & "<< Made in 2016/17 by Niklas Wagner in Hannover (DE) >>")
+        wnd_log.outputBox.AppendText("SmartUI LOG")
+        wnd_log.outputBox.AppendText(vbNewLine & "Made in 2016/17 by Niklas Wagner in Hannover (DE)")
         wnd_log.outputBox.AppendText(vbNewLine & "App startup time: " & DateTime.Now.Day & ". " & CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(DateTime.Now.Month) & " - " & DateTime.Now.ToLongTimeString)
         wnd_log.outputBox.AppendText(vbNewLine & "APP Version: " & My.Application.Info.Version.ToString & " - " & IO.File.GetLastWriteTime(AppDomain.CurrentDomain.BaseDirectory & "\SmartUI.exe").ToString("yyMMdd"))
         wnd_log.outputBox.AppendText(vbNewLine & "OS Version: " & Environment.OSVersion.ToString & vbNewLine)

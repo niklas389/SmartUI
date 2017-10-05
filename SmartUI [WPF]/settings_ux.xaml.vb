@@ -71,10 +71,6 @@ Public Class wnd_settings
 
     Private Sub btn_wnd_hide_MouseLeftButtonDown(sender As Object, e As RoutedEventArgs) Handles btn_wnd_hide.Click
         Me.Hide()
-
-        matc_tabctrl.SelectedIndex = 0
-        flyout_cache_reset.IsOpen = False
-        matc_tabctrl.Effect = Nothing
     End Sub
 
     Private Sub btn_wnd_minimize_MouseLeftButtonUp(sender As Object, e As RoutedEventArgs) Handles btn_wnd_minimize.Click
@@ -86,11 +82,14 @@ Public Class wnd_settings
         lib_hVOSD.Init() 'bring up lib_HVOSD
         Me.Hide()
 
+        matc_tabctrl.Visibility = Visibility.Visible
         matc_main.Visibility = Visibility.Hidden
         matc_weather.Visibility = Visibility.Hidden
         matc_changelog.Visibility = Visibility.Hidden
         matc_spotify.Visibility = Visibility.Hidden
         flyout_cache_reset.IsOpen = False
+        flyout_settings_saved.IsOpen = False
+        pring_flyout_settings_saved.Visibility = Visibility.Hidden
 
         'Spotify Check
         If IO.File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Spotify\Spotify.exe") Then
@@ -130,6 +129,11 @@ Public Class wnd_settings
         Else
             ComboBox_net_interface.SelectedItem = ini.ReadValue("NET", "ComboBox_net_interface", "")
         End If
+
+        matc_tabctrl.SelectedIndex = 0
+        lbl_header.Content = "EINSTELLUNGEN"
+        flyout_cache_reset.IsOpen = False
+        matc_tabctrl.Effect = Nothing
 
         cache_getSize()
     End Sub
@@ -397,17 +401,27 @@ Public Class wnd_settings
     End Sub
 
     Private Sub btn_restart_spotify_Click(sender As Object, e As RoutedEventArgs) Handles btn_restart_spotify.Click
-        flyout_settings_saved.IsOpen = True
-        lbl_flyout_settings_text.Content = "Spotify wird neu-gestartet..."
-        pring_flyout_settings_saved.Visibility = Visibility.Visible
+        flyout_spotify("force_restart")
+    End Sub
 
-        For Each prog As Process In Process.GetProcesses
-            If prog.ProcessName = "Spotify" Or prog.ProcessName = "SpotifyWebHelper" Then
-                prog.Kill()
-            End If
-        Next
+    Private Sub flyout_spotify(ctnt As String)
+        Select Case ctnt
+            Case "del_cache"
+                btn_flyout_spotify_confirm.Tag = "del_cache"
+                lbl_flyout_spotify_msg.Content = "Alle Zwischengespeicherten Album-Cover werden entfernt, sodass" & vbCrLf & "diese erneut heruntergeladen werden müssen"
+                btn_flyout_spotify_confirm.Content = "Löschen"
 
-        Process.Start(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Spotify\Spotify.exe")
+            Case "force_restart"
+                btn_flyout_spotify_confirm.Tag = "force_restart"
+                lbl_flyout_spotify_msg.Content = "Dies wird die Spotify App beenden und wieder starten"
+                btn_flyout_spotify_confirm.Content = "Neu starten"
+
+        End Select
+
+        flyout_cache_reset.IsOpen = True
+        Dim c_blur As New Effects.BlurEffect
+        c_blur.Radius = 10
+        matc_tabctrl.Effect = c_blur
     End Sub
 
 #Region "AlbumArt Cache"
@@ -438,23 +452,36 @@ Public Class wnd_settings
     End Sub
 
     Private Sub btn_cache_reset_Click(sender As Object, e As RoutedEventArgs) Handles btn_cache_reset.Click
-        flyout_cache_reset.IsOpen = True
-        Dim c_blur As New Effects.BlurEffect
-        c_blur.Radius = 10
-        matc_tabctrl.Effect = c_blur
+        flyout_spotify("del_cache")
     End Sub
 
-    Private Sub btn_reset_cache_confirm_Click(sender As Object, e As RoutedEventArgs) Handles btn_reset_cache_confirm.Click
-        If IO.Directory.Exists(AppDomain.CurrentDomain.BaseDirectory & "cache\media\") Then
-            For Each file As String In System.IO.Directory.EnumerateFiles(AppDomain.CurrentDomain.BaseDirectory & "cache\media\", "*.*", System.IO.SearchOption.AllDirectories)
-                Try
-                    IO.File.Delete(file)
-                Catch ex As Exception
-                End Try
+    Private Sub btn_reset_cache_confirm_Click(sender As Object, e As RoutedEventArgs) Handles btn_flyout_spotify_confirm.Click
+        If btn_flyout_spotify_confirm.Tag Is "del_cache" Then
+
+            If IO.Directory.Exists(AppDomain.CurrentDomain.BaseDirectory & "cache\media\") Then
+                For Each file As String In System.IO.Directory.EnumerateFiles(AppDomain.CurrentDomain.BaseDirectory & "cache\media\", "*.*", System.IO.SearchOption.AllDirectories)
+                    Try
+                        IO.File.Delete(file)
+                    Catch ex As Exception
+                    End Try
+                Next
+            End If
+            cache_getSize()
+
+        ElseIf btn_flyout_spotify_confirm.Tag Is "force_restart" Then
+            flyout_settings_saved.IsOpen = True
+            lbl_flyout_settings_text.Content = "Spotify wird neu-gestartet..."
+            pring_flyout_settings_saved.Visibility = Visibility.Visible
+
+            For Each prog As Process In Process.GetProcesses
+                If prog.ProcessName = "Spotify" Or prog.ProcessName = "SpotifyWebHelper" Then
+                    prog.Kill()
+                End If
             Next
+
+            Process.Start(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Spotify\Spotify.exe")
         End If
 
-        cache_getSize()
         flyout_cache_reset.IsOpen = False
         matc_tabctrl.Effect = Nothing
     End Sub

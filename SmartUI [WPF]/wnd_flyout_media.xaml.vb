@@ -82,8 +82,8 @@ Public Class wnd_flyout_media
             'get URI before DL image to avoid mismatching info (eg.: user changes track while downloading)
 
             If Not IO.File.Exists(cache_path & trk_uri) Then
-                'Construct a bitmap from the button image resource.
-                Dim img As New Bitmap(Await Task.Run(Function() MainWindow._currentTrack.GetAlbumArtAsync(SpotifyAPI.Local.Enums.AlbumArtSize.Size320))) 'Image DL
+                'Construct a bitmap
+                Dim img As New Bitmap(Await Task.Run(Function() MainWindow._currentTrack.GetAlbumArtAsync(SpotifyAPI.Local.Enums.AlbumArtSize.Size320))) 'cover DL
                 img.Save(cache_path & trk_uri, Imaging.ImageFormat.Jpeg) 'save cover
 
                 img.Dispose()

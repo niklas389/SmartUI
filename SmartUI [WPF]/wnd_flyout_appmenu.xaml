@@ -5,13 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SmartUI__WPF_"
         mc:Ignorable="d"
-        Title="SmartUI Menü" Height="120" Width="200" AllowsTransparency="True" WindowStyle="None" Background="#D8000000" Foreground="White" ShowInTaskbar="False" Topmost="True">
+        Title="Menü" Height="120" Width="200" AllowsTransparency="True" WindowStyle="None" Background="#D8000000" Foreground="White" ShowInTaskbar="False" Topmost="True">
+    
     <Grid>
-        <Button x:Name="btn_intern_appsettings" Content="Einstellungen" Margin="0" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" HorizontalContentAlignment="Center" VerticalAlignment="Top" Height="30"/>
+        <Button x:Name="btn_intern_appsettings" Template="{StaticResource custbtn_transBG}" Content="Einstellungen" Margin="0" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" HorizontalContentAlignment="Center" VerticalAlignment="Top" Height="30"/>
         <Separator x:Name="spacer_01" Margin="0,30,0,0" VerticalAlignment="Top" Foreground="{x:Null}" Background="#3FFFFFFF"/>
-        <Button x:Name="btn_do_restart" Content="Neu Starten" Margin="0,60,0,0" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" HorizontalContentAlignment="Center" VerticalAlignment="Top" Height="30"/>
-        <Button x:Name="btn_do_exit" Content="Beenden" Margin="0,90,0,0" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" HorizontalContentAlignment="Center" VerticalAlignment="Top" Height="30"/>
-        <Button x:Name="btn_intern_log" Content="Log" Margin="0,30,0,0" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" HorizontalContentAlignment="Center" VerticalAlignment="Top" Height="30"/>
-
+        <Button x:Name="btn_do_restart" Template="{StaticResource custbtn_transBG}" Content="Neu Starten" Margin="0,60,0,0" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" HorizontalContentAlignment="Center" VerticalAlignment="Top" Height="30"/>
+        <Button x:Name="btn_do_exit" Template="{StaticResource custbtn_transBG}" Content="Beenden" Margin="0,90,0,0" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" HorizontalContentAlignment="Center" VerticalAlignment="Top" Height="30"/>
+        <Button x:Name="btn_intern_log" Template="{StaticResource custbtn_transBG}" Content="Log" Margin="0,30,0,0" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" HorizontalContentAlignment="Center" VerticalAlignment="Top" Height="30"/>
     </Grid>
 </Window>

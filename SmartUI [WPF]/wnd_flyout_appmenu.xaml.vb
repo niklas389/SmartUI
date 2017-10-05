@@ -1,4 +1,6 @@
-﻿Public Class wnd_flyout_appmenu
+﻿Imports System.Windows.Media.Animation
+
+Public Class wnd_flyout_appmenu
 
     Dim m_ht As Double = 90
 #Region "WND Show/Hide"
@@ -26,12 +28,13 @@
     End Sub
 
     Private Sub wnd_flyout_appmenu_LostFocus(sender As Object, e As RoutedEventArgs) Handles Me.MouseLeave
-        Do Until Me.Height < 5
-            Me.Height -= 3
-
-        Loop
         Me.Hide()
     End Sub
+
+    Private Sub anim_Completed(sender As Object, e As EventArgs)
+        Close()
+    End Sub
+
 #End Region
 
     Public Shared ui_settings As New wnd_settings
