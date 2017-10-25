@@ -257,6 +257,9 @@
     <Content Include="Resources\ic_error_outline_white_24dp.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\win_vis_beta_startup.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="Resources\ic_explicit_white_24dp.png" />
     <Content Include="Resources\ic_ethernet_cable_off_white_21px.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -8,8 +8,6 @@ Imports System.Threading
 Imports System.Windows.Interop
 Imports System.Xml
 Imports CoreAudioApi
-'Imports nSpotify
-
 'Imports for SPOTIFY-API .NET
 Imports SpotifyAPI.Local 'Enums
 Imports SpotifyAPI.Local.Models 'Models for the JSON-responses
@@ -21,7 +19,6 @@ Class MainWindow
 
     Public Shared settings_update_needed As Boolean = False
 
-    Dim log_cat As String = "MW"
     Public Shared wnd_log As New wnd_log
 
 #Region "Blur & Dock"
@@ -165,21 +162,24 @@ Class MainWindow
         helper_grid(grd_network, False)
         helper_grid(grd_menu_right, False)
 
-        init_spotifyAPI() 'Init Spotify-API
-
         ui_clock_weekday = CultureInfo.CurrentCulture.DateTimeFormat.GetShortestDayName(DateTime.Now.DayOfWeek)
-
-        settings_load()
 
         'Add log entry if this is this versions first run
         If Not My.Application.Info.Version.ToString = ini.ReadValue("app", "firstrun", "") Then
-            wnd_log.AddLine("INFO", "First start after updating the app")
+            wnd_log.AddLine("INFO", "First start after updating the app" & vbNewLine)
         End If
+
+        settings_load()
     End Sub
 
     Public Sub settings_load()
         'LOG
-        If settings_update_needed Then wnd_log.AddLine(log_cat & "-SETTINGS", "Loading updated settings") Else wnd_log.AddLine(log_cat & "-SETTINGS", "Loading settings")
+        If settings_update_needed Then
+            wnd_log.AddLine("INFO" & "-SETTINGS", "Loading updated settings")
+            helper_notification("Einstellungen geladen...")
+        Else
+            wnd_log.AddLine("INFO" & "-SETTINGS", "Loading settings")
+        End If
 
         'Seconds
         If CType(ini.ReadValue("UI", "cb_wndmain_clock_enabled", "True"), Boolean) = False Then ui_clock_style = 0 Else ui_clock_style = 1
@@ -213,9 +213,11 @@ Class MainWindow
 
         'Weather
         oww_update() 'openweather
+        'SPOTIFY-API
+        init_spotifyAPI() 'Init Spotify-API
 
         If IO.File.Exists(".\config\wcom_allowed") Then
-            wnd_log.AddLine(log_cat & "-WEATHER", "wetter.com is allowed")
+            wnd_log.AddLine("CONFIG" & "-WEATHER", "wetter.com is allowed")
             wConf_useWcom = True
             wcom_update()
         End If
@@ -298,7 +300,7 @@ Class MainWindow
                 media_widget_opened = -1
 
                 init_spotifyAPI()
-                wnd_log.AddLine(log_cat & "-MEDIA", " - Spotify API restarted")
+                wnd_log.AddLine("ATT" & "-MEDIA", " - Spotify API restarted")
                 sAPI_error = True
             End If
 
@@ -339,7 +341,7 @@ Class MainWindow
     Private audio_device As MMDevice = device_enum.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eMultimedia)
 
     Private Sub init_coreaudio()
-        wnd_log.AddLine(log_cat & "-CORE AUDIO", "Initializing...")
+        wnd_log.AddLine("INFO" & "-CORE AUDIO", "Initializing...")
         AddHandler audio_device.AudioEndpointVolume.OnVolumeNotification, AddressOf AudioEndpointVolume_OnVolumeNotification
 
         helper_grid(grd_volume, True)
@@ -412,32 +414,30 @@ Class MainWindow
     Public Shared _sAPI_ClientVersion As String
 
     Sub init_spotifyAPI() 'Init and connect Spotify-API
-        wnd_log.AddLine(log_cat & "-MEDIA", "Init Spotify-API .NET...")
+        wnd_log.AddLine("INFO" & "-MEDIA", "Init Spotify-API .NET...")
         spotifyapi = New SpotifyLocalAPI
 
         'Check if Spotify (and WebHelper) are running
         If Not SpotifyLocalAPI.IsSpotifyRunning() Then
-            wnd_log.AddLine(log_cat & "-MEDIA", "Spotify isn't running!")
+            wnd_log.AddLine("INFO" & "-MEDIA", "Spotify isn't running!")
         End If
 
         If Not SpotifyLocalAPI.IsSpotifyWebHelperRunning() Then
-            wnd_log.AddLine(log_cat & "-MEDIA", "SpotifyWebHelper isn't running!")
+            wnd_log.AddLine("INFO" & "-MEDIA", "SpotifyWebHelper isn't running!")
         End If
 
         Try
             Dim sAPI_connected As Boolean = spotifyapi.Connect
             sAPI_allowed = sAPI_connected
             If sAPI_connected = True Then
-                wnd_log.AddLine(log_cat & "-MEDIA", "Connection established succesfully!")
+                wnd_log.AddLine("INFO" & "-MEDIA", "Connection established succesfully!")
                 sAPI_UpdateInfos()
 
                 spotifyapi.ListenForEvents = True
                 sAPI_error = False
             Else
-                wnd_log.AddLine(log_cat & "-MEDIA", "Couldn't connect - API disabled until next start!")
+                wnd_log.AddLine("INFO" & "-MEDIA", "Couldn't connect - API disabled until next start!")
                 sAPI_error = True
-                'helper_grid(grd_spotify, False) 'grid is only visible if Spotify is playing something. | it's working without this
-                'helper_grid(grd_link, False)
             End If
 
         Catch ex As Exception
@@ -447,14 +447,12 @@ Class MainWindow
         AddHandler spotifyapi.OnPlayStateChange, AddressOf spotifyapi_OnPlayStateChange
         AddHandler spotifyapi.OnTrackChange, AddressOf spotifyapi_OnTrackChange
         AddHandler spotifyapi.OnTrackTimeChange, AddressOf spotifyapi_OnTrackTimeChange
-        AddHandler spotifyapi.OnVolumeChange, AddressOf spotifyapi_OnVolumeChange
-
-        '_spotify.SynchronizingObject = this;
+        'AddHandler spotifyapi.OnVolumeChange, AddressOf spotifyapi_OnVolumeChange
     End Sub
 
     Public Sub sAPI_UpdateInfos()
         Dim status As StatusResponse = spotifyapi.GetStatus
-        wnd_log.AddLine(log_cat & "-MEDIA", "Spotify-Client Version: " & spotifyapi.GetStatus.ClientVersion.ToString)
+        wnd_log.AddLine("INFO" & "-MEDIA", "Spotify-Client Version: " & spotifyapi.GetStatus.ClientVersion.ToString)
         _sAPI_ClientVersion = spotifyapi.GetStatus.ClientVersion.ToString
 
         'Basic Spotify Infos
@@ -478,9 +476,9 @@ Class MainWindow
     '    bigAlbumPicture.Image = Await track.GetAlbumArtAsync(AlbumArtSize.Size640)
     '    smallAlbumPicture.Image = Await track.GetAlbumArtAsync(AlbumArtSize.Size160)
 
-    Private Sub spotifyapi_OnVolumeChange(sender As Object, e As VolumeChangeEventArgs)
-        'volumeLabel.Text = (e.NewVolume * 100).ToString(CultureInfo.InvariantCulture)
-    End Sub
+    'Private Sub spotifyapi_OnVolumeChange(sender As Object, e As VolumeChangeEventArgs)
+    '    'volumeLabel.Text = (e.NewVolume * 100).ToString(CultureInfo.InvariantCulture)
+    'End Sub
 
     Private Sub spotifyapi_OnTrackTimeChange(sender As Object, e As TrackTimeChangeEventArgs)
         sui_media_update(_currentTrack.TrackResource.Name, _currentTrack.ArtistResource.Name, DateTime.MinValue.AddSeconds(_currentTrack.Length - CInt(e.TrackTime)).ToString("m:ss"), e.TrackTime, CDbl(_currentTrack.Length), e_playing)
@@ -657,55 +655,6 @@ Class MainWindow
     End Sub
 #End Region
 
-
-#Region "nSpotify"
-    '    'Dim evp_nSpotify As New EventProvider
-
-    '    Private Sub nSpotify_init()
-    '        'If Process.GetProcessesByName("Spotify").Length > 1 Then
-    '        '    wnd_log.AddLine(log_cat & "-MEDIA", "Spotify running, loading spotify integration...")
-    '        '    'EventHandler
-    '        '    AddHandler evp_nSpotify.DataUpdated, AddressOf nSpotify_smthChanged
-    '        '    'EventProvider starten
-    '        '    evp_nSpotify.Start()
-    '        'Else
-    '        '    wnd_log.AddLine(log_cat & "-MEDIA", "Spotify not running, disabled integration")
-    '        '    evp_nSpotify.Dispose()
-    '        '    nSpotify_allowed = False
-    '        'End If
-    '    End Sub
-
-    '    Dim nSpotify_lblInfo As String
-
-    '    Dim nSpotify_playing As Boolean = False
-
-    '    Dim nSpotify_cnt As Integer = 0
-    '    Dim dbg_sptfy As String = ""
-    '    Dim dbg_sptfy_2 As String = ""
-
-    '    'Spotify Event Listener
-    '    Private Sub nSpotify_smthChanged(sender As Object, e As DataUpdatedEventArgs)
-    '        If nSpotify_allowed = False Then Exit Sub
-    '        helper_grid(grd_spotify, e.CurrentStatus.Playing) 'grid is only visible if Spotify is playing something.
-
-    '        helper_grid(grd_link, Not e.CurrentStatus.Playing)
-
-    '        'Info is handled in another sub
-    '        sui_media_update(e.CurrentStatus.Track.Name, e.CurrentStatus.Track.Artist, DateTime.MinValue.AddSeconds(e.CurrentStatus.Track.Length.TotalSeconds - e.CurrentStatus.PlayingPosition.TotalSeconds).ToString("m:ss"), e.CurrentStatus.PlayingPosition.TotalSeconds, e.CurrentStatus.Track.Length.TotalSeconds, e.CurrentStatus.Playing)
-
-    '        dbg_sptfy = e.CurrentStatus.ToString
-    '    End Sub
-
-    'MEDIA GRID UPDATE PART FOLLOWING---------------------------
-
-    '    'workaround > spotify wiederbeleben
-    '    Private Sub lbl_spotify_remaining_MouseUp(sender As Object, e As MouseButtonEventArgs) Handles lbl_spotify.MouseRightButtonUp, lbl_spotify_remaining.MouseRightButtonUp, icn_run_spotify.MouseRightButtonUp
-    '        'evp_nSpotify.Stop()
-    '        'evp_nSpotify.Start()
-    '    End Sub
-#End Region'_nSpotify is disabled
-
-
 #Region "Media Widget/Flyout"
     Public Shared media_widget_opened As Integer = 0
     Dim flyout_media As New wnd_flyout_media
@@ -788,6 +737,21 @@ Class MainWindow
         Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Normal, New ThreadStart(Sub() tmp_str = ctrl.Content.ToString))
         Return tmp_str
     End Function
+
+    Private Sub helper_notification(e_msg As String, Optional e_icn As String = Nothing)
+        Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Normal, New ThreadStart(Sub()
+                                                                                                               fout_notification.IsOpen = True
+                                                                                                               fout_notification.IsAutoCloseEnabled = False
+                                                                                                               fout_notification.IsAutoCloseEnabled = True
+
+                                                                                                               lbl_notification.Content = e_msg
+                                                                                                               If Not e_icn = Nothing Then
+                                                                                                                   icn_notification.Source = CType(New ImageSourceConverter().ConvertFromString(e_icn), ImageSource)
+                                                                                                               Else
+                                                                                                                   icn_notification.Source = CType(New ImageSourceConverter().ConvertFromString("pack://application:,,,/Resources/ic_error_outline_white_24dp.png"), ImageSource)
+                                                                                                               End If
+                                                                                                           End Sub))
+    End Sub
 #End Region
 
 #Region "Network Monitoring"
@@ -802,7 +766,7 @@ Class MainWindow
     'Update timer
     Private WithEvents tmr_network As New System.Windows.Threading.DispatcherTimer With {.Interval = New TimeSpan(0, 0, 0, 0, 500), .IsEnabled = False}
     Private Sub tmr_network_Tick(ByVal sender As Object, ByVal e As System.EventArgs) Handles tmr_network.Tick
-        If net_monitoring_allowed = -1 Then wnd_log.AddLine(log_cat & "-NET", "Network monitoring state: " & net_monitoring_allowed.ToString)
+        If net_monitoring_allowed = -1 Then wnd_log.AddLine("INFO" & "-NET", "Network monitoring state: " & net_monitoring_allowed.ToString)
         If net_monitoring_allowed = -1 Then tmr_network.Stop()
         net_monitoring()
     End Sub
@@ -828,13 +792,13 @@ Class MainWindow
                 End If
             Next
 
-            wnd_log.AddLine(log_cat & "-NET", "Interface: " & net_monitoredInterface.Name)
+            wnd_log.AddLine("INFO" & "-NET", "Interface: " & net_monitoredInterface.Name)
 
             helper_grid(grd_network, True)
             net_monitoring_allowed = 1
 
         Catch
-            wnd_log.AddLine(log_cat & "-NET", "Error in 'net_get_interfaces'")
+            wnd_log.AddLine("ERR" & "-NET", "Error in 'net_get_interfaces'")
             net_monitoring_allowed = -1
             helper_grid(grd_network, False)
         End Try
@@ -849,14 +813,14 @@ Class MainWindow
 
     Private Sub net_monitoring()
         If net_monitoring_allowed = 0 Then
-            wnd_log.AddLine(log_cat & "-NET", "Network monitoring disabled, GoTo 'net_get_interfaces'")
+            wnd_log.AddLine("INFO" & "-NET", "Network monitoring disabled, GoTo 'net_get_interfaces'")
 
             net_get_interfaces()
             ' helper_grid(grd_network, False)
             Exit Sub
 
         ElseIf net_monitoring_allowed = -1 Then 'Exit sub if netmon got an error
-            wnd_log.AddLine(log_cat & "-NET", "Network monitoring error, exiting")
+            wnd_log.AddLine("ERR" & "-NET", "Network monitoring error, exiting")
             helper_grid(grd_network, False)
             Exit Sub
         End If
@@ -894,7 +858,7 @@ Class MainWindow
                 Me.lbl_network_traffic_receive.Content = Nothing
                 Me.icn_network_receive.Visibility = Visibility.Hidden
 
-                wnd_log.AddLine(log_cat & "-NET", "Error in 'get sent/received kbytes'")
+                wnd_log.AddLine("ERR" & "-NET", "Error in 'get sent/received kbytes'")
                 Exit Sub
             End Try
         End If
@@ -1010,9 +974,9 @@ Class MainWindow
             oww_API_error = True
 
             If ex.Status = WebExceptionStatus.ProtocolError Then
-                wnd_log.AddLine(log_cat & "-WEATHER", "OWW (401 Zugriff verweigert)")
+                wnd_log.AddLine("ERR" & "-WEATHER", "OWW (401 Zugriff verweigert)")
             Else
-                wnd_log.AddLine(log_cat & "-WEATHER", "OWW unknown Error")
+                wnd_log.AddLine("ERR" & "-WEATHER", "OWW unknown Error")
             End If
         End Try
 
@@ -1029,9 +993,9 @@ Class MainWindow
 
             wData_lastUpdate = DateTime.Now
             ini.WriteValue("Weather", "last_update", Date.Now.ToShortTimeString)
-            wnd_log.AddLine(log_cat & "-WEATHER", "OWW data updated")
+            'wnd_log.AddLine(log_cat & "-WEATHER", "OWW data updated")
         Else
-            wnd_log.AddLine(log_cat & "-WEATHER", "OWW API-Error")
+            wnd_log.AddLine("ERR" & "-WEATHER", "OWW API-Error")
         End If
         'End API Update
 
@@ -1131,7 +1095,7 @@ Class MainWindow
 
             Case Else
                 helper_image(icn_weather, icn_basePath & "0.png")
-                wnd_log.AddLine(log_cat & "-WEATHER", "No condition icon (" & oww_data_conditionID & ")")
+                wnd_log.AddLine("ATT" & "-WEATHER", "No condition icon (" & oww_data_conditionID & ")")
         End Select
 
         If wData_lastUpdate = Nothing Then
@@ -1179,8 +1143,8 @@ Class MainWindow
         If wStationData_data.Length < 10 Then
             wcom_error(e_station)
             Exit Sub
-        Else
-            wnd_log.AddLine(log_cat & "-WEATHER", "WCOM data updated")
+            'Else
+            '    wnd_log.AddLine(log_cat & "-WEATHER", "WCOM data updated")
         End If
 
         Dim sSplit As String() = wStationData_data.Split(CType("}", Char()))
@@ -1231,12 +1195,12 @@ Class MainWindow
 
     Private Sub wcom_error(e_station As Integer)
         If e_station = 16549 Then
-            wnd_log.AddLine(log_cat & "-WEATHER", "WCOM API-Error with Station 16549 - Fallback to OpenWeather")
+            wnd_log.AddLine("ERR" & "-WEATHER", "WCOM API-Error with Station 16549 - Fallback to OpenWeather")
             Me.lbl_weather.Content = oww_data_temp.ToString & "°"
             Exit Sub
         End If
 
-        wnd_log.AddLine(log_cat & "-WEATHER", "WCOM API-Error with Station 7704, trying 16549")
+        wnd_log.AddLine("ATT" & "-WEATHER", "WCOM API-Error with Station 7704, trying 16549")
         wcom_update(16549)
     End Sub
 #End Region

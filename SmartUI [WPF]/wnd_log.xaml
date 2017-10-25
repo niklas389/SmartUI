@@ -9,14 +9,14 @@
 
     <Grid>
         <Grid x:Name="grd_header" Height="33" Margin="0" VerticalAlignment="Top" Background="#19FFFFFF">
-            <Label x:Name="lbl_wndTitle" Content="DEBUG LOG" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Bottom" Foreground="White" FontSize="18" FontFamily="Segoe UI Light" Background="{x:Null}"/>
-            <Button x:Name="btn_wnd_minimize" Content="0" HorizontalAlignment="Left" Margin="480,0,0,0" VerticalAlignment="Top" Width="35" Foreground="#3FFFFFFF" Background="#00000000" BorderBrush="#00707070" Height="25" FontFamily="Webdings"/>
-            <Button x:Name="btn_wnd_hide" Content="r" Margin="515,0,0,8" VerticalAlignment="Bottom" Foreground="#3FFFFFFF" Background="#00000000" BorderBrush="#00707070" Height="25" FontFamily="Webdings"/>
+            <Label x:Name="lbl_wndTitle" Content="LOG" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Bottom" Foreground="White" FontSize="18" FontFamily="Segoe UI Light" Background="{x:Null}"/>
+            <Button x:Name="btn_wnd_minimize" Content="0" Template="{StaticResource custbtn_transBG}" HorizontalAlignment="Left" Margin="480,0,0,0" VerticalAlignment="Top" Width="35" Foreground="#3FFFFFFF" Background="#00000000" BorderBrush="#00707070" Height="25" FontFamily="Webdings"/>
+            <Button x:Name="btn_wnd_hide" Content="r" Template="{StaticResource custbtn_transBG}" Margin="515,0,0,8" VerticalAlignment="Bottom" Foreground="#3FFFFFFF" Background="#00000000" BorderBrush="#00707070" Height="25" FontFamily="Webdings"/>
         </Grid>
 
         <Grid x:Name="grd_btm_cmd" Height="33" Margin="0" VerticalAlignment="Bottom" Background="#19FFFFFF">
-            <Button x:Name="btn_log_clear" Content="Clear" HorizontalAlignment="Right" Margin="0,0,7,0" VerticalAlignment="Center" Width="75" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White"/>
-            <Button x:Name="btn_app_kill" Content="Kill App" HorizontalAlignment="Right" Margin="0,6,465,7" VerticalAlignment="Center" Width="75" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White"/>
+            <Button x:Name="btn_log_clear" Content="Clear" Template="{StaticResource custbtn}" HorizontalAlignment="Right" Margin="0,0,5,0" VerticalAlignment="Center" Width="75" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" Height="25"/>
+            <Button x:Name="btn_app_kill" Content="Kill App" Template="{StaticResource custbtn}" HorizontalAlignment="Left" Margin="5,0,0,0" VerticalAlignment="Center" Width="75" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" Height="25"/>
         </Grid>
         <Grid Margin="0,33">
             <RichTextBox x:Name="outputBox" Background="Transparent" BorderBrush="#00ABADB3" Foreground="White" BorderThickness="0" IsReadOnlyCaretVisible="True" SelectionBrush="#FF00F19F" Block.LineHeight="7" SelectionOpacity="0.3" IsDocumentEnabled="True" IsReadOnly="True" UndoLimit="0" Margin="0,0,0,0">

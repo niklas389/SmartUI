@@ -16,7 +16,7 @@
         <Button x:Name="btn_wnd_hide" Content="r" Template="{StaticResource custbtn_transBG}" Margin="515,0,0,358" VerticalAlignment="Bottom" Foreground="#3FFFFFFF" Background="{x:Null}" BorderBrush="{x:Null}" Height="25" FontFamily="Webdings"/>
         <Custom:MetroContentControl x:Name="lbl_header" Content="EINSTELLUNGEN" HorizontalAlignment="Center" Margin="0,8,0,0" VerticalAlignment="Top" Foreground="White" FontSize="18.667" FontFamily="Segoe UI Light" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
 
-        <Custom:MetroAnimatedTabControl x:Name="matc_tabctrl" Margin="0,25,0,0" Visibility="Hidden">
+        <Custom:MetroAnimatedTabControl x:Name="matc_tabctrl" Margin="0,25,0,0">
             <TabItem x:Name="matc_main" Header="Settings Main" Background="{x:Null}" Foreground="#FF838383" BorderBrush="{x:Null}">
                 <Grid x:Name="matc_tab_main">
                     <Grid HorizontalAlignment="Left" Height="155" VerticalAlignment="Top" Width="550" Margin="0">
@@ -76,6 +76,7 @@
                         <ComboBox x:Name="ComboBox_net_interface" HorizontalAlignment="Left" VerticalAlignment="Top" Width="215" Margin="324,65,0,0"/>
                         <CheckBox x:Name="cb_wndmain_spotify_progress" Content="Zeitleiste (Spotify)" HorizontalAlignment="Left" Margin="15,105,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="122"/>
                         <CheckBox x:Name="cb_other_disableVolumeOSD" Content="Verstecke Lautst. OSD" HorizontalAlignment="Left" Margin="153,96,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="148"/>
+                        <CheckBox x:Name="cb_other_startup_play" Content="Play StartUp Sound" HorizontalAlignment="Left" Margin="153,113,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="148"/>
                     </Grid>
                     <Grid HorizontalAlignment="Left" Height="145" Margin="0,155,0,0" VerticalAlignment="Top" Width="550">
                         <Label Content="Sonstiges" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light" Margin="10,5,0,0"/>
@@ -133,7 +134,7 @@
                 </Grid>
             </TabItem>
         </Custom:MetroAnimatedTabControl>
-        <Custom:Flyout x:Name="flyout_cache_reset" Header="" HorizontalAlignment="Left" Height="125" VerticalAlignment="Bottom" Background="#33FFFFFF" Margin="0" AnimateOpacity="True" AutoCloseInterval="0" CloseButtonVisibility="Collapsed" Position="Bottom" IsOpen="True">
+        <Custom:Flyout x:Name="flyout_cache_reset" Header="" HorizontalAlignment="Left" Height="125" VerticalAlignment="Bottom" Background="#33FFFFFF" Margin="0" AnimateOpacity="True" AutoCloseInterval="0" CloseButtonVisibility="Collapsed" Position="Bottom">
             <Grid x:Name="grd_reset_cache_confirmation_Copy" Margin="-35,12,0,0">
                 <Custom:MetroContentControl x:Name="lbl_reset_cache_header" Content="Sind Sie sicher?" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Top" Foreground="White" FontSize="18.667" FontFamily="Segoe UI Light" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
                 <Button x:Name="btn_flyout_spotify_confirm" Template="{StaticResource custbtn_dark}" Content="Löschen" HorizontalAlignment="Right" Margin="0,0,5,5" VerticalAlignment="Bottom" Width="85" Foreground="White" Background="#66000000" BorderBrush="{x:Null}" Height="26"/>

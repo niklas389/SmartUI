@@ -17,10 +17,10 @@ Namespace HideVolumeOSD
         Private hWndInject As IntPtr = IntPtr.Zero
 
         Private hide_osd_option As Integer = -1
-        Private log_cat As String = "LIB_hv-OSD"
+        Private log_cat As String = "   LIB-HV_OSD"
 
         Public Async Sub Init()
-            MainWindow.wnd_log.AddLine(log_cat, "Init...")
+            'MainWindow.wnd_log.AddLine(log_cat, "Init...")
 
             Dim count As Integer = 1
 
@@ -93,7 +93,7 @@ Namespace HideVolumeOSD
 
             ' SW_MINIMIZE
             ShowWindow(hWndInject, 6)
-            MainWindow.wnd_log.AddLine(log_cat, "hiding volume OSD")
+            MainWindow.wnd_log.AddLine(log_cat, "Volume OSD hidden")
         End Sub
 
         Public Sub ShowOSD()
@@ -102,7 +102,7 @@ Namespace HideVolumeOSD
 
             ' SW_RESTORE
             ShowWindow(hWndInject, 9)
-            MainWindow.wnd_log.AddLine(log_cat, "showing volume OSD")
+            MainWindow.wnd_log.AddLine(log_cat, "Volume OSD visible")
         End Sub
 
         Private Shared Function InlineAssignHelper(Of T)(ByRef target As T, value As T) As T

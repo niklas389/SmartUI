@@ -165,10 +165,10 @@ Public Class wnd_settings
         End If
 
         ini.WriteValue("UI", "cb_wndmain_net_iconDisableSpeedLimit", CType(cb_wndmain_net_iconDisableSpeedLimit.IsChecked, String))
-        ini.WriteValue("UI", "cb_wndmain_net_textDisableSpeedLimit", CType(cb_wndmain_net_textDisableSpeedLimit.IsChecked, String))
 
         'others
         ini.WriteValue("SYS", "cb_other_disableVolumeOSD", CType(cb_other_disableVolumeOSD.IsChecked, String))
+        ini.WriteValue("SYS", "cb_other_startup_play", CType(cb_other_startup_play.IsChecked, String))
 
 
         'Show flyout after saving settings
@@ -230,6 +230,8 @@ Public Class wnd_settings
 
         'Others
         cb_other_disableVolumeOSD.IsChecked = CType(ini.ReadValue("SYS", "cb_other_disableVolumeOSD", "False"), Boolean)
+        cb_other_startup_play.IsChecked = CType(ini.ReadValue("SYS", "cb_other_startup_play", "False"), Boolean)
+
         'Others End
     End Sub
 
@@ -489,6 +491,10 @@ Public Class wnd_settings
     Private Sub btn_reset_cache_cancel_Click(sender As Object, e As RoutedEventArgs) Handles btn_reset_cache_cancel.Click
         flyout_cache_reset.IsOpen = False
         matc_tabctrl.Effect = Nothing
+    End Sub
+
+    Private Sub cb_other_startup_play_Checked(sender As Object, e As RoutedEventArgs) Handles cb_other_startup_play.Checked
+        My.Computer.Audio.Play(System.AppDomain.CurrentDomain.BaseDirectory & "\Resources\win_vis_beta_startup.wav")
     End Sub
 #End Region
 
