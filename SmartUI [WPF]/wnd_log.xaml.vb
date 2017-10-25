@@ -87,6 +87,7 @@ Public Class wnd_log
 
     Private Sub btn_log_clear_Click(sender As Object, e As RoutedEventArgs) Handles btn_log_clear.Click
         outputBox.Document.Blocks.Clear()
+        outputBox.AppendText(DateTime.Now.ToLongTimeString & " | Cleared Log")
     End Sub
 
     Private Sub btn_app_kill_Click(sender As Object, e As RoutedEventArgs) Handles btn_app_kill.Click
