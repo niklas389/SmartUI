@@ -49,32 +49,11 @@ Class MainWindow
         apiSHAppBarMessage(ABM_REMOVE, abd)
     End Sub
 
-    Private Sub DockToTop()
-        On Error Resume Next
-        apiSHAppBarMessage(ABM_REMOVE, abd)
-        abd = New APPBARDATA
-        abd.cbSize = Marshal.SizeOf(abd)
-        abd.uEdge = 1
-        Me.Width = SystemParameters.WorkArea.Width
-        Me.Height = 25
-        abd.rc.rLeft = CInt(SystemParameters.WorkArea.Left)
-        abd.rc.rRight = CInt(SystemParameters.WorkArea.Right)
-        abd.rc.rTop = CInt(SystemParameters.WorkArea.Top)
-        abd.rc.rBottom = 25
-        apiSHAppBarMessage(ABM_NEW, abd)
-        apiSHAppBarMessage(ABM_SETPOS, abd)
-        Me.Topmost = True
-        Me.Top = 0
-        Me.Left = 0
-    End Sub
-
-    Private Sub MainWindow_LocationChanged(sender As Object, e As EventArgs) Handles Me.LocationChanged
-        Me.Top = 0
-        Me.Left = 0
-    End Sub
-
-    Private Sub MainWindow_SizeChanged(sender As Object, e As SizeChangedEventArgs) Handles Me.SizeChanged
+    'LC
+    Private Sub MainWindow_LocationChanged(sender As Object, e As EventArgs) Handles Me.LocationChanged, Me.SizeChanged
         Me.Width = SystemParameters.PrimaryScreenWidth
+        Me.Top = 0
+        Me.Left = 0
     End Sub
 
     'Blur
@@ -90,9 +69,7 @@ Class MainWindow
     End Structure
 
     Friend Enum WindowCompositionAttribute
-        ' ...
-        WCA_ACCENT_POLICY = 19
-        ' ...
+       WCA_ACCENT_POLICY = 19
     End Enum
 
     Friend Enum AccentState
@@ -111,25 +88,44 @@ Class MainWindow
         Public AnimationId As Integer
     End Structure
 
-    Friend Sub EnableBlur()
-        Dim windowHelper = New WindowInteropHelper(Me)
+    Private Sub sui_dock_blur(ByVal Optional e_blur As Boolean = True)
+        'DOCK
+        On Error Resume Next
+        apiSHAppBarMessage(ABM_REMOVE, abd)
+        abd = New APPBARDATA
+        abd.cbSize = Marshal.SizeOf(abd)
+        abd.uEdge = 1
+        Me.Width = SystemParameters.WorkArea.Width
+        Me.Height = 25
+        abd.rc.rLeft = CInt(SystemParameters.WorkArea.Left)
+        abd.rc.rRight = CInt(SystemParameters.WorkArea.Right)
+        abd.rc.rTop = CInt(SystemParameters.WorkArea.Top)
+        abd.rc.rBottom = 25
+        apiSHAppBarMessage(ABM_NEW, abd)
+        apiSHAppBarMessage(ABM_SETPOS, abd)
+        Me.Topmost = True
+        Me.Top = 0
+        Me.Left = 0
 
-        Dim accent = New AccentPolicy()
-        Dim accentStructSize = Marshal.SizeOf(accent)
-        accent.AccentState = AccentState.ACCENT_ENABLE_BLURBEHIND
+        If e_blur = True Then
+            Dim windowHelper = New WindowInteropHelper(Me)
 
-        Dim accentPtr = Marshal.AllocHGlobal(accentStructSize)
-        Marshal.StructureToPtr(accent, accentPtr, False)
+            Dim accent = New AccentPolicy()
+            Dim accentStructSize = Marshal.SizeOf(accent)
+            accent.AccentState = AccentState.ACCENT_ENABLE_BLURBEHIND
 
-        Dim data = New WindowCompositionAttributeData() With {
+            Dim accentPtr = Marshal.AllocHGlobal(accentStructSize)
+            Marshal.StructureToPtr(accent, accentPtr, False)
+
+            Dim data = New WindowCompositionAttributeData() With {
             .Attribute = WindowCompositionAttribute.WCA_ACCENT_POLICY,
             .SizeOfData = accentStructSize,
-            .Data = accentPtr
-        }
+            .Data = accentPtr}
 
-        SetWindowCompositionAttribute(windowHelper.Handle, data)
+            SetWindowCompositionAttribute(windowHelper.Handle, data)
 
-        Marshal.FreeHGlobal(accentPtr)
+            Marshal.FreeHGlobal(accentPtr)
+        End If
     End Sub
 #End Region
 
@@ -148,13 +144,12 @@ Class MainWindow
     End Sub
 
     Private Sub MainWindow_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
-        DockToTop()
-        EnableBlur()
+        sui_dock_blur()
 
         'If IO.File.Exists(".\config\wcom_allowed") Then wnd_log.Show()
 
         lbl_clock.Content = "SmartUI"
-        lbl_clock_weekday.Content = My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor
+        lbl_clock_weekday.Content = "v" & My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & "." & IO.File.GetLastWriteTime(AppDomain.CurrentDomain.BaseDirectory & "\SmartUI.exe").ToString("yyMMdd")
 
         helper_grid(grd_volume, False)
         helper_grid(grd_spotify, False)
@@ -825,12 +820,11 @@ Class MainWindow
             Exit Sub
         End If
 
-        Dim net_NIC_statistic As IPInterfaceStatistics ' = net_monitoredInterface.GetIPStatistics()
+        Dim net_NIC_statistic As IPInterfaceStatistics
 
         Try
             net_NIC_statistic = net_monitoredInterface.GetIPStatistics()
         Catch ex As Exception
-            'Me.net_get_interfaces()
             Exit Sub
         End Try
 
@@ -951,23 +945,20 @@ Class MainWindow
     Dim oww_data_conditionID As Integer = 0
     Public Shared oww_data_condition As String = ""
 
-    'OpenWeather API
-    'DATA PATH -> (path_cache & "weather\oww_data.xml")
+    'OpenWeather API - DATA PATH -> (path_cache & "weather\oww_data.xml")
     Dim path_cache_weather As String = AppDomain.CurrentDomain.BaseDirectory & "cache\weather\"
 
     Private Async Sub oww_update(ByVal Optional e_force_oww As Boolean = False)
         If wData_enabled = False Then Exit Sub
         Dim oww_API_error As Boolean = False
 
-        'API Update
-        'request weather data
+        'API Update - request weather data
         Dim oww_api_request As WebRequest = WebRequest.Create("http://api.openweathermap.org/data/2.5/weather?id=" & wConf_API_cityID & "&APPID=" & wConf_API_key & "&mode=xml&units=metric&lang=DE")
         Dim oww_api_respone As WebResponse
         oww_xml = New XmlDocument()
 
         Try
-            'server response
-            oww_api_respone = Await oww_api_request.GetResponseAsync()
+            oww_api_respone = Await oww_api_request.GetResponseAsync() 'server response
 
         Catch ex As WebException
             oww_api_respone = Nothing
@@ -1013,9 +1004,7 @@ Class MainWindow
                         xmlid = .Name
                         'If xmlid = "country" Then oww_data_country = .ReadElementContentAsString
 
-                        ' Ein Element 
                         If .AttributeCount > 0 Then
-                            ' Es sind noch weitere Attribute vorhanden 
                             While .MoveToNextAttribute ' nächstes 
                                 'If xmlid = "city" And .Name = "name" Then oww_data_location = .Value
                                 If xmlid = "temperature" And .Name = "value" Then oww_data_temp = .Value.Remove(.Value.Length - 1, 1)
@@ -1032,8 +1021,8 @@ Class MainWindow
                             End While
                         End If
                     End If
-                Loop  ' Weiter nach Daten schauen 
-                .Close()  ' XMLTextReader schließen 
+                Loop
+                .Close()
             End With
         Else
 
@@ -1143,8 +1132,6 @@ Class MainWindow
         If wStationData_data.Length < 10 Then
             wcom_error(e_station)
             Exit Sub
-            'Else
-            '    wnd_log.AddLine(log_cat & "-WEATHER", "WCOM data updated")
         End If
 
         Dim sSplit As String() = wStationData_data.Split(CType("}", Char()))
