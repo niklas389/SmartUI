@@ -63,6 +63,36 @@ Namespace My.Resources
         '''<summary>
         '''  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         '''</summary>
+        Friend ReadOnly Property atm_pressure() As System.Drawing.Bitmap
+            Get
+                Dim obj As Object = ResourceManager.GetObject("atm_pressure", resourceCulture)
+                Return CType(obj,System.Drawing.Bitmap)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        '''</summary>
+        Friend ReadOnly Property drop() As System.Drawing.Bitmap
+            Get
+                Dim obj As Object = ResourceManager.GetObject("drop", resourceCulture)
+                Return CType(obj,System.Drawing.Bitmap)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        '''</summary>
+        Friend ReadOnly Property ic_arrow() As System.Drawing.Bitmap
+            Get
+                Dim obj As Object = ResourceManager.GetObject("ic_arrow", resourceCulture)
+                Return CType(obj,System.Drawing.Bitmap)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        '''</summary>
         Friend ReadOnly Property ic_arrow_back_white_24dp() As System.Drawing.Bitmap
             Get
                 Dim obj As Object = ResourceManager.GetObject("ic_arrow_back_white_24dp", resourceCulture)
@@ -193,6 +223,16 @@ Namespace My.Resources
         '''<summary>
         '''  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         '''</summary>
+        Friend ReadOnly Property ic_room_white_18dp() As System.Drawing.Bitmap
+            Get
+                Dim obj As Object = ResourceManager.GetObject("ic_room_white_18dp", resourceCulture)
+                Return CType(obj,System.Drawing.Bitmap)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        '''</summary>
         Friend ReadOnly Property ic_update_white_24dp() As System.Drawing.Bitmap
             Get
                 Dim obj As Object = ResourceManager.GetObject("ic_update_white_24dp", resourceCulture)
@@ -216,6 +256,16 @@ Namespace My.Resources
         Friend ReadOnly Property ic_warning_white_24dp() As System.Drawing.Bitmap
             Get
                 Dim obj As Object = ResourceManager.GetObject("ic_warning_white_24dp", resourceCulture)
+                Return CType(obj,System.Drawing.Bitmap)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        '''</summary>
+        Friend ReadOnly Property img_weather_init() As System.Drawing.Bitmap
+            Get
+                Dim obj As Object = ResourceManager.GetObject("img_weather_init", resourceCulture)
                 Return CType(obj,System.Drawing.Bitmap)
             End Get
         End Property
@@ -346,6 +396,16 @@ Namespace My.Resources
         Friend ReadOnly Property win_vis_beta_startup() As System.IO.UnmanagedMemoryStream
             Get
                 Return ResourceManager.GetStream("win_vis_beta_startup", resourceCulture)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        '''</summary>
+        Friend ReadOnly Property wind() As System.Drawing.Bitmap
+            Get
+                Dim obj As Object = ResourceManager.GetObject("wind", resourceCulture)
+                Return CType(obj,System.Drawing.Bitmap)
             End Get
         End Property
     End Module

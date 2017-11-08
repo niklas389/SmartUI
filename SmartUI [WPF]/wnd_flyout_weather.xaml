@@ -6,15 +6,72 @@
         xmlns:local="clr-namespace:SmartUI__WPF_"
         xmlns:Custom="http://metro.mahapps.com/winfx/xaml/controls" x:Name="wnd_flyout_weather" x:Class="wnd_flyout_weather"
         mc:Ignorable="d"
-        Title="Wetter Flyout" Height="135" Width="350" Background="#59000000" Foreground="Black" AllowsTransparency="True" WindowStyle="None" ShowInTaskbar="False" ResizeMode="NoResize" Topmost="True">
+        Title="Wetter Flyout" Height="336" Width="350" Background="#59000000" Foreground="Black" AllowsTransparency="True" WindowStyle="None" ShowInTaskbar="False" ResizeMode="NoResize" Topmost="True">
     <Grid x:Name="grd_main">
-        <Label x:Name="lbl_weather_condition" Content="&lt;weather condition&gt;" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="330" Foreground="White" FontSize="18" FontFamily="Segoe UI Light" Background="{x:Null}"/>
-        <Label x:Name="lbl_weather_humidity" Content="&lt;humidity&gt;" Margin="10,50,180,0" VerticalAlignment="Top" Foreground="White" Background="{x:Null}"/>
-        <Label x:Name="lbl_weather_winddir" Content="&lt;wind direction&gt;" Margin="10,80,170,0" VerticalAlignment="Top" Foreground="White" Background="{x:Null}"/>
-        <Label x:Name="lbl_weather_windspeed" Content="&lt;wind speed&gt;" Margin="180,80,10,0" VerticalAlignment="Top" Foreground="White" Background="{x:Null}"/>
-        <Label x:Name="lbl_weather_airPressure" Content="&lt;air pressure&gt;" Margin="180,50,10,0" VerticalAlignment="Top" Foreground="White" HorizontalAlignment="Center" Width="160" Background="{x:Null}"/>
-        <Label x:Name="lbl_weather_info" Content="&lt;weather info&gt;" Margin="10,0" VerticalAlignment="Bottom" Foreground="#4CFFFFFF" HorizontalAlignment="Center" Width="330" Background="{x:Null}"/>
         <Separator Margin="0" VerticalAlignment="Top" Foreground="{x:Null}" Background="#19FFFFFF" Height="1"/>
+        <Grid x:Name="grd_weather_old" HorizontalAlignment="Left" Height="139" Margin="0,197,0,0" VerticalAlignment="Top" Width="350" Visibility="Hidden">
+            <Label x:Name="lbl_weather_condition" Content="&lt;weather condition&gt;" HorizontalAlignment="Left" Margin="10,6,0,0" VerticalAlignment="Top" Width="330" Foreground="White" FontSize="18" FontFamily="Segoe UI Light" Background="{x:Null}"/>
+            <Label x:Name="lbl_weather_humidity" Content="&lt;humidity&gt;" Margin="10,46,180,0" VerticalAlignment="Top" Foreground="White" Background="{x:Null}"/>
+            <Label x:Name="lbl_weather_winddir" Content="&lt;wind direction&gt;" Margin="10,76,170,0" VerticalAlignment="Top" Foreground="White" Background="{x:Null}"/>
+            <Label x:Name="lbl_weather_windspeed" Content="&lt;wind speed&gt;" Margin="180,76,10,0" VerticalAlignment="Top" Foreground="White" Background="{x:Null}"/>
+            <Label x:Name="lbl_weather_airPressure" Content="&lt;air pressure&gt;" Margin="180,46,10,0" VerticalAlignment="Top" Foreground="White" HorizontalAlignment="Center" Width="160" Background="{x:Null}"/>
+            <Label x:Name="lbl_weather_info" Content="&lt;weather info&gt;" Margin="10,0" VerticalAlignment="Bottom" Foreground="#4CFFFFFF" HorizontalAlignment="Center" Width="330" Background="{x:Null}"/>
+        </Grid>
+        <Grid x:Name="grd_weather_v2" VerticalAlignment="Top">
+            <Grid x:Name="grd_v2_location" Height="35" Margin="0" VerticalAlignment="Top">
+                <Image x:Name="img_data_refresh" HorizontalAlignment="Right" Height="20" Width="20" Margin="0,0,3,0" Source="pack://siteoforigin:,,,/Resources/ic_update_white_24dp.png" RenderTransformOrigin="0.5,0.5" VerticalAlignment="Center"/>
+                <Grid HorizontalAlignment="Center" Margin="0" Height="25" VerticalAlignment="Center">
+                    <Image HorizontalAlignment="Left" Height="18" Margin="3.5,0,0,0" VerticalAlignment="Center" Width="18" Source="Resources/ic_room_white_18dp.png"/>
+                    <Label x:Name="lbl_location" Content="&lt;location&gt;" Margin="20,0,0,0" Cursor="" Foreground="White" Background="{x:Null}"/>
+                </Grid>
+            </Grid>
+            <Grid x:Name="grd_weather_now" Height="75" Margin="0,35,0,0" VerticalAlignment="Top">
+                <Grid x:Name="grd_now" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center">
+                    <Image x:Name="img_now_condition" HorizontalAlignment="Center" Height="30" VerticalAlignment="Top" Width="30" Source="Resources/img_weather_init.png" Margin="79,10,0,0"/>
+                    <Label x:Name="lbl_now_temp" Content="24°" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="White" Background="{x:Null}" FontFamily="Segoe UI Light" FontSize="48"/>
+                    <Label x:Name="lbl_now_txt" Content="Label" HorizontalAlignment="Center" Margin="79,40,0,0" VerticalAlignment="Top" HorizontalContentAlignment="Center" Foreground="#99FFFFFF" Background="{x:Null}"/>
+                </Grid>
+            </Grid>
+
+            <Grid Height="120" Margin="0,110,0,0" VerticalAlignment="Top">
+                <Grid x:Name="grd_now_wind" HorizontalAlignment="Center" Margin="-250,11,0,0" VerticalAlignment="Center">
+                    <Image HorizontalAlignment="Center" Height="25" VerticalAlignment="Top" Width="25" Source="Resources/wind.png"/>
+                    <Label x:Name="lbl_now_windspeed" Content="23" HorizontalAlignment="Center" Margin="0,15,0,0" VerticalAlignment="Top" Foreground="White" Background="{x:Null}" FontFamily="Segoe UI Light" FontSize="30"/>
+                    <Label Content="km/h" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,52,0,0" Background="{x:Null}" Foreground="#7FFFFFFF" RenderTransformOrigin="0.5,0.5"/>
+                </Grid>
+                <Grid x:Name="grd_now_humidity" HorizontalAlignment="Center" Margin="0,11,0,0" VerticalAlignment="Center">
+                    <Image HorizontalAlignment="Center" Height="25" VerticalAlignment="Top" Width="25" Source="Resources/drop.png"/>
+                    <Label x:Name="lbl_now_humidity" Content="89" HorizontalAlignment="Center" Margin="0,15,0,0" VerticalAlignment="Top" Foreground="White" Background="{x:Null}" FontFamily="Segoe UI Light" FontSize="30"/>
+                    <Label Content="%" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,52,1,0" Background="{x:Null}" Foreground="#7FFFFFFF" RenderTransformOrigin="0.5,0.5"/>
+                </Grid>
+                <Grid x:Name="grd_now_winddir" HorizontalAlignment="Center" Margin="-125,11,0,0" VerticalAlignment="Center">
+                    <Image x:Name="img_now_winddir" HorizontalAlignment="Center" Height="25" VerticalAlignment="Top" Width="25" Source="Resources/ic_arrow.png" RenderTransformOrigin="0.5,0.5">
+                        <Image.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform/>
+                                <SkewTransform/>
+                                <RotateTransform Angle="70"/>
+                                <TranslateTransform/>
+                            </TransformGroup>
+                        </Image.RenderTransform>
+                    </Image>
+                    <Label x:Name="lbl_now_winddir_deg" Content="70" HorizontalAlignment="Center" Margin="0,15,0,0" VerticalAlignment="Top" Foreground="White" Background="{x:Null}" FontFamily="Segoe UI Light" FontSize="30"/>
+                    <Label x:Name="lbl_now_winddir" Content="Wind" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,52,0,0" Background="{x:Null}" Foreground="#7FFFFFFF" RenderTransformOrigin="0.5,0.5"/>
+                </Grid>
+                <Grid x:Name="grd_now_pressure" HorizontalAlignment="Center" Margin="125,11,0,0" VerticalAlignment="Center" Height="78">
+                    <Image HorizontalAlignment="Center" Height="25" VerticalAlignment="Top" Width="25" Source="Resources/atm-pressure.png"/>
+                    <Label x:Name="lbl_now_pressure" Content="1120&#xD;&#xA;" HorizontalAlignment="Center" Margin="0,15,0,0" VerticalAlignment="Top" Foreground="White" Background="{x:Null}" FontFamily="Segoe UI Light" FontSize="30"/>
+                    <Label Content="hPa&#xD;&#xA;" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,52,1,0" Background="{x:Null}" Foreground="#7FFFFFFF" RenderTransformOrigin="0.5,0.5" Height="26"/>
+                </Grid>
+                <Grid x:Name="grd_now_humidity_Copy" HorizontalAlignment="Center" Margin="250,11,0,0" VerticalAlignment="Center">
+                    <Image HorizontalAlignment="Center" Height="25" VerticalAlignment="Top" Width="25" Source="Resources/drop.png"/>
+                    <Label x:Name="lbl_now_sun" Content="00" HorizontalAlignment="Center" Margin="0,15,0,0" VerticalAlignment="Top" Foreground="White" Background="{x:Null}" FontFamily="Segoe UI Light" FontSize="30"/>
+                    <Label Content="%" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,52,1,0" Background="{x:Null}" Foreground="#7FFFFFFF" RenderTransformOrigin="0.5,0.5"/>
+                </Grid>
+                <Separator HorizontalAlignment="Left" Height="26" Margin="49,1,0,0" VerticalAlignment="Top" Width="295" Background="#7FFFFFFF" Foreground="{x:Null}"/>
+                <Label Content="Jetzt" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" Foreground="White" Background="{x:Null}"/>
+            </Grid>
+        </Grid>
 
     </Grid>
 </Window>

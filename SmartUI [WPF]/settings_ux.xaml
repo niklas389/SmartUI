@@ -5,12 +5,18 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:Custom="http://metro.mahapps.com/winfx/xaml/controls" x:Name="settings_ux" x:Class="wnd_settings"
         mc:Ignorable="d"
-        Title="Einstellungen" Height="383" Width="550" Background="#B2000000" Foreground="White" AllowsTransparency="True" WindowStyle="None" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" Topmost="True">
+        Title="Einstellungen" Height="383" Width="550" Background="#99000000" Foreground="White" AllowsTransparency="True" WindowStyle="None" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" Topmost="True">
     <Window.Resources>
         <SolidColorBrush x:Key="MainColorBtn">#0CFFFFFF</SolidColorBrush>
     </Window.Resources>
 
     <Grid x:Name="grd_main">
+        <Grid.Background>
+            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                <GradientStop Color="#7FFFFFFF" Offset="0"/>
+                <GradientStop Offset="0.11" Color="#00000000"/>
+            </LinearGradientBrush>
+        </Grid.Background>
         <Label x:Name="label" Content="Info: Designtest - Die &quot;Sonstiges&quot; Einstellungen haben keine funktion" HorizontalAlignment="Left" Margin="0,357,0,0" VerticalAlignment="Top" Width="390" Foreground="#33FFFFFF" Visibility="Hidden"/>
         <Button x:Name="btn_wnd_minimize" Content="0" Template="{StaticResource custbtn_transBG}" HorizontalAlignment="Left" Margin="480,0,0,0" VerticalAlignment="Top" Width="35" Foreground="#3FFFFFFF" Background="{x:Null}" BorderBrush="{x:Null}" Height="25" FontFamily="Webdings"/>
         <Button x:Name="btn_wnd_hide" Content="r" Template="{StaticResource custbtn_transBG}" Margin="515,0,0,358" VerticalAlignment="Bottom" Foreground="#3FFFFFFF" Background="{x:Null}" BorderBrush="{x:Null}" Height="25" FontFamily="Webdings"/>
@@ -23,7 +29,7 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <Label Content="Personalisierung" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light" Margin="10,5,0,0"/>
+                        <Label x:Name="lbl_customize_header" Content="Personalisierung" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light" Margin="10,5,0,0" Background="{x:Null}"/>
                         <Separator HorizontalAlignment="Left" Height="10" Margin="15,30,0,0" VerticalAlignment="Top" Width="525" Foreground="#FF13EAAC" Background="#3FFFFFFF"/>
                         <CheckBox x:Name="cb_wndmain_clock_enabled" Content="Uhr anzeigen" HorizontalAlignment="Left" Margin="15,45,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="142" IsChecked="True"/>
                         <CheckBox x:Name="cb_wndmain_clock_seconds" Content="mit Sekunden" HorizontalAlignment="Left" Margin="25,65,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="122" IsChecked="True"/>
@@ -73,7 +79,14 @@
                                 </TransformGroup>
                             </Separator.RenderTransform>
                         </Separator>
-                        <ComboBox x:Name="ComboBox_net_interface" HorizontalAlignment="Left" VerticalAlignment="Top" Width="215" Margin="324,65,0,0"/>
+                        <ComboBox x:Name="ComboBox_net_interface" HorizontalAlignment="Left" VerticalAlignment="Top" Width="215" Margin="324,65,0,0">
+                            <ComboBox.Background>
+                                <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
+                                    <GradientStop Color="Black" Offset="0"/>
+                                    <GradientStop Color="Black" Offset="1"/>
+                                </LinearGradientBrush>
+                            </ComboBox.Background>
+                        </ComboBox>
                         <CheckBox x:Name="cb_wndmain_spotify_progress" Content="Zeitleiste (Spotify)" HorizontalAlignment="Left" Margin="15,105,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="122"/>
                         <CheckBox x:Name="cb_other_disableVolumeOSD" Content="Verstecke Lautst. OSD" HorizontalAlignment="Left" Margin="153,96,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="148"/>
                         <CheckBox x:Name="cb_other_startup_play" Content="Play StartUp Sound" HorizontalAlignment="Left" Margin="153,113,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="148"/>

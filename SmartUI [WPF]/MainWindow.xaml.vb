@@ -16,7 +16,6 @@ Class MainWindow
     Dim ini As New ini_file
     Dim mysettings As New wnd_settings
     Dim wConf_useWcom As Boolean = False
-
     Public Shared settings_update_needed As Boolean = False
 
     Public Shared wnd_log As New wnd_log
@@ -787,7 +786,7 @@ Class MainWindow
                 End If
             Next
 
-            wnd_log.AddLine("INFO" & "-NET", "Interface: " & net_monitoredInterface.Name)
+            wnd_log.AddLine("INFO" & "-NET", "Seleceted Interface: " & net_monitoredInterface.Name)
 
             helper_grid(grd_network, True)
             net_monitoring_allowed = 1
@@ -808,7 +807,7 @@ Class MainWindow
 
     Private Sub net_monitoring()
         If net_monitoring_allowed = 0 Then
-            wnd_log.AddLine("INFO" & "-NET", "Network monitoring disabled, GoTo 'net_get_interfaces'")
+            wnd_log.AddLine("INFO" & "-NET", "Network monitoring disabled or no interface selected, GoTo 'net_get_interfaces'")
 
             net_get_interfaces()
             ' helper_grid(grd_network, False)
@@ -931,19 +930,8 @@ Class MainWindow
     Private wConf_API_key As String = ""
     Dim oww_xml As XmlDocument
 
-    'Dim oww_data_location As String = ""
-    'Dim oww_data_country As String = ""
-
-    Dim oww_data_Tmin As String = "0"
-    Dim oww_data_Tmax As String = "0"
     Public Shared oww_data_temp As String = "0"
-    Public Shared oww_data_humidity As Integer = 0
-    Public Shared oww_data_pressure As Integer = 0
-    Public Shared oww_data_windspeed As Integer = 0
-    'Dim oww_data_windcondition As String = ""
-    Public Shared oww_data_winddirection As String = ""
     Dim oww_data_conditionID As Integer = 0
-    Public Shared oww_data_condition As String = ""
 
     'OpenWeather API - DATA PATH -> (path_cache & "weather\oww_data.xml")
     Dim path_cache_weather As String = AppDomain.CurrentDomain.BaseDirectory & "cache\weather\"
@@ -1006,16 +994,7 @@ Class MainWindow
 
                         If .AttributeCount > 0 Then
                             While .MoveToNextAttribute ' nächstes 
-                                'If xmlid = "city" And .Name = "name" Then oww_data_location = .Value
                                 If xmlid = "temperature" And .Name = "value" Then oww_data_temp = .Value.Remove(.Value.Length - 1, 1)
-                                If xmlid = "temperature" And .Name = "max" Then oww_data_Tmax = .Value.Remove(.Value.Length - 1, 1)
-                                If xmlid = "temperature" And .Name = "min" Then oww_data_Tmin = .Value.Remove(.Value.Length - 1, 1)
-                                If xmlid = "humidity" And .Name = "value" Then oww_data_humidity = CInt(.Value)
-                                If xmlid = "pressure" And .Name = "value" Then oww_data_pressure = CInt(.Value)
-                                If xmlid = "wind" And .Name = "value" Then oww_data_windspeed = CInt(.Value)
-                                'If xmlid = "wind" And .Name = "name" Then oww_data_windcondition = .Value
-                                If xmlid = "direction" And .Name = "code" Then oww_data_winddirection = .Value
-                                If xmlid = "weather" And .Name = "value" Then oww_data_condition = .Value
                                 If xmlid = "weather" And .Name = "number" Then oww_data_conditionID = CInt(.Value)
 
                             End While
@@ -1101,11 +1080,6 @@ Class MainWindow
 
     Public Shared wData_temp As String
     Public Shared wData_condition As String
-    Public Shared wData_humidity As String
-    Public Shared wData_rain As String
-    Public Shared wData_airPressure As String
-    Public Shared wData_windDir As String
-    Public Shared wData_windSpeed As String
 
     Public Shared wData_lastUpdate As Date
     Public Shared WData_wcom_lastUpdate As Date
@@ -1143,33 +1117,6 @@ Class MainWindow
         Else
             wData_temp = ssSplit(3).Substring(0, ssSplit(3).Length - 5) & "°"
         End If
-
-        'Windspeed
-        If ssSplit(7).Substring(0, ssSplit(7).Length - 5) = "null" Then
-            wData_windSpeed = "0 km/h"
-        Else
-            wData_windSpeed = CDbl((ssSplit(7).Substring(0, ssSplit(7).Length - 5))) * 3.6 / 10 & " km/h"
-        End If
-
-        'humidity
-        If ssSplit(2).Substring(0, ssSplit(2).Length - 5) = "null" Then
-            wData_humidity = "N/A"
-        Else
-            wData_humidity = ssSplit(2).Substring(0, ssSplit(2).Length - 5) & "%"
-        End If
-
-        'wind direction
-        wData_windDir = ssSplit(8) & "°"
-        'wind speed
-        If (ssSplit(7).Substring(0, ssSplit(7).Length - 5)) = "null" Then
-            wData_windSpeed = "N/A"
-        Else
-            wData_windSpeed = CDbl((ssSplit(7).Substring(0, ssSplit(7).Length - 5))) * 3.6 / 10 & " km/h"
-        End If
-        'rain
-        wData_rain = ssSplit(6).Substring(0, ssSplit(6).Length - 5) & " l/qm"
-        'air pressure
-        wData_airPressure = ssSplit(5).Substring(0, ssSplit(5).Length - 5) & " hPa"
 
         Me.lbl_weather.Content = wData_temp
 
