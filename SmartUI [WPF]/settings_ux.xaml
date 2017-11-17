@@ -98,6 +98,7 @@
                         <Button x:Name="btn_credits" Content="Credits" HorizontalAlignment="Left" Margin="465,105,0,0" VerticalAlignment="Top" Width="75" Foreground="#3FFFFFFF" Background="#00000000" BorderBrush="#00707070" Height="25" Visibility="Hidden"/>
                         <Button x:Name="btn_info_3rdpty" Template="{StaticResource custbtn}" Content="Drittanbieter Software" HorizontalAlignment="Left" Margin="405,75,0,0" VerticalAlignment="Top" Width="135" Foreground="#7FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25"/>
                         <Button x:Name="btn_spotify" Template="{StaticResource custbtn}" Content="Spotify" HorizontalAlignment="Left" Margin="385,45,0,0" VerticalAlignment="Top" Width="75" Foreground="#7FFFFFFF" Background="{x:Null}" BorderBrush="{x:Null}" Height="25" BorderThickness="1" SnapsToDevicePixels="True"/>
+                        <Button x:Name="btn_updates" Template="{StaticResource custbtn}" Content="Updates" HorizontalAlignment="Left" Margin="305,45,0,0" VerticalAlignment="Top" Width="75" Foreground="#7FFFFFFF" Background="{x:Null}" BorderBrush="{x:Null}" Height="25" BorderThickness="1" SnapsToDevicePixels="True"/>
                     </Grid>
                     <Grid x:Name="grd_bottom_strip" Height="28" VerticalAlignment="Bottom" Margin="0">
                         <Button x:Name="btn_settings_save" Content="Speichern" Template="{StaticResource custbtn}" HorizontalAlignment="Right" Margin="0,-6,10,9" VerticalAlignment="Center" Width="85" Foreground="#7FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25"/>
@@ -118,7 +119,7 @@
                     <Button x:Name="btn_oww_getKey" Content="API-Key erhalten" Template="{StaticResource custbtn}" HorizontalAlignment="Right" Margin="0,126,10,0" VerticalAlignment="Top" Width="120" Foreground="#3FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25" ToolTip="Öffnet den Browser und leitet sie zu OpenWeather weiter, dort erhalten sie ihren API-Key"/>
                     <Label Content="City-ID" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light" Margin="10,159,0,0"/>
                     <Separator HorizontalAlignment="Left" Height="10" Margin="15,186,0,0" VerticalAlignment="Top" Width="525" Foreground="#FF13EAAC" Background="#3FFFFFFF"/>
-                    <TextBox x:Name="txtBx_weather_zipcode" HorizontalAlignment="Center" Height="23" Margin="211,240,219,0" TextWrapping="Wrap" Text="&lt;City ID&gt;" VerticalAlignment="Top" Width="120" Background="#0CFFFFFF" BorderBrush="#0CFFFFFF" Foreground="White"/>
+                    <TextBox x:Name="txtBx_weather_cid" HorizontalAlignment="Center" Height="23" Margin="211,240,219,0" TextWrapping="Wrap" Text="&lt;City ID&gt;" VerticalAlignment="Top" Width="120" Background="#0CFFFFFF" BorderBrush="#0CFFFFFF" Foreground="White"/>
                     <Label x:Name="lbl_overlay_description_Copy" Content="Hier fügen Sie die ID ihrer Stadt ein" HorizontalAlignment="Left" Margin="15,201,0,0" VerticalAlignment="Top" Width="221" Foreground="#7FFFFFFF" Height="34"/>
                     <Label x:Name="lbl_wcom_check" Content="&lt;wcom_check&gt;" HorizontalAlignment="Left" Margin="10,268,0,0" VerticalAlignment="Top" Width="530" Foreground="#3FFFFFFF" Height="30"/>
                 </Grid>
@@ -144,6 +145,16 @@
                     <Label x:Name="lbl_header_spfy" Content="Alles zur Spotify Integration" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light" Margin="10,5,0,0"/>
                     <Separator Height="10" Margin="15,30,15,0" VerticalAlignment="Top" Foreground="#FF13EAAC" Background="#3FFFFFFF"/>
                     <Button x:Name="btn_restart_spotify" Content="Force Restart Spotify" Template="{StaticResource custbtn}" Margin="351,111,15,0" VerticalAlignment="Top" Foreground="#7FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25"/>
+                </Grid>
+            </TabItem>
+            <TabItem x:Name="matc_updates" Header="Updates" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" Width="54" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF767676">
+                <Grid x:Name="matc_tab_updates">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Label x:Name="lbl_header_spfy_Copy" Content="Updates" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light" Margin="10,5,0,0"/>
+                    <Separator Height="10" Margin="15,30,15,0" VerticalAlignment="Top" Foreground="#FF13EAAC" Background="#3FFFFFFF"/>
+                    <Button Content="Button" HorizontalAlignment="Left" Margin="233,116,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click"/>
                 </Grid>
             </TabItem>
         </Custom:MetroAnimatedTabControl>

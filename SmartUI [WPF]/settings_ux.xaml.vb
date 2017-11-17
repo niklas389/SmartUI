@@ -1,9 +1,12 @@
 ﻿Imports System.ComponentModel
 Imports System.Diagnostics
+Imports System.Globalization
 Imports System.IO
 Imports System.Net
 Imports System.Runtime.InteropServices
+Imports System.Threading
 Imports System.Windows.Interop
+Imports nUpdate.Updating
 
 Public Class wnd_settings
 #Region "Blur"
@@ -87,6 +90,8 @@ Public Class wnd_settings
         matc_weather.Visibility = Visibility.Hidden
         matc_changelog.Visibility = Visibility.Hidden
         matc_spotify.Visibility = Visibility.Hidden
+        matc_updates.Visibility = Visibility.Hidden
+
         flyout_cache_reset.IsOpen = False
         flyout_settings_saved.IsOpen = False
         pring_flyout_settings_saved.Visibility = Visibility.Hidden
@@ -151,9 +156,12 @@ Public Class wnd_settings
         ini.WriteValue("Spotify", "cb_wndmain_spotify_progress", CType(cb_wndmain_spotify_progress.IsChecked, String))
 
         'Weather
-        ini.WriteValue("Weather", "cb_wndmain_weather_enabled", CType(cb_wndmain_weather_enabled.IsChecked, String))
-        If Not txtBx_weather_zipcode.Text = "<City ID>" Then ini.WriteValue("Weather", "txtBx_weather_zipcode", txtBx_weather_zipcode.Text)
-        If Not txtBx_weather_APIkey.Text = "<API Key>" Then ini.WriteValue("Weather", "txtBx_weather_APIkey", txtBx_weather_APIkey.Text)
+        'ini.WriteValue("Weather", "cb_wndmain_weather_enabled", CType(cb_wndmain_weather_enabled.IsChecked, String))
+        cls_weather.enabled(cb_wndmain_weather_enabled.IsChecked.Value)
+        'If Not txtBx_weather_zipcode.Text = "<City ID>" Then ini.WriteValue("Weather", "txtBx_weather_zipcode", txtBx_weather_zipcode.Text)
+        'If Not txtBx_weather_APIkey.Text = "<API Key>" Then ini.WriteValue("Weather", "txtBx_weather_APIkey", txtBx_weather_APIkey.Text)
+
+        If Not txtBx_weather_cid.Text = "<City ID>" And Not txtBx_weather_APIkey.Text = "<API Key>" Then cls_weather.oww_set_data(CInt(txtBx_weather_cid.Text), txtBx_weather_APIkey.Text)
 
         'Network
         If Not ComboBox_net_interface.SelectedIndex = -1 Then
@@ -173,7 +181,7 @@ Public Class wnd_settings
 
         'Show flyout after saving settings
         grd_bottom_strip.Visibility = Visibility.Hidden
-        lbl_flyout_settings_text.Content = "Ihre Änderungen wurden gespeichert!"
+        lbl_flyout_settings_text.Content = "Änderungen gespeichert!"
         flyout_settings_saved.IsAutoCloseEnabled = True
         flyout_settings_saved.IsOpen = True
 
@@ -204,19 +212,11 @@ Public Class wnd_settings
         cb_wndmain_spotify_progress.IsChecked = CType(ini.ReadValue("Spotify", "cb_wndmain_spotify_progress", "False"), Boolean)
 
         'Weather
-        cb_wndmain_weather_enabled.IsChecked = CType(ini.ReadValue("Weather", "cb_wndmain_weather_enabled", "False"), Boolean)
+        'cb_wndmain_weather_enabled.IsChecked = CType(ini.ReadValue("Weather", "cb_wndmain_weather_enabled", "False"), Boolean)
 
-        If ini.ReadValue("Weather", "txtBx_weather_zipcode", "0") = "0" Then
-            txtBx_weather_zipcode.Text = "<City ID>"
-        Else
-            txtBx_weather_zipcode.Text = ini.ReadValue("Weather", "txtBx_weather_zipcode", "0")
-        End If
-
-        If ini.ReadValue("Weather", "txtBx_weather_APIkey", "0") = "0" Then
-            txtBx_weather_APIkey.Text = "<API Key>"
-        Else
-            txtBx_weather_APIkey.Text = ini.ReadValue("Weather", "txtBx_weather_APIkey", "0")
-        End If
+        cb_wndmain_weather_enabled.IsChecked = cls_weather.conf_enabled
+        txtBx_weather_cid.Text = cls_weather.oww_API_cityID.ToString
+        txtBx_weather_APIkey.Text = cls_weather.oww_API_key
 
         'Network
         If ini.ReadValue("NET", "ComboBox_net_interface", "") = "null" Then
@@ -267,7 +267,7 @@ Public Class wnd_settings
 
 #Region "Weather & API-Key Overlay"
     Private Sub cb_wndmain_weather_enabled_Checked(sender As Object, e As RoutedEventArgs) Handles cb_wndmain_weather_enabled.Click
-        If txtBx_weather_zipcode.Text = "<City ID>" Or txtBx_weather_APIkey.Text = "<API Key>" Then
+        If txtBx_weather_cid.Text = "<City ID>" Or txtBx_weather_APIkey.Text = "<API Key>" Then
             cb_wndmain_weather_enabled.IsChecked = False
             MessageBox.Show("Bitte geben sie die ID ihres Ortes und ihren OpenWeather API-Key ein, damit wir die Wetterdaten abrufen können." & vbCrLf &
                             "Falls sie keinen API-Key haben, können sie diesen KOSTENLOS bei OpenWeather erhalten, klicken sie dafür auf 'Einrichten > API-Key erhalten'", "OpenWeather | Einrichten", MessageBoxButton.OK, MessageBoxImage.Asterisk)
@@ -284,7 +284,7 @@ Public Class wnd_settings
 
         lbl_flyout_settings_text.Content = "Einen moment, bitte..."
 
-        Dim oww_api_request As WebRequest = WebRequest.Create("http://api.openweathermap.org/data/2.5/weather?id=" & txtBx_weather_zipcode.Text & "&APPID=" & txtBx_weather_APIkey.Text & "&mode=xml&units=metric&lang=DE")
+        Dim oww_api_request As WebRequest = WebRequest.Create("http://api.openweathermap.org/data/2.5/weather?id=" & txtBx_weather_cid.Text & "&APPID=" & txtBx_weather_APIkey.Text & "&mode=xml&units=metric&lang=DE")
         Dim oww_api_respone As WebResponse
         Dim oww_api_txt As String = ""
 
@@ -388,18 +388,18 @@ Public Class wnd_settings
     End Sub
 #End Region
 
-#Region "Spotify"
-    Private Sub btn_spotify_Click(sender As Object, e As RoutedEventArgs) Handles btn_spotify.Click
-        matc_tabctrl.SelectedIndex = 3
-        lbl_header.Content = "SPOTIFY"
-    End Sub
-
     Private Sub matc_tabctrl_SelectionChanged(sender As Object, e As SelectionChangedEventArgs) Handles matc_tabctrl.SelectionChanged
         If Not matc_tabctrl.SelectedIndex = 0 Then
             ico_backToStart.Visibility = Visibility.Visible
         Else
             ico_backToStart.Visibility = Visibility.Hidden
         End If
+    End Sub
+
+#Region "Spotify"
+    Private Sub btn_spotify_Click(sender As Object, e As RoutedEventArgs) Handles btn_spotify.Click
+        matc_tabctrl.SelectedIndex = 3
+        lbl_header.Content = "SPOTIFY"
     End Sub
 
     Private Sub btn_restart_spotify_Click(sender As Object, e As RoutedEventArgs) Handles btn_restart_spotify.Click
@@ -415,14 +415,13 @@ Public Class wnd_settings
 
             Case "force_restart"
                 btn_flyout_spotify_confirm.Tag = "force_restart"
-                lbl_flyout_spotify_msg.Content = "Dies wird die Spotify App beenden und wieder starten"
+                lbl_flyout_spotify_msg.Content = "Die Spotify App wird beendet und wieder gestartet"
                 btn_flyout_spotify_confirm.Content = "Neu starten"
 
         End Select
 
         flyout_cache_reset.IsOpen = True
-        Dim c_blur As New Effects.BlurEffect
-        c_blur.Radius = 10
+        Dim c_blur As New Effects.BlurEffect With {.Radius = 10}
         matc_tabctrl.Effect = c_blur
     End Sub
 
@@ -498,6 +497,25 @@ Public Class wnd_settings
     End Sub
 #End Region
 
+#End Region
+
+#Region "Updates"
+    Private Sub btn_updates_Click(sender As Object, e As RoutedEventArgs) Handles btn_updates.Click
+        matc_tabctrl.SelectedIndex = 4
+        lbl_header.Content = "UPDATES"
+    End Sub
+
+    Private Sub updater_search()
+        Dim manager As New UpdateManager(New Uri("ftp://zo-nikwa@zorm-network.de/updates/SmartUI/updates.json"), "<RSAKeyValue><Modulus>xiMIBF4we8mbMW7WvbjbTyuLEMay6MVzj8+n8EUs/Du6a1iIxY5ywxZar/kbqcd5ET5kHjaQnaYZNTTUNF1zkL/8b9zM6nvo5BvIY1UQF4MoTEiodmRqViyL4sJ10RVS0AbX25UwlisdYjLfhwqvm00TGzejQXopayDUbLxVr7xj2vAhC4MkTKPmNx383zOFpgUYHt+FdAzUMSSOlXcpqgRorl5xM+theAZ5GIvSTf/TD0CiNRoRoCtm91BeNUk89xbTqLnHNzfTHWBLjNqS5J5iWC5mTvr51EBxhqvFFKNQB1PjCAnAb9ChApAFpEQvOO0Z2O6GSnSM3aSzYc9dx7b0cB/6CtmUAZa9WZoEfyN3GtPW+z4kwY3pf9QCAnrpD8q+d2Lb8X/Mgq0F7pBro8/dJ83xwMuZ4Tp7PgnAYDhCizKem0kWxF2RNvr8SIpJ+q5cRDgBJQMEpNI7oFL+n+c3z+0HOvaEI46Qesw3Qcbjv+oBWEvHrpwlzQTewWNS0wSD3CpXzxj+IbjICFYCURpkqXie+IrFkPBFZoQCFD0WdvO2Rn+VZefLeQx67D9aTxqrurdPgToYt1s33lFEKtgziZ2LHinR8pmNEErg5q7wDFcJbpJBhB6gViSOqK8PvI34CXuhcJDBd1vO6AX0ANnSBQNs5LPO/i6akLaqRoaK4GJiBINN2XZ9Av81RFmLKOf2RpD1AdF6ezw9jVAIBCD3THofO5ivEeDuiK/nQIWZSSUn6PkqmfIC+xlYeGLkb1ydD1bUSsHB7oocfaSh3hMcdrW/1A+vDrbyv4BJR+jteM6dUdjoj/LCZFKseh8gQOqk9xSRrukPyjaWwVVy96ZlJbyJZTcatE50BwDaFVCWOyeDyONBouol+xlLwgJ9TkBIfwXHa2fnB8JtqR+45btHb+pndQ4DbA+ISavwTGqxGCDmu4g14hy9uch61YYe2KXBHKFmEW723n+z78+wVbEIWZKLYKNVRQhgybTPX5VESyb66hkuZ57njhPcScUL2obEH6ShpF3gOPU0cfGR6HZrJn8Vxy2LUhV/06BgARYJQ2gqwFb2/T74eis7CCnHgcAtHbZ0yeUlru9WGNh1BR06s+6mntPIIT8IWqyMwV2mPMJ/ep1FdHf3iwE1xBPx4QI9RW9G3/nBwwQvPuOdZIFmEWruQN//hQdEc6AZ/cTFzWu2wtLa/dOpESQ6JEe+uWGHSkZD4nSr7q9FgwIIWzZls5NomSZgFtGFuO7jolHqANFuDA6LYvRN9wcoVmkwshzGIxdn3BOSJ1UJjUEHZqk2gPQjJ8hNRlE+PA06Gx8dB0+P9eUAvI0Wu+wbcN4/2F/UN80sKhoSbP94FOryYQ==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>", New CultureInfo("en"))
+        Dim updaterUI As New UpdaterUI(manager, SynchronizationContext.Current)
+        manager.IncludeBeta = True
+
+        updaterUI.ShowUserInterface()
+    End Sub
+
+    Private Sub Button_Click(sender As Object, e As RoutedEventArgs)
+        updater_search()
+    End Sub
 #End Region
 
 End Class

@@ -1,12 +1,9 @@
 ﻿Imports System.ComponentModel
 Imports System.Globalization
-Imports System.IO
-Imports System.Net
 Imports System.Net.NetworkInformation
 Imports System.Runtime.InteropServices
 Imports System.Threading
 Imports System.Windows.Interop
-Imports System.Xml
 Imports CoreAudioApi
 'Imports for SPOTIFY-API .NET
 Imports SpotifyAPI.Local 'Enums
@@ -15,8 +12,8 @@ Imports SpotifyAPI.Local.Models 'Models for the JSON-responses
 Class MainWindow
     Dim ini As New ini_file
     Dim mysettings As New wnd_settings
-    Dim wConf_useWcom As Boolean = False
     Public Shared settings_update_needed As Boolean = False
+    Public Shared weather_update_needed As Boolean = False
 
     Public Shared wnd_log As New wnd_log
 
@@ -68,7 +65,7 @@ Class MainWindow
     End Structure
 
     Friend Enum WindowCompositionAttribute
-       WCA_ACCENT_POLICY = 19
+        WCA_ACCENT_POLICY = 19
     End Enum
 
     Friend Enum AccentState
@@ -150,11 +147,11 @@ Class MainWindow
         lbl_clock.Content = "SmartUI"
         lbl_clock_weekday.Content = "v" & My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & "." & IO.File.GetLastWriteTime(AppDomain.CurrentDomain.BaseDirectory & "\SmartUI.exe").ToString("yyMMdd")
 
-        helper_grid(grd_volume, False)
-        helper_grid(grd_spotify, False)
-        helper_grid(grd_weather, False)
-        helper_grid(grd_network, False)
-        helper_grid(grd_menu_right, False)
+        wpf_helper.helper_grid(grd_volume, False)
+        wpf_helper.helper_grid(grd_spotify, False)
+        wpf_helper.helper_grid(grd_weather, False)
+        wpf_helper.helper_grid(grd_network, False)
+        wpf_helper.helper_grid(grd_menu_right, False)
 
         ui_clock_weekday = CultureInfo.CurrentCulture.DateTimeFormat.GetShortestDayName(DateTime.Now.DayOfWeek)
 
@@ -183,11 +180,6 @@ Class MainWindow
             If CBool(ini.ReadValue("UI", "cb_wndmain_clock_weekday", "True")) = True Then ui_clock_style += 10 'Weekday
         End If
 
-        'weather
-        wData_enabled = CBool(ini.ReadValue("Weather", "cb_wndmain_weather_enabled", "False"))
-        wConf_API_cityID = CInt(ini.ReadValue("Weather", "txtBx_weather_zipcode", "0"))
-        wConf_API_key = (ini.ReadValue("Weather", "txtBx_weather_APIkey", "0"))
-
         'Network
         net_allSpeeds = CType(ini.ReadValue("UI", "cb_wndmain_net_iconDisableSpeedLimit", "False"), Boolean)
         net_textAllSpeeds = CType(ini.ReadValue("UI", "cb_wndmain_net_textDisableSpeedLimit", "False"), Boolean)
@@ -200,21 +192,16 @@ Class MainWindow
     Private Sub tmr_aInit_Tick(ByVal sender As Object, ByVal e As System.EventArgs) Handles tmr_aInit.Tick
         init_coreaudio()
 
-        helper_grid(grd_menu_right, True)
-
-        lbl_weather.Content = "--°" 'Change text to this to avoid that user see's labels standard text
-        helper_grid(grd_weather, wData_enabled)
+        wpf_helper.helper_grid(grd_menu_right, True)
 
         'Weather
-        oww_update() 'openweather
+        cls_weather.init_update(True)
+
+        lbl_weather.Content = "--°" 'Change text to this to avoid that user see's labels standard text
+        wpf_helper.helper_grid(grd_weather, cls_weather.conf_enabled)
+
         'SPOTIFY-API
         init_spotifyAPI() 'Init Spotify-API
-
-        If IO.File.Exists(".\config\wcom_allowed") Then
-            wnd_log.AddLine("CONFIG" & "-WEATHER", "wetter.com is allowed")
-            wConf_useWcom = True
-            wcom_update()
-        End If
 
         tmr_clock.Start()
         tmr_network.Start()
@@ -227,8 +214,8 @@ Class MainWindow
         wnd_flyout_appmenu.ui_settings.Show()
 
         If sAPI_allowed = True Then
-            helper_grid(grd_spotify, e_playing) 'grid is only visible if Spotify is playing something.
-            helper_grid(grd_link, Not e_playing)
+            wpf_helper.helper_grid(grd_spotify, e_playing) 'grid is only visible if Spotify is playing something.
+            wpf_helper.helper_grid(grd_link, Not e_playing)
         End If
 
         tmr_aInit.Stop()
@@ -275,9 +262,16 @@ Class MainWindow
         If DateTime.Now.Second = 55 Then
             Select Case DateTime.Now.Minute
                 Case 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55
-                    If wConf_useWcom = True Then wcom_update()
-                    If DateTime.Now.Minute = 0 Or DateTime.Now.Minute = 30 Then oww_update()
+                    cls_weather.init_update(False, 2) 'wettercom update
+                    If DateTime.Now.Minute = 0 Or DateTime.Now.Minute = 30 Then cls_weather.init_update(False, 1) 'oww_update
             End Select
+        End If
+
+        If weather_update_needed Then
+            lbl_weather.Content = cls_weather.get_temp
+            wpf_helper.helper_image(icn_weather, cls_weather.oww_data_conditionIMG)
+
+            weather_update_needed = False
         End If
 
         'WA Spotify v2 (Aggressive) | Restart sotify evp in case of error
@@ -285,9 +279,9 @@ Class MainWindow
             sAPI_error_count += 1
 
             If sAPI_error_count > 4 Then
-                helper_grid(grd_spotify, False) 'grid is only visible if Spotify is playing something.
-                helper_grid(grd_link, True)
-                helper_image(icn_run_spotify, "pack://application:,,,/Resources/ic_error_outline_white_24dp.png")
+                wpf_helper.helper_grid(grd_spotify, False) 'grid is only visible if Spotify is playing something.
+                wpf_helper.helper_grid(grd_link, True)
+                wpf_helper.helper_image(icn_run_spotify, "pack://application:,,,/Resources/ic_error_outline_white_24dp.png")
             Else
 
                 flyout_media.Close() 'close media widget
@@ -338,7 +332,7 @@ Class MainWindow
         wnd_log.AddLine("INFO" & "-CORE AUDIO", "Initializing...")
         AddHandler audio_device.AudioEndpointVolume.OnVolumeNotification, AddressOf AudioEndpointVolume_OnVolumeNotification
 
-        helper_grid(grd_volume, True)
+        wpf_helper.helper_grid(grd_volume, True)
 
         ca_update(Math.Round(audio_device.AudioEndpointVolume.MasterVolumeLevelScalar * 100, 0), audio_device.AudioEndpointVolume.Mute)
     End Sub
@@ -349,21 +343,21 @@ Class MainWindow
 
     Private Sub ca_update(ByVal e_volume As Double, ByVal e_muted As Boolean)
         If e_volume < 1 Or e_muted = True Then
-            helper_image(icn_volume, "pack://application:,,,/Resources/snd_off.png")
-            helper_label(lbl_volume, "Mute")
+            wpf_helper.helper_image(icn_volume, "pack://application:,,,/Resources/snd_off.png")
+            wpf_helper.helper_label(lbl_volume, "Mute")
 
         Else
-            helper_label(lbl_volume, e_volume & "%")
+            wpf_helper.helper_label(lbl_volume, e_volume & "%")
 
             Select Case e_volume
                 Case < 10
-                    helper_image(icn_volume, "pack://application:,,,/Resources/snd_vLow.png")
+                    wpf_helper.helper_image(icn_volume, "pack://application:,,,/Resources/snd_vLow.png")
                 Case < 30
-                    helper_image(icn_volume, "pack://application:,,,/Resources/snd_low.png")
+                    wpf_helper.helper_image(icn_volume, "pack://application:,,,/Resources/snd_low.png")
                 Case < 60
-                    helper_image(icn_volume, "pack://application:,,,/Resources/snd_mid.png")
+                    wpf_helper.helper_image(icn_volume, "pack://application:,,,/Resources/snd_mid.png")
                 Case Else
-                    helper_image(icn_volume, "pack://application:,,,/Resources/snd_high.png")
+                    wpf_helper.helper_image(icn_volume, "pack://application:,,,/Resources/snd_high.png")
             End Select
         End If
     End Sub
@@ -490,19 +484,19 @@ Class MainWindow
 
         If e.Playing = False Then
             tmr_mediaInfo_delay.Start()
-            helper_image(icn_spotify, "pack://application:,,,/Resources/ic_pause_white_24dp.png")
+            wpf_helper.helper_image(icn_spotify, "pack://application:,,,/Resources/ic_pause_white_24dp.png")
         Else
             tmr_mediaInfo_delay.Stop()
-            helper_image(icn_spotify, "pack://application:,,,/Resources/spotify_notification.png")
-            helper_grid(grd_spotify, e.Playing) 'grid is only visible if Spotify is playing something.
-            helper_grid(grd_link, Not e.Playing)
+            wpf_helper.helper_image(icn_spotify, "pack://application:,,,/Resources/spotify_notification.png")
+            wpf_helper.helper_grid(grd_spotify, e.Playing) 'grid is only visible if Spotify is playing something.
+            wpf_helper.helper_grid(grd_link, Not e.Playing)
         End If
     End Sub
 
     Private WithEvents tmr_mediaInfo_delay As New System.Windows.Threading.DispatcherTimer With {.Interval = New TimeSpan(0, 0, 3), .IsEnabled = False}
     Private Sub tmr_mediaInfo_delay_Tick(ByVal sender As Object, ByVal e As System.EventArgs) Handles tmr_mediaInfo_delay.Tick
-        helper_grid(grd_spotify, e_playing) 'delayed hiding after playing is paused
-        helper_grid(grd_link, Not e_playing)
+        wpf_helper.helper_grid(grd_spotify, e_playing) 'delayed hiding after playing is paused
+        wpf_helper.helper_grid(grd_link, Not e_playing)
         tmr_mediaInfo_delay.Stop()
     End Sub
 
@@ -522,19 +516,19 @@ Class MainWindow
     Private Sub sui_media_update(ByVal e_title As String, ByVal e_artist As String, ByVal e_Tremaining As String, ByVal e_pb_val As Double, ByVal e_pb_max As Double, ByVal e_playing As Boolean)
         'Title ------------------
         'If title didn't change - don't update label
-        If Not e_title = media_last_title Or helper_label_gc(lbl_spotify) = "Spotify" Then
+        If Not e_title = media_last_title Or wpf_helper.helper_label_gc(lbl_spotify) = "Spotify" Then
             media_last_title = e_title
 
             If Not media_widget_opened = 1 Then
 
                 If e_title.Contains("(") And Not e_title.StartsWith("(") Then
-                    helper_label(lbl_spotify, e_title.Substring(0, (e_title.IndexOf("(") - 1)))
+                    wpf_helper.helper_label(lbl_spotify, e_title.Substring(0, (e_title.IndexOf("(") - 1)))
                     'check & add info in SubLabel
                     test_trk_rest = media_trk_adinfo(e_title.Substring(e_title.IndexOf("("), e_title.Length - e_title.IndexOf("("))) & " ٠ "
 
                 ElseIf e_title.Contains("-") Then
                     If e_title.Substring(0, (e_title.IndexOf("-"))).EndsWith(" ") = True Then
-                        helper_label(lbl_spotify, e_title.Substring(0, (e_title.IndexOf("-") - 1)))
+                        wpf_helper.helper_label(lbl_spotify, e_title.Substring(0, (e_title.IndexOf("-") - 1)))
                         'check & add info in SubLabel
                         test_trk_rest = media_trk_adinfo(e_title.Substring(e_title.IndexOf("-"), e_title.Length - e_title.IndexOf("-"))) & " ٠ "
 
@@ -543,9 +537,9 @@ Class MainWindow
                         test_trk_rest = ""
 
                         If e_title.Length > 41 Then
-                            helper_label(lbl_spotify, e_title.Remove(40, e_title.Length - 40) & "...")
+                            wpf_helper.helper_label(lbl_spotify, e_title.Remove(40, e_title.Length - 40) & "...")
                         Else
-                            helper_label(lbl_spotify, e_title)
+                            wpf_helper.helper_label(lbl_spotify, e_title)
                         End If
                     End If
 
@@ -553,25 +547,25 @@ Class MainWindow
                     test_trk_rest = ""
 
                     If e_title.Length > 41 Then
-                        helper_label(lbl_spotify, e_title.Remove(40, e_title.Length - 40) & "...")
+                        wpf_helper.helper_label(lbl_spotify, e_title.Remove(40, e_title.Length - 40) & "...")
                     Else
-                        helper_label(lbl_spotify, e_title)
+                        wpf_helper.helper_label(lbl_spotify, e_title)
                     End If
                 End If
             End If
         End If
 
-        If Not media_trktype & e_artist & " -" & e_Tremaining = media_last_artist_time Or helper_label_gc(lbl_spotify_remaining) = " " Then
+        If Not media_trktype & e_artist & " -" & e_Tremaining = media_last_artist_time Or wpf_helper.helper_label_gc(lbl_spotify_remaining) = " " Then
             media_last_artist_time = test_trk_rest & e_artist & " ٠ " & e_Tremaining
             wnd_flyout_media.str_media_time = e_pb_val & "%" & e_pb_max & "#" & e_Tremaining
 
-            If Not media_widget_opened = 1 Then helper_label(lbl_spotify_remaining, media_last_artist_time)
+            If Not media_widget_opened = 1 Then wpf_helper.helper_label(lbl_spotify_remaining, media_last_artist_time)
         End If
 
         If trk_show_progess = True Then
-            helper_progressBar(mpb_indicateLoading, e_pb_val, e_pb_max, e_playing)
+            wpf_helper.helper_progressBar(mpb_indicateLoading, e_pb_val, e_pb_max, e_playing)
         Else
-            If mpb_indicateLoading.Visibility = Visibility.Visible Then helper_progressBar(mpb_indicateLoading, 0, 0, False)
+            If mpb_indicateLoading.Visibility = Visibility.Visible Then wpf_helper.helper_progressBar(mpb_indicateLoading, 0, 0, False)
         End If
     End Sub
 
@@ -622,9 +616,9 @@ Class MainWindow
         If sAPI_error = True Then
             sAPI_error_count = 0
             init_spotifyAPI()
-            helper_image(icn_run_spotify, "pack://application:,,,/Resources/spotify_notification.png")
-            helper_grid(grd_spotify, e_playing) 'grid is only visible if Spotify is playing something.
-            helper_grid(grd_link, Not e_playing)
+            wpf_helper.helper_image(icn_run_spotify, "pack://application:,,,/Resources/spotify_notification.png")
+            wpf_helper.helper_grid(grd_spotify, e_playing) 'grid is only visible if Spotify is playing something.
+            wpf_helper.helper_grid(grd_link, Not e_playing)
         Else
             ' PlayPause
             If e_playing = False Then spotifyapi.Play() Else spotifyapi.Pause()
@@ -632,11 +626,11 @@ Class MainWindow
     End Sub
 
     Private Sub icn_spotify_MouseEnter(sender As Object, e As MouseEventArgs) Handles icn_spotify.MouseEnter
-        helper_image(icn_spotify, "pack://application:,,,/Resources/ic_pause_white_24dp.png")
+        wpf_helper.helper_image(icn_spotify, "pack://application:,,,/Resources/ic_pause_white_24dp.png")
     End Sub
 
     Private Sub icn_spotify_MouseLeave(sender As Object, e As MouseEventArgs) Handles icn_spotify.MouseLeave
-        helper_image(icn_spotify, "pack://application:,,,/Resources/spotify_notification.png")
+        wpf_helper.helper_image(icn_spotify, "pack://application:,,,/Resources/spotify_notification.png")
     End Sub
 
     'positioning labels - left
@@ -653,7 +647,7 @@ Class MainWindow
     Public Shared media_widget_opened As Integer = 0
     Dim flyout_media As New wnd_flyout_media
 
-    Private Sub lbl_spotify_MouseLeftButtonUp(sender As Object, e As MouseButtonEventArgs) Handles lbl_spotify.MouseLeftButtonUp, lbl_spotify_remaining.MouseLeftButtonUp
+    Private Sub lbl_spotify_MouseLeftButtonUp(sender As Object, e As MouseButtonEventArgs) Handles grd_spotify.MouseLeftButtonUp
         If media_widget_opened = -1 Then flyout_media = New wnd_flyout_media
 
         If media_widget_opened = 1 Then
@@ -662,89 +656,28 @@ Class MainWindow
         Else
             flyout_media.Show()
             media_widget_opened = 1
-            helper_label(lbl_spotify, "Spotify")
-            helper_label(lbl_spotify_remaining, " ")
+            wpf_helper.helper_label(lbl_spotify, "Spotify")
+            wpf_helper.helper_label(lbl_spotify_remaining, " ")
             Me.Topmost = False
             Me.Topmost = True
         End If
     End Sub
 #End Region
 
-#Region "GUI Helper"
-    Private Sub helper_grid(ByVal ctrl As Grid, ByVal Optional e_visible As Boolean = Nothing)
-        If e_visible = True Then
-            Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Background, New ThreadStart(Sub() ctrl.Visibility = Visibility.Visible))
-        ElseIf e_visible = False Then
-            Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Background, New ThreadStart(Sub() ctrl.Visibility = Visibility.Hidden))
-        End If
-    End Sub
-
-    Private Sub helper_label(ByVal ctrl As Label, ByVal Optional e_content As String = Nothing, ByVal Optional e_visible As Boolean = Nothing)
-        If Not e_content = Nothing Then
-            Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Normal, New ThreadStart(Sub() ctrl.Content = e_content))
-        End If
-
-        If Not e_visible = Nothing Then
-            If e_visible = True Then
-                Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Normal, New ThreadStart(Sub() ctrl.Visibility = Visibility.Visible))
-            Else
-                Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Normal, New ThreadStart(Sub() ctrl.Visibility = Visibility.Hidden))
-            End If
-        End If
-    End Sub
-
-    Private Sub helper_image(ByVal ctrl As Controls.Image, ByVal Optional e_content As String = "<nothing>", ByVal Optional e_visible As Boolean = Nothing)
-        If Not e_content = "<nothing>" Then
-            Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Background, New ThreadStart(Sub() ctrl.Source = CType(New ImageSourceConverter().ConvertFromString(e_content), ImageSource)))
-        End If
-
-        If Not e_visible = Nothing Then
-            Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Background, New ThreadStart(Sub()
-
-                                                                                                                       If e_visible = True Then
-                                                                                                                           ctrl.Visibility = Visibility.Visible
-                                                                                                                       ElseIf e_visible = False Then
-                                                                                                                           ctrl.Visibility = Visibility.Hidden
-                                                                                                                       End If
-                                                                                                                   End Sub))
-        End If
-    End Sub
-
-    Private Sub helper_progressBar(ByVal ctrl As MahApps.Metro.Controls.MetroProgressBar, ByVal Optional e_value As Double = -1, ByVal Optional e_max As Double = -1, ByVal Optional e_visible As Boolean = Nothing)
-        Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Normal, New ThreadStart(Sub()
-
-                                                                                                               If e_visible = True Then
-                                                                                                                   ctrl.Visibility = Visibility.Visible
-                                                                                                               ElseIf e_visible = False Then
-                                                                                                                   ctrl.Visibility = Visibility.Hidden
-                                                                                                               End If
-
-                                                                                                               If Not e_value = -1 Then ctrl.Value = e_value
-                                                                                                               If Not e_max = -1 Then ctrl.Maximum = e_max
-
-                                                                                                           End Sub))
-
-    End Sub
-
-    Private Function helper_label_gc(ByVal ctrl As Label) As String
-        Dim tmp_str As String = ""
-        Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Normal, New ThreadStart(Sub() tmp_str = ctrl.Content.ToString))
-        Return tmp_str
-    End Function
-
+#Region "NOTIFICATION"
     Private Sub helper_notification(e_msg As String, Optional e_icn As String = Nothing)
-        Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Normal, New ThreadStart(Sub()
-                                                                                                               fout_notification.IsOpen = True
-                                                                                                               fout_notification.IsAutoCloseEnabled = False
-                                                                                                               fout_notification.IsAutoCloseEnabled = True
+        Application.Current.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, New ThreadStart(Sub()
+                                                                                                                      fout_notification.IsOpen = True
+                                                                                                                      fout_notification.IsAutoCloseEnabled = False
+                                                                                                                      fout_notification.IsAutoCloseEnabled = True
 
-                                                                                                               lbl_notification.Content = e_msg
-                                                                                                               If Not e_icn = Nothing Then
-                                                                                                                   icn_notification.Source = CType(New ImageSourceConverter().ConvertFromString(e_icn), ImageSource)
-                                                                                                               Else
-                                                                                                                   icn_notification.Source = CType(New ImageSourceConverter().ConvertFromString("pack://application:,,,/Resources/ic_error_outline_white_24dp.png"), ImageSource)
-                                                                                                               End If
-                                                                                                           End Sub))
+                                                                                                                      lbl_notification.Content = e_msg
+                                                                                                                      If Not e_icn = Nothing Then
+                                                                                                                          icn_notification.Source = CType(New System.Windows.Media.ImageSourceConverter().ConvertFromString(e_icn), System.Windows.Media.ImageSource)
+                                                                                                                      Else
+                                                                                                                          icn_notification.Source = CType(New System.Windows.Media.ImageSourceConverter().ConvertFromString("pack://application:,,,/Resources/ic_error_outline_white_24dp.png"), System.Windows.Media.ImageSource)
+                                                                                                                      End If
+                                                                                                                  End Sub))
     End Sub
 #End Region
 
@@ -788,13 +721,13 @@ Class MainWindow
 
             wnd_log.AddLine("INFO" & "-NET", "Seleceted Interface: " & net_monitoredInterface.Name)
 
-            helper_grid(grd_network, True)
+            wpf_helper.helper_grid(grd_network, True)
             net_monitoring_allowed = 1
 
         Catch
             wnd_log.AddLine("ERR" & "-NET", "Error in 'net_get_interfaces'")
             net_monitoring_allowed = -1
-            helper_grid(grd_network, False)
+            wpf_helper.helper_grid(grd_network, False)
         End Try
     End Sub
 
@@ -815,7 +748,7 @@ Class MainWindow
 
         ElseIf net_monitoring_allowed = -1 Then 'Exit sub if netmon got an error
             wnd_log.AddLine("ERR" & "-NET", "Network monitoring error, exiting")
-            helper_grid(grd_network, False)
+            wpf_helper.helper_grid(grd_network, False)
             Exit Sub
         End If
 
@@ -828,9 +761,9 @@ Class MainWindow
         End Try
 
         If net_monitoredInterface.OperationalStatus = OperationalStatus.Up Then
-            helper_image(icn_network_state, "pack://application:,,,/Resources/ic_lan_connected.png")
+            wpf_helper.helper_image(icn_network_state, "pack://application:,,,/Resources/ic_lan_connected.png")
         Else
-            helper_image(icn_network_state, "pack://application:,,,/Resources/ic_ethernet_cable_off_white_21px.png")
+            wpf_helper.helper_image(icn_network_state, "pack://application:,,,/Resources/ic_ethernet_cable_off_white_21px.png")
         End If
 
         If net_stat_bSent = 0 And net_stat_bReceived = 0 Then
@@ -845,11 +778,11 @@ Class MainWindow
                 'wnd_log.AddLine(log_cat & "-NET-MON", "bSent: " & net_stat_bSent_speed & " / bReceived: " & net_stat_bReceived_speed)
             Catch ex As Exception
 
-                Me.lbl_network_traffic_send.Content = Nothing
-                Me.icn_network_send.Visibility = Visibility.Hidden
+                lbl_network_traffic_send.Content = Nothing
+                icn_network_send.Visibility = Visibility.Hidden
 
-                Me.lbl_network_traffic_receive.Content = Nothing
-                Me.icn_network_receive.Visibility = Visibility.Hidden
+                lbl_network_traffic_receive.Content = Nothing
+                icn_network_receive.Visibility = Visibility.Hidden
 
                 wnd_log.AddLine("ERR" & "-NET", "Error in 'get sent/received kbytes'")
                 Exit Sub
@@ -862,31 +795,31 @@ Class MainWindow
         'visualize sent v2
         If net_stat_bSent_speed > 0 Then
             If net_allSpeeds = True Or net_stat_bSent_speed > 4096 Then
-                Me.icn_network_send.Visibility = Visibility.Visible
+                icn_network_send.Visibility = Visibility.Visible
                 If net_stat_bSent_speed > 51200 Or net_textAllSpeeds = True Then Me.lbl_network_traffic_send.Content = get_formatted_bytes(net_stat_bSent_speed)
             Else
-                Me.lbl_network_traffic_send.Content = Nothing
-                Me.icn_network_send.Visibility = Visibility.Hidden
+                lbl_network_traffic_send.Content = Nothing
+                icn_network_send.Visibility = Visibility.Hidden
             End If
 
         Else
-            Me.lbl_network_traffic_send.Content = Nothing
-            Me.icn_network_send.Visibility = Visibility.Hidden
+            lbl_network_traffic_send.Content = Nothing
+            icn_network_send.Visibility = Visibility.Hidden
         End If
 
         'visualize received v2
         If net_stat_bReceived_speed > 0 Then
             If net_allSpeeds = True Or net_stat_bReceived_speed > 4096 Then
-                Me.icn_network_receive.Visibility = Visibility.Visible
+                icn_network_receive.Visibility = Visibility.Visible
                 If net_stat_bReceived_speed > 51200 Or net_textAllSpeeds = True Then Me.lbl_network_traffic_receive.Content = get_formatted_bytes(net_stat_bReceived_speed)
             Else
-                Me.lbl_network_traffic_receive.Content = Nothing
-                Me.icn_network_receive.Visibility = Visibility.Hidden
+                lbl_network_traffic_receive.Content = Nothing
+                icn_network_receive.Visibility = Visibility.Hidden
             End If
 
         Else
-            Me.lbl_network_traffic_receive.Content = Nothing
-            Me.icn_network_receive.Visibility = Visibility.Hidden
+            lbl_network_traffic_receive.Content = Nothing
+            icn_network_receive.Visibility = Visibility.Hidden
         End If
     End Sub
 
@@ -917,227 +850,10 @@ Class MainWindow
 
 #End Region
 
-#Region "Weather"
     Dim weather_flyout As New wnd_flyout_weather
-    Private Sub icn_weather_MouseUp(sender As Object, e As MouseButtonEventArgs) Handles lbl_weather.MouseUp, icn_weather.MouseUp
+    Private Sub icn_weather_MouseUp(sender As Object, e As MouseButtonEventArgs) Handles grd_weather.MouseUp
         weather_flyout.Show()
     End Sub
-
-    Dim wData_enabled As Boolean = True
-    Dim icn_basePath As String = System.AppDomain.CurrentDomain.BaseDirectory & "\Resources\wIcons\"
-
-    Private wConf_API_cityID As Integer = 0
-    Private wConf_API_key As String = ""
-    Dim oww_xml As XmlDocument
-
-    Public Shared oww_data_temp As String = "0"
-    Dim oww_data_conditionID As Integer = 0
-
-    'OpenWeather API - DATA PATH -> (path_cache & "weather\oww_data.xml")
-    Dim path_cache_weather As String = AppDomain.CurrentDomain.BaseDirectory & "cache\weather\"
-
-    Private Async Sub oww_update(ByVal Optional e_force_oww As Boolean = False)
-        If wData_enabled = False Then Exit Sub
-        Dim oww_API_error As Boolean = False
-
-        'API Update - request weather data
-        Dim oww_api_request As WebRequest = WebRequest.Create("http://api.openweathermap.org/data/2.5/weather?id=" & wConf_API_cityID & "&APPID=" & wConf_API_key & "&mode=xml&units=metric&lang=DE")
-        Dim oww_api_respone As WebResponse
-        oww_xml = New XmlDocument()
-
-        Try
-            oww_api_respone = Await oww_api_request.GetResponseAsync() 'server response
-
-        Catch ex As WebException
-            oww_api_respone = Nothing
-            oww_API_error = True
-
-            If ex.Status = WebExceptionStatus.ProtocolError Then
-                wnd_log.AddLine("ERR" & "-WEATHER", "OWW (401 Zugriff verweigert)")
-            Else
-                wnd_log.AddLine("ERR" & "-WEATHER", "OWW unknown Error")
-            End If
-        End Try
-
-        If oww_API_error = False Then
-            If Not IO.Directory.Exists(path_cache_weather) Then IO.Directory.CreateDirectory(path_cache_weather)
-            Dim oww_api_dataStream As Stream = oww_api_respone.GetResponseStream()
-            ' Open the stream using a StreamReader for easy access.
-            Dim oww_api_reader As New StreamReader(oww_api_dataStream)
-            'Load XML from reader
-            oww_xml.LoadXml(oww_api_reader.ReadToEnd())
-            'save xml, because we can update only after 10mins
-            oww_xml.PreserveWhitespace = True
-            oww_xml.Save(path_cache_weather & "oww_data.xml")
-
-            wData_lastUpdate = DateTime.Now
-            ini.WriteValue("Weather", "last_update", Date.Now.ToShortTimeString)
-            'wnd_log.AddLine(log_cat & "-WEATHER", "OWW data updated")
-        Else
-            wnd_log.AddLine("ERR" & "-WEATHER", "OWW API-Error")
-        End If
-        'End API Update
-
-        'Process new Data
-        If File.Exists(path_cache_weather & "oww_data.xml") Then
-            Dim XMLReader As Xml.XmlReader = New Xml.XmlTextReader(path_cache_weather & "oww_data.xml")
-
-            ' Es folgt das Auslesen der XML-Datei 
-            Dim xmlid As String = ""
-            With XMLReader
-                Do While .Read ' Es sind noch Daten vorhanden 
-                    ' Welche Art von Daten liegt an? 
-                    If .NodeType = Xml.XmlNodeType.Element Then
-
-                        xmlid = .Name
-                        'If xmlid = "country" Then oww_data_country = .ReadElementContentAsString
-
-                        If .AttributeCount > 0 Then
-                            While .MoveToNextAttribute ' nächstes 
-                                If xmlid = "temperature" And .Name = "value" Then oww_data_temp = .Value.Remove(.Value.Length - 1, 1)
-                                If xmlid = "weather" And .Name = "number" Then oww_data_conditionID = CInt(.Value)
-
-                            End While
-                        End If
-                    End If
-                Loop
-                .Close()
-            End With
-        Else
-
-        End If
-
-        'DEBUG:  Show Wdata after Update
-        'MessageBox.Show("City: " & oww_data_location & " // Country: " & oww_data_country & vbCrLf & "Temp: " & oww_data_temp & "// Tmin: " &
-        'oww_data_Tmin & " // Tmax: " & oww_data_Tmax & vbCrLf & "Humidity: " & oww_data_humidity & vbCrLf & "Pressure: " & oww_data_pressure &
-        '                        "Wind Speed: " & oww_data_windspeed & " // Wind Condition: " & oww_data_windcondition & " // Winddirection: " & oww_data_winddirection & vbCrLf &
-        '"Weather txt: " & oww_data_condition & " // Weather Code: " & oww_data_conditionID)
-
-        Select Case oww_data_conditionID
-            'Conditions as described at: http://openweathermap.org/weather-conditions
-
-            Case 200 To 232 'Thunderstorm / Gewitter
-                helper_image(icn_weather, icn_basePath & "7.png")
-
-            Case 300 To 310 'Drizzle / Nieselregen
-                helper_image(icn_weather, icn_basePath & "2.png")
-
-            Case 311 To 321
-                helper_image(icn_weather, icn_basePath & "6.png")
-
-            Case 500 To 531 'Rain / Regen
-                helper_image(icn_weather, icn_basePath & "8.png")
-
-            Case 600 'Light Snow
-                helper_image(icn_weather, icn_basePath & "9.png")
-
-            Case 601 To 622 'Snow / Schnee
-                helper_image(icn_weather, icn_basePath & "10.png")
-
-            Case 700 To 781 'Atmosphere 
-                helper_image(icn_weather, icn_basePath & "1.png")
-
-            Case 800 'Clear / Klar
-
-                If DateTime.Now.Hour > 20 Or DateTime.Now.Hour < 6 Then
-                    helper_image(icn_weather, icn_basePath & "5n.png")
-                Else
-                    helper_image(icn_weather, icn_basePath & "5.png")
-                End If
-
-            Case 801 To 802
-                If DateTime.Now.Hour > 20 Or DateTime.Now.Hour < 6 Then
-                    helper_image(icn_weather, icn_basePath & "3n.png")
-                Else
-                    helper_image(icn_weather, icn_basePath & "3.png")
-                End If
-
-            Case 803 To 804 'Cloudy / Wolkig
-                helper_image(icn_weather, icn_basePath & "4.png")
-
-            Case 900 To 906 'Extreme / Extremes Unwetter
-                helper_image(icn_weather, icn_basePath & "0.png")
-
-            Case 951 To 962 'Additional / Extra
-                helper_image(icn_weather, icn_basePath & "0.png")
-
-            Case Else
-                helper_image(icn_weather, icn_basePath & "0.png")
-                wnd_log.AddLine("ATT" & "-WEATHER", "No condition icon (" & oww_data_conditionID & ")")
-        End Select
-
-        If wData_lastUpdate = Nothing Then
-            DateTime.TryParse(ini.ReadValue("Weather", "last_update", ""), wData_lastUpdate)
-        End If
-
-        'Wetter.com Data - Normally not used because we have no permission to use it.
-
-        If wConf_useWcom = False Then
-            Me.lbl_weather.Content = oww_data_temp & "°"
-        End If
-
-    End Sub
-
-    Public Shared wData_temp As String
-    Public Shared wData_condition As String
-
-    Public Shared wData_lastUpdate As Date
-    Public Shared WData_wcom_lastUpdate As Date
-    Private wData_updateWA As Integer
-
-    Private Async Sub wcom_update(ByVal Optional e_station As Integer = 7704, ByVal Optional e_failed As Boolean = False)
-        'Quelltext herunterladen
-        Dim wStationData_request As WebRequest = WebRequest.Create("http://netzwerk.wetter.com/api/stationdata/" & e_station & "/1/")
-        Dim wStationData_respone As WebResponse = Await wStationData_request.GetResponseAsync()
-
-        ' Get the stream containing content returned by the server.
-        Dim wStationData_dataStream As Stream = wStationData_respone.GetResponseStream()
-        ' Open the stream using a StreamReader for easy access.
-        Dim wStationData_reader As New StreamReader(wStationData_dataStream)
-        ' Read the content.
-        Dim wStationData_data As String = wStationData_reader.ReadToEnd()
-
-        Dim int As Integer = 0
-        For Each data_set As String In wStationData_data.Split(CType("}", Char()))
-            int += 1
-        Next
-        'Example string:    "1464900000":{"hu":90,"te":17.7,"dp":15.6,"pr":1011.9,"pa":null,"ws":0.2,"wd":135
-
-        If wStationData_data.Length < 10 Then
-            wcom_error(e_station)
-            Exit Sub
-        End If
-
-        Dim sSplit As String() = wStationData_data.Split(CType("}", Char()))
-        Dim ssSplit As String() = sSplit(int - 3).ToString.Split(CType(":", Char()))
-
-        'temperature
-        If ssSplit(3).Substring(0, ssSplit(3).Length - 5) = "null" Then
-            wData_temp = "--°"
-        Else
-            wData_temp = ssSplit(3).Substring(0, ssSplit(3).Length - 5) & "°"
-        End If
-
-        Me.lbl_weather.Content = wData_temp
-
-        wStationData_reader.Close()
-        wStationData_respone.Close()
-
-        wData_updateWA = DateTime.Now.Minute
-        WData_wcom_lastUpdate = DateTime.Now
-    End Sub
-
-    Private Sub wcom_error(e_station As Integer)
-        If e_station = 16549 Then
-            wnd_log.AddLine("ERR" & "-WEATHER", "WCOM API-Error with Station 16549 - Fallback to OpenWeather")
-            Me.lbl_weather.Content = oww_data_temp.ToString & "°"
-            Exit Sub
-        End If
-
-        wnd_log.AddLine("ATT" & "-WEATHER", "WCOM API-Error with Station 7704, trying 16549")
-        wcom_update(16549)
-    End Sub
-#End Region
 
 #Region "LINK GRID"
     Private Sub grd_link_IsVisibleChanged(sender As Object, e As DependencyPropertyChangedEventArgs) Handles grd_link.IsVisibleChanged
@@ -1150,11 +866,11 @@ Class MainWindow
 
     'Icon : SpotifyLink
     Private Sub icn_run_spotify_MouseEnter(sender As Object, e As MouseEventArgs) Handles icn_run_spotify.MouseEnter
-        helper_image(icn_run_spotify, "pack://application:,,,/Resources/ic_play_arrow_white_24dp.png")
+        wpf_helper.helper_image(icn_run_spotify, "pack://application:,,,/Resources/ic_play_arrow_white_24dp.png")
     End Sub
 
     Private Sub icn_run_spotify_MouseLeave(sender As Object, e As MouseEventArgs) Handles icn_run_spotify.MouseLeave
-        helper_image(icn_run_spotify, "pack://application:,,,/Resources/spotify_notification.png")
+        wpf_helper.helper_image(icn_run_spotify, "pack://application:,,,/Resources/spotify_notification.png")
     End Sub
 
     Dim ui_appmenu As New wnd_flyout_appmenu

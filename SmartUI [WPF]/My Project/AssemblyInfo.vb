@@ -1,9 +1,6 @@
-﻿Imports System
-Imports System.Reflection
+﻿Imports System.Reflection
 Imports System.Runtime.InteropServices
-Imports System.Globalization
-Imports System.Resources
-Imports System.Windows
+Imports nUpdate.Core
 
 ' Allgemeine Informationen über eine Assembly werden über die folgenden 
 ' Attribute gesteuert. Ändern Sie diese Attributwerte, um die Informationen zu ändern,
@@ -15,9 +12,10 @@ Imports System.Windows
 <Assembly: AssemblyDescription("")>
 <Assembly: AssemblyCompany("")>
 <Assembly: AssemblyProduct("SmartUI")>
-<Assembly: AssemblyCopyright("Copyright © 2016 / 2017 by Niklas Wagner")>
+<Assembly: AssemblyCopyright("Copyright © 2016 - 2017 by Niklas Wagner")>
 <Assembly: AssemblyTrademark("")>
-<Assembly: ComVisible(false)>
+<Assembly: ComVisible(False)>
+<Assembly: nUpdateVersion("1.2")>
 
 'Um mit dem Erstellen lokalisierbarer Anwendungen zu beginnen, legen Sie 
 '<UICulture>ImCodeVerwendeteKultur</UICulture> in der VBPROJ-Datei

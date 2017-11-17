@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:SmartUI__WPF_"
         xmlns:Custom="http://metro.mahapps.com/winfx/xaml/controls" x:Name="wnd_main" x:Class="MainWindow"
         mc:Ignorable="d"
-        Title="Main Overlay" Height="25" Width="1000" AllowsTransparency="True" WindowStyle="None" Background="#59000000" ShowInTaskbar="False" ShowActivated="False" ResizeMode="NoResize" Foreground="White" Left="0" Top="0" Topmost="True">
+        Title="Main Overlay" Height="25" Width="1000" AllowsTransparency="True" WindowStyle="None" Background="#7F000000" ShowInTaskbar="False" ShowActivated="False" ResizeMode="NoResize" Foreground="White" Left="0" Top="0" Topmost="True">
     <Window.Resources>
         <FontFamily x:Key="MainFont">Segoe UI Light</FontFamily>
     </Window.Resources>
