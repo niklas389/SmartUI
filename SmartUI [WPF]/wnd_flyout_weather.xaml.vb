@@ -86,7 +86,7 @@ Public Class wnd_flyout_weather
 
         lbl_now_windspeed.Content = cls_weather.get_wind_speed
         lbl_now_winddir_deg.Content = cls_weather.get_wind_dir
-        img_now_winddir.RenderTransform = New RotateTransform(cls_weather.get_wind_dir - 360)
+        img_now_winddir.RenderTransform = New RotateTransform(cls_weather.get_wind_dir - 180)
         lbl_now_winddir.Content = cls_weather.oww_winddir
 
         lbl_now_humidity.Content = cls_weather.get_humidity
