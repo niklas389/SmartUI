@@ -1,9 +1,13 @@
-﻿Imports System.ComponentModel
+﻿Imports System
+Imports System.ComponentModel
 Imports System.Globalization
 Imports System.Net.NetworkInformation
 Imports System.Runtime.InteropServices
 Imports System.Threading
+Imports System.Windows
+Imports System.Windows.Input
 Imports System.Windows.Interop
+Imports System.Windows.Media
 Imports CoreAudioApi
 'Imports for SPOTIFY-API .NET
 Imports SpotifyAPI.Local 'Enums
@@ -12,10 +16,12 @@ Imports SpotifyAPI.Local.Models 'Models for the JSON-responses
 Class MainWindow
     Dim ini As New ini_file
     Dim mysettings As New wnd_settings
+    Public Shared wnd_log As New wnd_log
+
     Public Shared settings_update_needed As Boolean = False
     Public Shared weather_update_needed As Boolean = False
 
-    Public Shared wnd_log As New wnd_log
+    Public Shared suiversion As String = My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & ".4"
 
 #Region "Blur & Dock"
     'Dock
@@ -128,10 +134,10 @@ Class MainWindow
 #Region "MyBase & Startup"
     Public Sub New()
         wnd_log.outputBox.AppendText("SmartUI LOG")
-        wnd_log.outputBox.AppendText(vbNewLine & "Made in 2016/17 by Niklas Wagner in Hannover (DE)")
-        wnd_log.outputBox.AppendText(vbNewLine & "App startup time: " & DateTime.Now.Day & ". " & CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(DateTime.Now.Month) & " - " & DateTime.Now.ToLongTimeString)
-        wnd_log.outputBox.AppendText(vbNewLine & "APP Version: " & My.Application.Info.Version.ToString & " - " & IO.File.GetLastWriteTime(AppDomain.CurrentDomain.BaseDirectory & "\SmartUI.exe").ToString("yyMMdd"))
-        wnd_log.outputBox.AppendText(vbNewLine & "OS Version: " & Environment.OSVersion.ToString & vbNewLine)
+        wnd_log.outputBox.AppendText(NewLine & "Made in 2016/17 by Niklas Wagner in Hannover (DE)")
+        wnd_log.outputBox.AppendText(NewLine & "App startup time: " & DateTime.Now.Day & ". " & CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(DateTime.Now.Month) & " - " & DateTime.Now.ToLongTimeString)
+        wnd_log.outputBox.AppendText(NewLine & "APP Version: " & My.Application.Info.Version.ToString & " - " & IO.File.GetLastWriteTime(AppDomain.CurrentDomain.BaseDirectory & "\SmartUI.exe").ToString("yyMMdd"))
+        wnd_log.outputBox.AppendText(NewLine & "OS Version: " & Environment.OSVersion.ToString & NewLine)
 
         ' Dieser Aufruf ist für den Designer erforderlich.
         InitializeComponent()
@@ -145,7 +151,7 @@ Class MainWindow
         'If IO.File.Exists(".\config\wcom_allowed") Then wnd_log.Show()
 
         lbl_clock.Content = "SmartUI"
-        lbl_clock_weekday.Content = "v" & My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & "." & IO.File.GetLastWriteTime(AppDomain.CurrentDomain.BaseDirectory & "\SmartUI.exe").ToString("yyMMdd")
+        lbl_clock_weekday.Content = "v" & suiversion
 
         wpf_helper.helper_grid(grd_volume, False)
         wpf_helper.helper_grid(grd_spotify, False)
@@ -157,10 +163,12 @@ Class MainWindow
 
         'Add log entry if this is this versions first run
         If Not My.Application.Info.Version.ToString = ini.ReadValue("app", "firstrun", "") Then
-            wnd_log.AddLine("INFO", "First start after updating the app" & vbNewLine)
+            wnd_log.AddLine("INFO", "First start after updating the app" & Environment.NewLine)
         End If
 
         settings_load()
+
+        AddHandler Microsoft.Win32.SystemEvents.PowerModeChanged, AddressOf SystemEvents_PowerModeChanged
     End Sub
 
     Public Sub settings_load()
@@ -223,14 +231,39 @@ Class MainWindow
 
 #End Region
 
+#Region "EVENTS"
+    'Update weather on os resume
+    Private Sub SystemEvents_PowerModeChanged(ByVal sender As Object, ByVal e As Microsoft.Win32.PowerModeChangedEventArgs)
+        'Select Case e.Mode
+        '    Case Microsoft.Win32.PowerModes.Resume
+        '    Case Microsoft.Win32.PowerModes.StatusChange
+        '    Case Microsoft.Win32.PowerModes.Suspend
+        'End Select
+
+        If e.Mode = Microsoft.Win32.PowerModes.Resume Then
+            wnd_log.AddLine("INFO" & "-SYSEVENT", "OS resumed from Standby/Hibernation")
+            lbl_weather.Content = "--°"
+            tmr_waitfornetwork.Start()
+        End If
+    End Sub
+
+    Private WithEvents tmr_waitfornetwork As New Threading.DispatcherTimer With {.Interval = New TimeSpan(0, 0, 5), .IsEnabled = False}
+    Private Sub tmr_WaitForNetwork_Tick(ByVal sender As Object, ByVal e As EventArgs) Handles tmr_waitfornetwork.Tick
+        If My.Computer.Network.IsAvailable = True Then
+            cls_weather.init_update(False)
+            tmr_waitfornetwork.Stop()
+        End If
+    End Sub
+
+#End Region
+
 #Region "Clock"
-    Private WithEvents tmr_clock As New System.Windows.Threading.DispatcherTimer With {.Interval = New TimeSpan(0, 0, 1), .IsEnabled = False}
+    Private WithEvents tmr_clock As New Threading.DispatcherTimer With {.Interval = New TimeSpan(0, 0, 1), .IsEnabled = False}
     Private ui_clock_weekday As String = "Mo"
     Private ui_clock_style As Integer = -1
     Dim clock_date As Boolean = False
 
-    Private Sub tmr_clock_Tick(ByVal sender As Object, ByVal e As System.EventArgs) Handles tmr_clock.Tick
-        If DateTime.Now.ToLongTimeString = "00:00:00" Then ui_clock_weekday = CultureInfo.CurrentCulture.DateTimeFormat.GetShortestDayName(DateTime.Now.DayOfWeek)
+    Private Sub tmr_clock_Tick(ByVal sender As Object, ByVal e As EventArgs) Handles tmr_clock.Tick
 
         If clock_date = False Then
             Select Case ui_clock_style
@@ -255,7 +288,6 @@ Class MainWindow
                     lbl_clock.Content = DateTime.Now.ToLongTimeString()
 
             End Select
-
         End If
 
         'Weather Update
@@ -264,13 +296,14 @@ Class MainWindow
                 Case 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55
                     cls_weather.init_update(False, 2) 'wettercom update
                     If DateTime.Now.Minute = 0 Or DateTime.Now.Minute = 30 Then cls_weather.init_update(False, 1) 'oww_update
+
+                    ui_clock_weekday = CultureInfo.CurrentCulture.DateTimeFormat.GetShortestDayName(DateTime.Now.DayOfWeek)
             End Select
         End If
 
-        If weather_update_needed Then
+        If weather_update_needed = True Then
             lbl_weather.Content = cls_weather.get_temp
             wpf_helper.helper_image(icn_weather, cls_weather.oww_data_conditionIMG)
-
             weather_update_needed = False
         End If
 
@@ -298,20 +331,20 @@ Class MainWindow
 
         dbg_sptfy = dbg_sptfy_2
 
-        If settings_update_needed Then
+        If settings_update_needed = True Then
             settings_load()
             settings_update_needed = False
         End If
     End Sub
 
     'Show Date on MouseOver
-    Private Sub lbl_clock_MouseEnter(sender As Object, e As MouseEventArgs) Handles lbl_clock.MouseEnter, lbl_clock_weekday.MouseEnter
+    Private Sub lbl_clock_MouseEnter(sender As Object, e As Input.MouseEventArgs) Handles lbl_clock.MouseEnter, lbl_clock_weekday.MouseEnter
         clock_date = True 'Block content change from clock timer
         lbl_clock.Content = DateTime.Now.Day & ". " & CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(DateTime.Now.Month) & " " & DateTime.Now.Year
         lbl_clock_weekday.Content = CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(DateTime.Now.DayOfWeek) & ","
     End Sub
 
-    Private Sub lbl_clock_MouseLeave(sender As Object, e As MouseEventArgs) Handles lbl_clock.MouseLeave, lbl_clock_weekday.MouseLeave
+    Private Sub lbl_clock_MouseLeave(sender As Object, e As Input.MouseEventArgs) Handles lbl_clock.MouseLeave, lbl_clock_weekday.MouseLeave
         clock_date = False 'Allow content change from clock timer
     End Sub
 
@@ -429,7 +462,7 @@ Class MainWindow
             End If
 
         Catch ex As Exception
-            MessageBox.Show(ex.InnerException.Message)
+            wnd_log.AddLine("INFO" & "-MEDIA", ex.InnerException.Message)
         End Try
 
         AddHandler spotifyapi.OnPlayStateChange, AddressOf spotifyapi_OnPlayStateChange
@@ -508,42 +541,27 @@ Class MainWindow
 
     Dim media_last_title As String = ""
     Dim media_last_artist_time As String = ""
-
-    Dim media_trktype As String = ""
-
     Dim test_trk_rest As String = ""
 
     Private Sub sui_media_update(ByVal e_title As String, ByVal e_artist As String, ByVal e_Tremaining As String, ByVal e_pb_val As Double, ByVal e_pb_max As Double, ByVal e_playing As Boolean)
         'Title ------------------
         'If title didn't change - don't update label
-        If Not e_title = media_last_title Or wpf_helper.helper_label_gc(lbl_spotify) = "Spotify" Then
+
+        If e_title <> media_last_title Or wpf_helper.helper_label_gc(lbl_spotify) = "Spotify" Then
             media_last_title = e_title
 
-            If Not media_widget_opened = 1 Then
-
-                If e_title.Contains("(") And Not e_title.StartsWith("(") Then
+            Select Case True
+                Case e_title.Contains("(") And Not e_title.StartsWith("(")
                     wpf_helper.helper_label(lbl_spotify, e_title.Substring(0, (e_title.IndexOf("(") - 1)))
                     'check & add info in SubLabel
                     test_trk_rest = media_trk_adinfo(e_title.Substring(e_title.IndexOf("("), e_title.Length - e_title.IndexOf("("))) & " ٠ "
 
-                ElseIf e_title.Contains("-") Then
-                    If e_title.Substring(0, (e_title.IndexOf("-"))).EndsWith(" ") = True Then
-                        wpf_helper.helper_label(lbl_spotify, e_title.Substring(0, (e_title.IndexOf("-") - 1)))
-                        'check & add info in SubLabel
-                        test_trk_rest = media_trk_adinfo(e_title.Substring(e_title.IndexOf("-"), e_title.Length - e_title.IndexOf("-"))) & " ٠ "
+                Case e_title.Contains("- ")
+                    wpf_helper.helper_label(lbl_spotify, e_title.Substring(0, (e_title.IndexOf("-") - 1)))
+                    'check & add info in SubLabel
+                    test_trk_rest = media_trk_adinfo(e_title.Substring(e_title.IndexOf("-"), e_title.Length - e_title.IndexOf("-"))) & " ٠ "
 
-                    Else
-                        'Fuck
-                        test_trk_rest = ""
-
-                        If e_title.Length > 41 Then
-                            wpf_helper.helper_label(lbl_spotify, e_title.Remove(40, e_title.Length - 40) & "...")
-                        Else
-                            wpf_helper.helper_label(lbl_spotify, e_title)
-                        End If
-                    End If
-
-                Else
+                Case Else
                     test_trk_rest = ""
 
                     If e_title.Length > 41 Then
@@ -551,11 +569,10 @@ Class MainWindow
                     Else
                         wpf_helper.helper_label(lbl_spotify, e_title)
                     End If
-                End If
-            End If
+            End Select
         End If
 
-        If Not media_trktype & e_artist & " -" & e_Tremaining = media_last_artist_time Or wpf_helper.helper_label_gc(lbl_spotify_remaining) = " " Then
+        If Not e_artist & " -" & e_Tremaining = media_last_artist_time Or wpf_helper.helper_label_gc(lbl_spotify_remaining) = " " Then
             media_last_artist_time = test_trk_rest & e_artist & " ٠ " & e_Tremaining
             wnd_flyout_media.str_media_time = e_pb_val & "%" & e_pb_max & "#" & e_Tremaining
 
@@ -577,18 +594,8 @@ Class MainWindow
         If e.StartsWith("(") And e.EndsWith(")") Then e_fs = e.Substring(1, e.Length - 2)
         'remove "-" at beginning
         If e.StartsWith("-") Then e_fs = e.Substring(2)
-
-        If e_fs.Length > 30 And e_fs.StartsWith("(") Then
-            If Not e_fs.Substring(1, 31).Contains(")") Then
-                Return e_fs.Substring(1, 31) & "..."
-            Else
-                Return e_fs.Substring(0, 30) & "..."
-            End If
-        ElseIf e_fs.Length > 30 Then
-            Return e_fs.Substring(0, 30) & "..."
-        Else
-            Return e_fs
-        End If
+        'limit to length of 30
+        If e_fs.Length > 30 Then Return e_fs.Substring(0, 30) & "..." Else Return e_fs
     End Function
 
     Private Sub lbl_spotify_SizeChanged(sender As Object, e As SizeChangedEventArgs) Handles lbl_spotify.SizeChanged, lbl_spotify_remaining.SizeChanged
@@ -625,11 +632,11 @@ Class MainWindow
         End If
     End Sub
 
-    Private Sub icn_spotify_MouseEnter(sender As Object, e As MouseEventArgs) Handles icn_spotify.MouseEnter
+    Private Sub icn_spotify_MouseEnter(sender As Object, e As Input.MouseEventArgs) Handles icn_spotify.MouseEnter
         wpf_helper.helper_image(icn_spotify, "pack://application:,,,/Resources/ic_pause_white_24dp.png")
     End Sub
 
-    Private Sub icn_spotify_MouseLeave(sender As Object, e As MouseEventArgs) Handles icn_spotify.MouseLeave
+    Private Sub icn_spotify_MouseLeave(sender As Object, e As Input.MouseEventArgs) Handles icn_spotify.MouseLeave
         wpf_helper.helper_image(icn_spotify, "pack://application:,,,/Resources/spotify_notification.png")
     End Sub
 
@@ -648,6 +655,10 @@ Class MainWindow
     Dim flyout_media As New wnd_flyout_media
 
     Private Sub lbl_spotify_MouseLeftButtonUp(sender As Object, e As MouseButtonEventArgs) Handles grd_spotify.MouseLeftButtonUp
+        'If icn_spotify.Source.ToString = "pack://application:,,,/Resources/spotify_notification.png" Then
+        '    MessageBox.Show("JUP")
+        'End If
+
         If media_widget_opened = -1 Then flyout_media = New wnd_flyout_media
 
         If media_widget_opened = 1 Then
@@ -666,18 +677,21 @@ Class MainWindow
 
 #Region "NOTIFICATION"
     Private Sub helper_notification(e_msg As String, Optional e_icn As String = Nothing)
-        Application.Current.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, New ThreadStart(Sub()
-                                                                                                                      fout_notification.IsOpen = True
-                                                                                                                      fout_notification.IsAutoCloseEnabled = False
-                                                                                                                      fout_notification.IsAutoCloseEnabled = True
+        Application.Current.Dispatcher.Invoke(Threading.DispatcherPriority.Normal,
+                                              New ThreadStart(Sub()
+                                                                  fout_notification.IsOpen = True
+                                                                  fout_notification.IsAutoCloseEnabled = False
+                                                                  fout_notification.IsAutoCloseEnabled = True
 
-                                                                                                                      lbl_notification.Content = e_msg
-                                                                                                                      If Not e_icn = Nothing Then
-                                                                                                                          icn_notification.Source = CType(New System.Windows.Media.ImageSourceConverter().ConvertFromString(e_icn), System.Windows.Media.ImageSource)
-                                                                                                                      Else
-                                                                                                                          icn_notification.Source = CType(New System.Windows.Media.ImageSourceConverter().ConvertFromString("pack://application:,,,/Resources/ic_error_outline_white_24dp.png"), System.Windows.Media.ImageSource)
-                                                                                                                      End If
-                                                                                                                  End Sub))
+                                                                  lbl_notification.Content = e_msg
+                                                                  If Not e_icn = Nothing Then
+                                                                      icn_notification.Source = CType(New ImageSourceConverter().ConvertFromString(e_icn),
+                                                                      ImageSource)
+                                                                  Else
+                                                                      icn_notification.Source = CType(New ImageSourceConverter().
+                                                                      ConvertFromString("pack://application:,,,/Resources/ic_error_outline_white_24dp.png"), ImageSource)
+                                                                  End If
+                                                              End Sub))
     End Sub
 #End Region
 
@@ -691,7 +705,7 @@ Class MainWindow
     Dim settings_net_interface As String = ""
 
     'Update timer
-    Private WithEvents tmr_network As New System.Windows.Threading.DispatcherTimer With {.Interval = New TimeSpan(0, 0, 0, 0, 500), .IsEnabled = False}
+    Private WithEvents tmr_network As New Threading.DispatcherTimer With {.Interval = New TimeSpan(0, 0, 0, 0, 500), .IsEnabled = False}
     Private Sub tmr_network_Tick(ByVal sender As Object, ByVal e As System.EventArgs) Handles tmr_network.Tick
         If net_monitoring_allowed = -1 Then wnd_log.AddLine("INFO" & "-NET", "Network monitoring state: " & net_monitoring_allowed.ToString)
         If net_monitoring_allowed = -1 Then tmr_network.Stop()
@@ -850,12 +864,7 @@ Class MainWindow
 
 #End Region
 
-    Dim weather_flyout As New wnd_flyout_weather
-    Private Sub icn_weather_MouseUp(sender As Object, e As MouseButtonEventArgs) Handles grd_weather.MouseUp
-        weather_flyout.Show()
-    End Sub
-
-#Region "LINK GRID"
+#Region "LINK GRID & FLYOUTS"
     Private Sub grd_link_IsVisibleChanged(sender As Object, e As DependencyPropertyChangedEventArgs) Handles grd_link.IsVisibleChanged
         If CBool(e.NewValue) = True Then
             grd_weather.Margin = New Thickness(25, 0, 0, 0)
@@ -865,17 +874,24 @@ Class MainWindow
     End Sub
 
     'Icon : SpotifyLink
-    Private Sub icn_run_spotify_MouseEnter(sender As Object, e As MouseEventArgs) Handles icn_run_spotify.MouseEnter
+    Private Sub icn_run_spotify_MouseEnter(sender As Object, e As Input.MouseEventArgs) Handles icn_run_spotify.MouseEnter
         wpf_helper.helper_image(icn_run_spotify, "pack://application:,,,/Resources/ic_play_arrow_white_24dp.png")
     End Sub
 
-    Private Sub icn_run_spotify_MouseLeave(sender As Object, e As MouseEventArgs) Handles icn_run_spotify.MouseLeave
+    Private Sub icn_run_spotify_MouseLeave(sender As Object, e As Input.MouseEventArgs) Handles icn_run_spotify.MouseLeave
         wpf_helper.helper_image(icn_run_spotify, "pack://application:,,,/Resources/spotify_notification.png")
     End Sub
 
     Dim ui_appmenu As New wnd_flyout_appmenu
     Private Sub btn_exit_Click(sender As Object, e As RoutedEventArgs) Handles icn_menu.MouseLeftButtonUp, grd_menu_right.MouseLeftButtonUp
         ui_appmenu.Show()
+    End Sub
+
+    Dim weather_flyout As New wnd_flyout_weather
+    Private Sub icn_weather_MouseUp(sender As Object, e As MouseButtonEventArgs) Handles grd_weather.MouseUp
+        weather_flyout.Show()
+        Me.Topmost = False
+        Me.Topmost = True
     End Sub
 #End Region
 

@@ -1,4 +1,8 @@
-﻿Imports System.Threading
+﻿Imports System
+Imports System.Threading
+Imports System.Windows
+Imports System.Windows.Controls
+Imports System.Windows.Media
 
 Public Class wpf_helper
     'helper: IMAGE

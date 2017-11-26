@@ -1,14 +1,21 @@
-﻿Imports System.ComponentModel
+﻿Imports System
+Imports System.ComponentModel
 Imports System.Diagnostics
 Imports System.Globalization
 Imports System.IO
 Imports System.Net
 Imports System.Runtime.InteropServices
 Imports System.Threading
+Imports System.Threading.Tasks
+Imports System.Windows
+Imports System.Windows.Controls
+Imports System.Windows.Input
 Imports System.Windows.Interop
+Imports System.Windows.Media
 Imports nUpdate.Updating
 
 Public Class wnd_settings
+
 #Region "Blur"
     'Blur
     <DllImport("user32.dll")>
@@ -74,6 +81,7 @@ Public Class wnd_settings
 
     Private Sub btn_wnd_hide_MouseLeftButtonDown(sender As Object, e As RoutedEventArgs) Handles btn_wnd_hide.Click
         Me.Hide()
+        matc_tabctrl.SelectedIndex = 5
     End Sub
 
     Private Sub btn_wnd_minimize_MouseLeftButtonUp(sender As Object, e As RoutedEventArgs) Handles btn_wnd_minimize.Click
@@ -84,6 +92,7 @@ Public Class wnd_settings
         EnableBlur() 'enable blurred window bg
         lib_hVOSD.Init() 'bring up lib_HVOSD
         Me.Hide()
+        matc_tabctrl.SelectedIndex = 5
 
         matc_tabctrl.Visibility = Visibility.Visible
         matc_main.Visibility = Visibility.Hidden
@@ -91,6 +100,7 @@ Public Class wnd_settings
         matc_changelog.Visibility = Visibility.Hidden
         matc_spotify.Visibility = Visibility.Hidden
         matc_updates.Visibility = Visibility.Hidden
+        matc_start.Visibility = Visibility.Hidden
 
         flyout_cache_reset.IsOpen = False
         flyout_settings_saved.IsOpen = False
@@ -103,13 +113,14 @@ Public Class wnd_settings
             lbl_spotifyCheck.Content = "Spotify ist nicht Installiert."
         End If
 
-        If IO.File.Exists("wcom_allowed") Then
+        If cls_weather.conf_wcom_enabled = True Then
             lbl_wcom_check.Content = "( ! ) wetter.com wird zum abrufen der aktuellen Wetterlage genutzt."
         Else
             lbl_wcom_check.Visibility = Visibility.Hidden
         End If
 
-        lbl_cpr.Content = "Version: " & My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & " - " & IO.File.GetLastWriteTime(AppDomain.CurrentDomain.BaseDirectory & "\SmartUI.exe").ToString("yyMMdd") & " - by Niklas Wagner"
+        'lbl_cpr.Content = "Version: " & My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & " - " & IO.File.GetLastWriteTime(AppDomain.CurrentDomain.BaseDirectory & "\SmartUI.exe").ToString("yyMMdd")
+        lbl_cpr.Content = "Version: " & MainWindow.suiversion & " - " & IO.File.GetLastWriteTime(AppDomain.CurrentDomain.BaseDirectory & "\SmartUI.exe").ToString("yyMMdd")
 
         load_settings()
         changelog_load()
@@ -133,14 +144,16 @@ Public Class wnd_settings
             ComboBox_net_interface.SelectedIndex = 0
         Else
             ComboBox_net_interface.SelectedItem = ini.ReadValue("NET", "ComboBox_net_interface", "")
+            If Not ComboBox_net_interface.SelectedItem Is ini.ReadValue("NET", "ComboBox_net_interface", "") Then ComboBox_net_interface.SelectedIndex = 1
         End If
 
-        matc_tabctrl.SelectedIndex = 0
-        lbl_header.Content = "EINSTELLUNGEN"
         flyout_cache_reset.IsOpen = False
         matc_tabctrl.Effect = Nothing
 
         cache_getSize()
+
+        matc_tabctrl.SelectedIndex = 0
+        lbl_header.Content = "EINSTELLUNGEN"
     End Sub
 #End Region
 
@@ -269,7 +282,7 @@ Public Class wnd_settings
     Private Sub cb_wndmain_weather_enabled_Checked(sender As Object, e As RoutedEventArgs) Handles cb_wndmain_weather_enabled.Click
         If txtBx_weather_cid.Text = "<City ID>" Or txtBx_weather_APIkey.Text = "<API Key>" Then
             cb_wndmain_weather_enabled.IsChecked = False
-            MessageBox.Show("Bitte geben sie die ID ihres Ortes und ihren OpenWeather API-Key ein, damit wir die Wetterdaten abrufen können." & vbCrLf &
+            MessageBox.Show("Bitte geben sie die ID ihres Ortes und ihren OpenWeather API-Key ein, damit wir die Wetterdaten abrufen können." & NewLine &
                             "Falls sie keinen API-Key haben, können sie diesen KOSTENLOS bei OpenWeather erhalten, klicken sie dafür auf 'Einrichten > API-Key erhalten'", "OpenWeather | Einrichten", MessageBoxButton.OK, MessageBoxImage.Asterisk)
         End If
 
@@ -410,7 +423,7 @@ Public Class wnd_settings
         Select Case ctnt
             Case "del_cache"
                 btn_flyout_spotify_confirm.Tag = "del_cache"
-                lbl_flyout_spotify_msg.Content = "Alle Zwischengespeicherten Album-Cover werden entfernt, sodass" & vbCrLf & "diese erneut heruntergeladen werden müssen"
+                lbl_flyout_spotify_msg.Content = "Alle Zwischengespeicherten Album-Cover werden entfernt, sodass" & NewLine & "diese erneut heruntergeladen werden müssen"
                 btn_flyout_spotify_confirm.Content = "Löschen"
 
             Case "force_restart"
@@ -500,21 +513,24 @@ Public Class wnd_settings
 #End Region
 
 #Region "Updates"
+    Dim manager As New UpdateManager(New Uri("https://niklas389.lima-city.de/SmartUI/updates.json"), "<RSAKeyValue><Modulus>1l9BYgpTEN2ID5l489eiFDhCUdHPGvJ21PJ2m1FdVlAzKl7zalkjvzYd8th7KOFaepYMWXryAIJ+v+FimyQ/H6/EcZH26sr+0mqo44UuBkiEvNFprwplmzt++TnuKIY6+exc0+S3NyuB9cxf4z9vKZGWwWrV/n+CXEU3GDAsWsRoAobU5/P2o56GlCfqO+ybyr5yO11O5eLoAYcMNjyY16VHa4aJvx9iPtRI0aM7T6BVuYuR1NTZjkdnQIdAJAY0T/zO47Fb2M34Oo7uDyRxZ4CDTpNya6ejR35PwIkTWfqRXjj6IJsF8rrjB/Xj/MCgLLXjbfy8F4pSmfmyJ56mUzNlA6rSmymvjg0hzSNwQqNKJEeK4W8WDd9Y5w/Lz9KMeNYz8Wy/oUHvJgx5DK2PmIAUuYhLTGO6wqG/IDt0xy5PyLa0NocbMcXneRPqXx7b3rT7uxvruuIyTMHovIln3F+3b7WYrsS52V8wWoOCDFElX+Y7L8gK1kQ4pXJvqFUqWYNGYG1yBorJ+eWc0E1PQ7Gv+ZL8CBigN4idfhRg87O87psXekK4RE76Pfx7RliTUH1P9LfwRrUQjamt60ZFGrmSKgqxMBGvWuYDFGEtai2EouqBsnVkyzfWPPqG4z++XvPsm0ah1+xJOCyRoa7NHkeGA/PZEVGHYmi9+GbqaV0hfmNx89I1EGn7cXC4Y67AnxvMy7N0jxrn3iQG3tI8AsX1ZZeUqYWwXpc8e1/cpXQ1POKu+gVj/sviyilZP4lFkGwR3ZIz2FZPLd547P2raz6xF1zgo722KZJCH2wU9uBDWiCwawv6N8cNHEuD+1b26ouot0O0Dg/9IA7ic3uWUA2o2zs5UxEoNQSc8z6HR+WeJmW5tjnr8ZZoFZECl8cnJmCTBfkwYbtv1xTf+VhxUa4aROMxbBaxTEMpbYVFZ7WYhJ4ncmh2JjNGYmKNphNUxrTcL6mzx8Mc9bdmr+sxymdKHnybjT39oGI7bkh8jeQj/qDMcIARu3nI0ORibThwYffiWXWKPE2o3yE3a/+RUqpEleK1+orzfO5cANZpTcTJ6ouSkNTnlQoNOsXHRhnC5wL2jeKjfUqEdtLHxMWhnhNnzWrWMnlgdfsjyUsUTOx0nWVPFSOACB943QmYxt1a+tNfkJZCkrIQtLlMqFYyUOEcSsDyaKft9FYE+ABKWKwRvO0X8hujTm2XWoNjyox7gCXCzD0DlawsegUgmT62gKxhhkOwbGyBbrGnZutcYJPL4KX5dxC6k25IGVSRsymzXqhvhu3f93Vn+/ynoZctjnYEw9SlRSqzIYR8xi1WdpKkLfe89EHD20wEf3xKL6cIhsd4npV/at6n6HOsxrQnjQ==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>", New CultureInfo("en"))
+    Dim updaterUI As New UpdaterUI(manager, SynchronizationContext.Current)
+
     Private Sub btn_updates_Click(sender As Object, e As RoutedEventArgs) Handles btn_updates.Click
         matc_tabctrl.SelectedIndex = 4
         lbl_header.Content = "UPDATES"
+
+        updater_hiddensearch()
     End Sub
 
-    Private Sub updater_search()
-        Dim manager As New UpdateManager(New Uri("ftp://zo-nikwa@zorm-network.de/updates/SmartUI/updates.json"), "<RSAKeyValue><Modulus>xiMIBF4we8mbMW7WvbjbTyuLEMay6MVzj8+n8EUs/Du6a1iIxY5ywxZar/kbqcd5ET5kHjaQnaYZNTTUNF1zkL/8b9zM6nvo5BvIY1UQF4MoTEiodmRqViyL4sJ10RVS0AbX25UwlisdYjLfhwqvm00TGzejQXopayDUbLxVr7xj2vAhC4MkTKPmNx383zOFpgUYHt+FdAzUMSSOlXcpqgRorl5xM+theAZ5GIvSTf/TD0CiNRoRoCtm91BeNUk89xbTqLnHNzfTHWBLjNqS5J5iWC5mTvr51EBxhqvFFKNQB1PjCAnAb9ChApAFpEQvOO0Z2O6GSnSM3aSzYc9dx7b0cB/6CtmUAZa9WZoEfyN3GtPW+z4kwY3pf9QCAnrpD8q+d2Lb8X/Mgq0F7pBro8/dJ83xwMuZ4Tp7PgnAYDhCizKem0kWxF2RNvr8SIpJ+q5cRDgBJQMEpNI7oFL+n+c3z+0HOvaEI46Qesw3Qcbjv+oBWEvHrpwlzQTewWNS0wSD3CpXzxj+IbjICFYCURpkqXie+IrFkPBFZoQCFD0WdvO2Rn+VZefLeQx67D9aTxqrurdPgToYt1s33lFEKtgziZ2LHinR8pmNEErg5q7wDFcJbpJBhB6gViSOqK8PvI34CXuhcJDBd1vO6AX0ANnSBQNs5LPO/i6akLaqRoaK4GJiBINN2XZ9Av81RFmLKOf2RpD1AdF6ezw9jVAIBCD3THofO5ivEeDuiK/nQIWZSSUn6PkqmfIC+xlYeGLkb1ydD1bUSsHB7oocfaSh3hMcdrW/1A+vDrbyv4BJR+jteM6dUdjoj/LCZFKseh8gQOqk9xSRrukPyjaWwVVy96ZlJbyJZTcatE50BwDaFVCWOyeDyONBouol+xlLwgJ9TkBIfwXHa2fnB8JtqR+45btHb+pndQ4DbA+ISavwTGqxGCDmu4g14hy9uch61YYe2KXBHKFmEW723n+z78+wVbEIWZKLYKNVRQhgybTPX5VESyb66hkuZ57njhPcScUL2obEH6ShpF3gOPU0cfGR6HZrJn8Vxy2LUhV/06BgARYJQ2gqwFb2/T74eis7CCnHgcAtHbZ0yeUlru9WGNh1BR06s+6mntPIIT8IWqyMwV2mPMJ/ep1FdHf3iwE1xBPx4QI9RW9G3/nBwwQvPuOdZIFmEWruQN//hQdEc6AZ/cTFzWu2wtLa/dOpESQ6JEe+uWGHSkZD4nSr7q9FgwIIWzZls5NomSZgFtGFuO7jolHqANFuDA6LYvRN9wcoVmkwshzGIxdn3BOSJ1UJjUEHZqk2gPQjJ8hNRlE+PA06Gx8dB0+P9eUAvI0Wu+wbcN4/2F/UN80sKhoSbP94FOryYQ==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>", New CultureInfo("en"))
-        Dim updaterUI As New UpdaterUI(manager, SynchronizationContext.Current)
+    Private Sub updater_hiddensearch()
         manager.IncludeBeta = True
-
-        updaterUI.ShowUserInterface()
+        manager.CloseHostApplication = True
+        manager.SearchForUpdatesAsync()
     End Sub
 
-    Private Sub Button_Click(sender As Object, e As RoutedEventArgs)
-        updater_search()
+    Private Sub btn_updates_search_Click(sender As Object, e As RoutedEventArgs) Handles btn_updates_search.Click
+        updaterUI.ShowUserInterface()
     End Sub
 #End Region
 

@@ -73,19 +73,9 @@ Namespace My.Resources
         '''<summary>
         '''  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         '''</summary>
-        Friend ReadOnly Property drop() As System.Drawing.Bitmap
+        Friend ReadOnly Property hygrometer_24() As System.Drawing.Bitmap
             Get
-                Dim obj As Object = ResourceManager.GetObject("drop", resourceCulture)
-                Return CType(obj,System.Drawing.Bitmap)
-            End Get
-        End Property
-        
-        '''<summary>
-        '''  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
-        '''</summary>
-        Friend ReadOnly Property ic_arrow() As System.Drawing.Bitmap
-            Get
-                Dim obj As Object = ResourceManager.GetObject("ic_arrow", resourceCulture)
+                Dim obj As Object = ResourceManager.GetObject("hygrometer_24", resourceCulture)
                 Return CType(obj,System.Drawing.Bitmap)
             End Get
         End Property
@@ -96,26 +86,6 @@ Namespace My.Resources
         Friend ReadOnly Property ic_arrow_back_white_24dp() As System.Drawing.Bitmap
             Get
                 Dim obj As Object = ResourceManager.GetObject("ic_arrow_back_white_24dp", resourceCulture)
-                Return CType(obj,System.Drawing.Bitmap)
-            End Get
-        End Property
-        
-        '''<summary>
-        '''  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
-        '''</summary>
-        Friend ReadOnly Property ic_autorenew_white_24dp() As System.Drawing.Bitmap
-            Get
-                Dim obj As Object = ResourceManager.GetObject("ic_autorenew_white_24dp", resourceCulture)
-                Return CType(obj,System.Drawing.Bitmap)
-            End Get
-        End Property
-        
-        '''<summary>
-        '''  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
-        '''</summary>
-        Friend ReadOnly Property ic_cpu_24dp() As System.Drawing.Bitmap
-            Get
-                Dim obj As Object = ResourceManager.GetObject("ic_cpu_24dp", resourceCulture)
                 Return CType(obj,System.Drawing.Bitmap)
             End Get
         End Property
@@ -183,6 +153,16 @@ Namespace My.Resources
         '''<summary>
         '''  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         '''</summary>
+        Friend ReadOnly Property ic_navigation() As System.Drawing.Bitmap
+            Get
+                Dim obj As Object = ResourceManager.GetObject("ic_navigation", resourceCulture)
+                Return CType(obj,System.Drawing.Bitmap)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        '''</summary>
         Friend ReadOnly Property ic_net_receive_24dp() As System.Drawing.Bitmap
             Get
                 Dim obj As Object = ResourceManager.GetObject("ic_net_receive_24dp", resourceCulture)
@@ -226,16 +206,6 @@ Namespace My.Resources
         Friend ReadOnly Property ic_room_white_18dp() As System.Drawing.Bitmap
             Get
                 Dim obj As Object = ResourceManager.GetObject("ic_room_white_18dp", resourceCulture)
-                Return CType(obj,System.Drawing.Bitmap)
-            End Get
-        End Property
-        
-        '''<summary>
-        '''  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
-        '''</summary>
-        Friend ReadOnly Property ic_update_white_24dp() As System.Drawing.Bitmap
-            Get
-                Dim obj As Object = ResourceManager.GetObject("ic_update_white_24dp", resourceCulture)
                 Return CType(obj,System.Drawing.Bitmap)
             End Get
         End Property
@@ -293,6 +263,16 @@ Namespace My.Resources
         '''<summary>
         '''  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         '''</summary>
+        Friend ReadOnly Property rain_gauge_24() As System.Drawing.Bitmap
+            Get
+                Dim obj As Object = ResourceManager.GetObject("rain_gauge_24", resourceCulture)
+                Return CType(obj,System.Drawing.Bitmap)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        '''</summary>
         Friend ReadOnly Property skip_next_36dp() As System.Drawing.Bitmap
             Get
                 Dim obj As Object = ResourceManager.GetObject("skip_next_36dp", resourceCulture)
@@ -306,16 +286,6 @@ Namespace My.Resources
         Friend ReadOnly Property skip_previous_36dp() As System.Drawing.Bitmap
             Get
                 Dim obj As Object = ResourceManager.GetObject("skip_previous_36dp", resourceCulture)
-                Return CType(obj,System.Drawing.Bitmap)
-            End Get
-        End Property
-        
-        '''<summary>
-        '''  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
-        '''</summary>
-        Friend ReadOnly Property snd_err() As System.Drawing.Bitmap
-            Get
-                Dim obj As Object = ResourceManager.GetObject("snd_err", resourceCulture)
                 Return CType(obj,System.Drawing.Bitmap)
             End Get
         End Property
@@ -373,9 +343,9 @@ Namespace My.Resources
         '''<summary>
         '''  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         '''</summary>
-        Friend ReadOnly Property Spotify_Logo_RGB_White() As System.Drawing.Bitmap
+        Friend ReadOnly Property spotify_notification() As System.Drawing.Bitmap
             Get
-                Dim obj As Object = ResourceManager.GetObject("Spotify_Logo_RGB_White", resourceCulture)
+                Dim obj As Object = ResourceManager.GetObject("spotify_notification", resourceCulture)
                 Return CType(obj,System.Drawing.Bitmap)
             End Get
         End Property
@@ -383,9 +353,9 @@ Namespace My.Resources
         '''<summary>
         '''  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         '''</summary>
-        Friend ReadOnly Property spotify_notification() As System.Drawing.Bitmap
+        Friend ReadOnly Property wback_normal() As System.Drawing.Bitmap
             Get
-                Dim obj As Object = ResourceManager.GetObject("spotify_notification", resourceCulture)
+                Dim obj As Object = ResourceManager.GetObject("wback_normal", resourceCulture)
                 Return CType(obj,System.Drawing.Bitmap)
             End Get
         End Property

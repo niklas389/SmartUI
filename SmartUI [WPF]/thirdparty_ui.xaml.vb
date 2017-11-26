@@ -1,4 +1,7 @@
-﻿Imports System.Runtime.InteropServices
+﻿Imports System
+Imports System.Runtime.InteropServices
+Imports System.Windows
+Imports System.Windows.Input
 Imports System.Windows.Interop
 
 Public Class thirdparty_ui

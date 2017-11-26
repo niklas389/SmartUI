@@ -1,10 +1,10 @@
 ﻿<Window
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:SmartUI__WPF_"
-        xmlns:Custom="http://metro.mahapps.com/winfx/xaml/controls" x:Name="wnd_main" x:Class="MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:Custom="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Name="wnd_main" x:Class="MainWindow"
         mc:Ignorable="d"
         Title="Main Overlay" Height="25" Width="1000" AllowsTransparency="True" WindowStyle="None" Background="#7F000000" ShowInTaskbar="False" ShowActivated="False" ResizeMode="NoResize" Foreground="White" Left="0" Top="0" Topmost="True">
     <Window.Resources>
@@ -28,7 +28,7 @@
 
         <Grid x:Name="grd_weather" HorizontalAlignment="Left" Height="25" VerticalAlignment="Top" Margin="0">
             <Label x:Name="lbl_weather" Content="&lt;weather&gt;" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="White" FontFamily="{DynamicResource MainFont}" FontSize="18.667" Height="35" Margin="24,-3,0,0" RenderTransformOrigin="12,0" Background="{x:Null}"/>
-            <Image x:Name="icn_weather" HorizontalAlignment="Left" Margin="5,3,0,0" VerticalAlignment="Top" Width="19" Height="19" Source="Resources/ic_update_white_24dp.png" Stretch="UniformToFill"/>
+            <Image x:Name="icn_weather" HorizontalAlignment="Left" Margin="5,3,0,0" VerticalAlignment="Top" Width="19" Height="19" Source="Resources/img_weather_init.png" Stretch="UniformToFill"/>
         </Grid>
 
         <Grid x:Name="grd_spotify" HorizontalAlignment="Left" Height="25" VerticalAlignment="Top" Margin="121,0,0,0">
@@ -49,6 +49,7 @@
             <Label x:Name="lbl_clock" Content="&lt;clock&gt;" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="White" FontFamily="{DynamicResource MainFont}" FontSize="18.667" Height="36" Margin="47,-3,0,0" Background="{x:Null}"/>
             <Label x:Name="lbl_clock_weekday" Content="&lt;day&gt;" HorizontalAlignment="Left" Margin="0,-1,0,0" VerticalAlignment="Top" Background="{x:Null}" FontSize="14" FontFamily="{DynamicResource MainFont}" Opacity="0.6" Foreground="White" Height="30"/>
         </Grid>
+        
         <Custom:Flyout x:Name="fout_notification" Header="Flyout" Height="25" VerticalAlignment="Top" CloseButtonVisibility="Collapsed" Position="Top" TitleVisibility="Collapsed" Background="#CC000000" Foreground="White" AnimateOpacity="True" AutoCloseInterval="2500" IsAutoCloseEnabled="True">
             <Grid x:Name="grd_fout_notifcation" Height="25" VerticalAlignment="Top" Margin="0">
                 <Label x:Name="lbl_notification" Content="&lt;notification&gt;" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="White" FontFamily="{DynamicResource MainFont}" FontSize="18.667" Height="35" Margin="24,-3,0,0" RenderTransformOrigin="12,0" Background="{x:Null}"/>

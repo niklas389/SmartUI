@@ -1,4 +1,7 @@
-﻿Imports System.Runtime.InteropServices
+﻿Imports System
+Imports System.Runtime.InteropServices
+Imports System.Threading.Tasks
+Imports System.Windows
 
 Namespace HideVolumeOSD
     Public Class HideVolumeOSDLib

@@ -1,5 +1,10 @@
-﻿Imports System.Drawing
+﻿Imports System
+Imports System.Drawing
 Imports System.Runtime.InteropServices
+Imports System.Threading.Tasks
+Imports System.Windows
+Imports System.Windows.Input
+Imports System.Windows.Media
 
 Public Class wnd_flyout_media
 
@@ -98,7 +103,7 @@ Public Class wnd_flyout_media
             img_albumCover.Source = CType(New ImageSourceConverter().ConvertFromString("pack://application:,,,/Resources/mediaservice_albums.png"), ImageSource)
             img_bg.Source = CType(New ImageSourceConverter().ConvertFromString(AppDomain.CurrentDomain.BaseDirectory & "Resources\no_cover.jpg"), ImageSource)
             img_cover_error.Visibility = Visibility.Visible
-            img_cover_error.ToolTip = "Wir hatten bei diesem Titel probleme das Cover abzurufen." & vbCrLf & "Prüfe deine Internetverbindung und probiere es noch einmal."
+            img_cover_error.ToolTip = "Wir hatten bei diesem Titel probleme das Cover abzurufen." & NewLine & "Prüfe deine Internetverbindung und probiere es noch einmal."
             If IO.File.Exists(cache_path & trk_uri) And err = False Then media_cache_albumArt(True)
         End Try
 

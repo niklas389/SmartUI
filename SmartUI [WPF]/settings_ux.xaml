@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:Custom="http://metro.mahapps.com/winfx/xaml/controls" x:Name="settings_ux" x:Class="wnd_settings"
         mc:Ignorable="d"
-        Title="Einstellungen" Height="383" Width="550" Background="#99000000" Foreground="White" AllowsTransparency="True" WindowStyle="None" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" Topmost="True">
+        Title="Einstellungen" Height="383" Width="550" Background="#99000000" Foreground="White" AllowsTransparency="True" WindowStyle="None" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
     <Window.Resources>
         <SolidColorBrush x:Key="MainColorBtn">#0CFFFFFF</SolidColorBrush>
     </Window.Resources>
@@ -154,8 +154,11 @@
                     </Grid.ColumnDefinitions>
                     <Label x:Name="lbl_header_spfy_Copy" Content="Updates" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light" Margin="10,5,0,0"/>
                     <Separator Height="10" Margin="15,30,15,0" VerticalAlignment="Top" Foreground="#FF13EAAC" Background="#3FFFFFFF"/>
-                    <Button Content="Button" HorizontalAlignment="Left" Margin="233,116,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click"/>
+                    <Button x:Name="btn_updates_search" Content="Nach Updates suchen" Template="{StaticResource custbtn}" HorizontalAlignment="Center" Margin="201,65,201,0" VerticalAlignment="Top" Width="148" Foreground="#7FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25" ToolTip="Öffnet die Unterseite der Wetter-Einstellungen"/>
                 </Grid>
+            </TabItem>
+            <TabItem x:Name="matc_start" Header="TITEM START" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" Width="54" Background="{x:Null}" Foreground="#FF767676" BorderBrush="{x:Null}">
+                <Grid/>
             </TabItem>
         </Custom:MetroAnimatedTabControl>
         <Custom:Flyout x:Name="flyout_cache_reset" Header="" HorizontalAlignment="Left" Height="125" VerticalAlignment="Bottom" Background="#33FFFFFF" Margin="0" AnimateOpacity="True" AutoCloseInterval="0" CloseButtonVisibility="Collapsed" Position="Bottom">

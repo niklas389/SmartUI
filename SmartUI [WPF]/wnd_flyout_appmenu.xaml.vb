@@ -1,4 +1,6 @@
-﻿Imports System.Windows.Media.Animation
+﻿Imports System
+Imports System.Windows
+Imports System.Windows.Media.Animation
 
 Public Class wnd_flyout_appmenu
 

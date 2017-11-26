@@ -1,4 +1,6 @@
-﻿Public Class ini_file
+﻿Imports System
+
+Public Class ini_file
     Private Declare Ansi Function GetPrivateProfileString Lib "kernel32.dll" Alias "GetPrivateProfileStringA" (ByVal lpApplicationName As String, ByVal lpKeyName As String, ByVal lpDefault As String, ByVal lpReturnedString As String, ByVal nSize As Int32, ByVal lpFileName As String) As Int32
     Private Declare Ansi Function WritePrivateProfileString Lib "kernel32.dll" Alias "WritePrivateProfileStringA" (ByVal lpApplicationName As String, ByVal lpKeyName As String, ByVal lpString As String, ByVal lpFileName As String) As Int32
 
@@ -12,7 +14,7 @@
         'strKey = Name des Schlüssels
         'strDefault = Standardwert, wird zurückgegeben, wenn der Wert in der INI-Datei nicht gefunden wurde
         'strFile = Vollständiger Pfad zur INI-Datei
-        Dim strTemp As String = Space(1024), lLength As Integer
+        Dim strTemp As String = Microsoft.VisualBasic.Space(1024), lLength As Integer
         Dim strFile As String
 
         If file = 0 Then

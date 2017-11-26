@@ -1,5 +1,8 @@
-﻿Imports System.Runtime.InteropServices
+﻿Imports System
+Imports System.Runtime.InteropServices
+Imports System.Windows
 Imports System.Windows.Documents
+Imports System.Windows.Input
 Imports System.Windows.Interop
 Imports System.Windows.Threading
 
@@ -81,7 +84,7 @@ Public Class wnd_log
     End Sub
 
     Public Sub AddLine(cat As String, msg As String)
-        outputBox.AppendText(vbNewLine & DateTime.Now.ToLongTimeString & " | " & cat & " > " & msg)
+        outputBox.AppendText(NewLine & DateTime.Now.ToLongTimeString & " | " & cat & " > " & msg)
         outputBox.ScrollToEnd()
     End Sub
 

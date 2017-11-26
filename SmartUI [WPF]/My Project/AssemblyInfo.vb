@@ -1,5 +1,6 @@
 ﻿Imports System.Reflection
 Imports System.Runtime.InteropServices
+Imports System.Windows
 Imports nUpdate.Core
 
 ' Allgemeine Informationen über eine Assembly werden über die folgenden 
@@ -15,7 +16,7 @@ Imports nUpdate.Core
 <Assembly: AssemblyCopyright("Copyright © 2016 - 2017 by Niklas Wagner")>
 <Assembly: AssemblyTrademark("")>
 <Assembly: ComVisible(False)>
-<Assembly: nUpdateVersion("1.2")>
+<Assembly: nUpdateVersion("1.3.4")>
 
 'Um mit dem Erstellen lokalisierbarer Anwendungen zu beginnen, legen Sie 
 '<UICulture>ImCodeVerwendeteKultur</UICulture> in der VBPROJ-Datei
@@ -53,5 +54,5 @@ Imports nUpdate.Core
 ' übernehmen, indem Sie "*" eingeben:
 ' <Assembly: AssemblyVersion("1.0.*")> 
 
-<Assembly: AssemblyVersion("1.2.*")>
+<Assembly: AssemblyVersion("1.3.*")>
 <Assembly: AssemblyFileVersion("1.0.0.0")>

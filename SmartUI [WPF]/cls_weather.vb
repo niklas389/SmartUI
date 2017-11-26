@@ -1,4 +1,5 @@
-﻿Imports System.IO
+﻿Imports System
+Imports System.IO
 Imports System.Net
 Imports System.Xml
 
@@ -90,7 +91,12 @@ Public Class cls_weather
 
     Public Shared Async Sub oww_update(ByVal Optional e_force_oww As Boolean = False)
         If conf_enabled = False Then
-            MainWindow.wnd_log.AddLine(logcat & "-ATT", "(OWW) Not updated, weather disabled!")
+            MainWindow.wnd_log.AddLine(logcat & "-ATT", "OWW - Not updated, weather disabled!")
+            Exit Sub
+        End If
+
+        If My.Computer.Network.IsAvailable = False Then
+            MainWindow.wnd_log.AddLine(logcat & "-ERR", "OWW - Error Network not available")
             Exit Sub
         End If
 
@@ -181,7 +187,7 @@ Public Class cls_weather
         '                        "Wind Speed: " & oww_data_windspeed & " // Wind Condition: " & oww_data_windcondition & " // Winddirection: " & oww_data_winddirection & vbCrLf &
         '"Weather txt: " & oww_data_condition & " // Weather Code: " & oww_data_conditionID)
 
-        Dim icn_basePath As String = System.AppDomain.CurrentDomain.BaseDirectory & "\Resources\wIcons\"
+        Dim icn_basePath As String = System.AppDomain.CurrentDomain.BaseDirectory & "Resources\wIcons\"
         Select Case oww_data_conditionID
             'Conditions as described at: http://openweathermap.org/weather-conditions
 
@@ -249,6 +255,11 @@ Public Class cls_weather
     Shared wcom_pressure As Integer
 
     Public Shared Async Sub wcom_update(ByVal Optional e_station As Integer = 7704, ByVal Optional e_failed As Boolean = False)
+        If My.Computer.Network.IsAvailable = False Then
+            MainWindow.wnd_log.AddLine(logcat & "-ERR", "WCOM - Error Network not available")
+            Exit Sub
+        End If
+
         'Quelltext herunterladen
         Dim wStationData_request As WebRequest = WebRequest.Create("http://netzwerk.wetter.com/api/stationdata/" & e_station & "/1/")
         Dim wStationData_respone As WebResponse = Await wStationData_request.GetResponseAsync()
@@ -301,11 +312,11 @@ Public Class cls_weather
         End If
 
         'wind direction
-        wcom_wind_direction = CDbl(ssSplit(8)) '& "°"
+        If ssSplit(8) = "null" Then wcom_wind_direction = -1 Else wcom_wind_direction = CDbl(ssSplit(8))
 
         'rain
         If ssSplit(6).Substring(0, ssSplit(6).Length - 5) = "null" Then
-            wcom_rain = "0"
+            wcom_rain = "-"
         Else
             wcom_rain = ssSplit(6).Substring(0, ssSplit(6).Length - 5) ' & " l/qm"
         End If
@@ -322,11 +333,11 @@ Public Class cls_weather
 
     Private Shared Sub wcom_error(e_station As Integer)
         If e_station = 16549 Then
-            MainWindow.wnd_log.AddLine(logcat & "-ERR", "WCOM API-Error with Station 16549 - Fallback to OpenWeather")
+            MainWindow.wnd_log.AddLine(logcat & "-ERR", "WCOM - API-Error with Station 16549 - Fallback to OpenWeather")
             Exit Sub
         End If
 
-        MainWindow.wnd_log.AddLine(logcat & "-ATT", "WCOM API-Error with Station 7704, trying 16549")
+        MainWindow.wnd_log.AddLine(logcat & "-ATT", "WCOM - API-Error with Station 7704, trying 16549")
         wcom_update(16549)
     End Sub
 #End Region
@@ -355,5 +366,11 @@ Public Class cls_weather
         If conf_wcom_enabled = True Then Return wcom_pressure Else Return oww_pressure
     End Function
 
-
+    Public Shared Function get_condition_pic(ByVal Optional e_img As Boolean = False) As String
+        If e_img = False Then
+            Return oww_data_conditionIMG
+        Else
+            Return oww_data_conditionIMG.Replace("wIcons", "wImg").Replace(".png", ".jpg")
+        End If
+    End Function
 End Class
