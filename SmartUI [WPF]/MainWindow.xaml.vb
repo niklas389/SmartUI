@@ -15,7 +15,6 @@ Imports SpotifyAPI.Local.Models 'Models for the JSON-responses
 
 Class MainWindow
     Dim ini As New ini_file
-    Dim mysettings As New wnd_settings
     Public Shared wnd_log As New wnd_log
 
     Public Shared settings_update_needed As Boolean = False
@@ -196,30 +195,29 @@ Class MainWindow
         trk_show_progess = CType(ini.ReadValue("Spotify", "cb_wndmain_spotify_progress", "False"), Boolean)
     End Sub
 
-    Private WithEvents tmr_aInit As New System.Windows.Threading.DispatcherTimer With {.Interval = New TimeSpan(0, 0, 5), .IsEnabled = True}
+    Private WithEvents tmr_aInit As New Threading.DispatcherTimer With {.Interval = New TimeSpan(0, 0, 5), .IsEnabled = True}
     Private Sub tmr_aInit_Tick(ByVal sender As Object, ByVal e As System.EventArgs) Handles tmr_aInit.Tick
-        init_coreaudio()
+        cls_weather.init_update(True) 'Init Weather
+
+        wnd_flyout_appmenu.ui_settings.Show()
 
         wpf_helper.helper_grid(grd_menu_right, True)
 
-        'Weather
-        cls_weather.init_update(True)
+        init_coreaudio() 'Init CoreAudio API
+
+        init_spotifyAPI() 'Init Spotify-API
 
         lbl_weather.Content = "--°" 'Change text to this to avoid that user see's labels standard text
         wpf_helper.helper_grid(grd_weather, cls_weather.conf_enabled)
 
-        'SPOTIFY-API
-        init_spotifyAPI() 'Init Spotify-API
-
         tmr_clock.Start()
         tmr_network.Start()
+
         mpb_indicateLoading.Visibility = Visibility.Hidden
         mpb_indicateLoading.Margin = New Thickness(0, -5, 0, 0)
         mpb_indicateLoading.IsIndeterminate = False
         mpb_indicateLoading.Foreground = Brushes.White
         mpb_indicateLoading.Opacity = 0.5
-
-        wnd_flyout_appmenu.ui_settings.Show()
 
         If sAPI_allowed = True Then
             wpf_helper.helper_grid(grd_spotify, e_playing) 'grid is only visible if Spotify is playing something.
@@ -338,17 +336,17 @@ Class MainWindow
     End Sub
 
     'Show Date on MouseOver
-    Private Sub lbl_clock_MouseEnter(sender As Object, e As Input.MouseEventArgs) Handles lbl_clock.MouseEnter, lbl_clock_weekday.MouseEnter
+    Private Sub lbl_clock_MouseEnter(sender As Object, e As Input.MouseEventArgs) Handles grd_clock.MouseEnter
         clock_date = True 'Block content change from clock timer
         lbl_clock.Content = DateTime.Now.Day & ". " & CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(DateTime.Now.Month) & " " & DateTime.Now.Year
         lbl_clock_weekday.Content = CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(DateTime.Now.DayOfWeek) & ","
     End Sub
 
-    Private Sub lbl_clock_MouseLeave(sender As Object, e As Input.MouseEventArgs) Handles lbl_clock.MouseLeave, lbl_clock_weekday.MouseLeave
+    Private Sub lbl_clock_MouseLeave(sender As Object, e As Input.MouseEventArgs) Handles grd_clock.MouseLeave
         clock_date = False 'Allow content change from clock timer
     End Sub
 
-    Private Sub lbl_clock_SizeChanged(sender As Object, e As SizeChangedEventArgs) Handles lbl_clock.SizeChanged, lbl_clock_weekday.SizeChanged
+    Private Sub lbl_clock_SizeChanged(sender As Object, e As SizeChangedEventArgs) Handles lbl_clock_weekday.SizeChanged 'lbl_clock.SizeChanged,
         If lbl_clock_weekday.Content Is Nothing Then
             lbl_clock.Margin = New Thickness(0, -2, 0, 0)
         Else
@@ -462,7 +460,7 @@ Class MainWindow
             End If
 
         Catch ex As Exception
-            wnd_log.AddLine("INFO" & "-MEDIA", ex.InnerException.Message)
+            wnd_log.AddLine("INFO" & "-MEDIA", "Well, here's something really fucked up...")
         End Try
 
         AddHandler spotifyapi.OnPlayStateChange, AddressOf spotifyapi_OnPlayStateChange
@@ -547,7 +545,7 @@ Class MainWindow
         'Title ------------------
         'If title didn't change - don't update label
 
-        If e_title <> media_last_title Or wpf_helper.helper_label_gc(lbl_spotify) = "Spotify" Then
+        If e_title <> media_last_title Or wpf_helper.helper_label_gc(lbl_spotify) = "Spotify" And media_widget_opened = 0 Then
             media_last_title = e_title
 
             Select Case True
@@ -574,15 +572,18 @@ Class MainWindow
 
         If Not e_artist & " -" & e_Tremaining = media_last_artist_time Or wpf_helper.helper_label_gc(lbl_spotify_remaining) = " " Then
             media_last_artist_time = test_trk_rest & e_artist & " ٠ " & e_Tremaining
-            wnd_flyout_media.str_media_time = e_pb_val & "%" & e_pb_max & "#" & e_Tremaining
 
-            If Not media_widget_opened = 1 Then wpf_helper.helper_label(lbl_spotify_remaining, media_last_artist_time)
+            If Not media_widget_opened = 1 Then
+                wpf_helper.helper_label(lbl_spotify_remaining, media_last_artist_time)
+            Else
+                wnd_flyout_media.str_media_time = e_pb_val & "%" & e_pb_max & "#" & e_Tremaining
+            End If
         End If
 
         If trk_show_progess = True Then
             wpf_helper.helper_progressBar(mpb_indicateLoading, e_pb_val, e_pb_max, e_playing)
         Else
-            If mpb_indicateLoading.Visibility = Visibility.Visible Then wpf_helper.helper_progressBar(mpb_indicateLoading, 0, 0, False)
+            If mpb_indicateLoading.Visibility = Visibility.Visible Then wpf_helper.helper_progressBar(mpb_indicateLoading, , , False)
         End If
     End Sub
 
@@ -595,7 +596,11 @@ Class MainWindow
         'remove "-" at beginning
         If e.StartsWith("-") Then e_fs = e.Substring(2)
         'limit to length of 30
-        If e_fs.Length > 30 Then Return e_fs.Substring(0, 30) & "..." Else Return e_fs
+        If e_fs.Length > 30 Then
+            If e_fs.Substring(0, 30).StartsWith("(") And Not e_fs.Substring(0, 30).Contains(")") Then Return e_fs.Substring(1, 30) & "..." Else Return e_fs.Substring(0, 30) & "..."
+        Else
+            Return e_fs
+        End If
     End Function
 
     Private Sub lbl_spotify_SizeChanged(sender As Object, e As SizeChangedEventArgs) Handles lbl_spotify.SizeChanged, lbl_spotify_remaining.SizeChanged
@@ -607,16 +612,15 @@ Class MainWindow
     Dim spotify_skip_trackChange As Boolean = False
 
     'Change track with scrolling up/down
-    Private Sub lbl_spotify_MouseWheel(sender As Object, e As MouseWheelEventArgs) Handles icn_spotify.MouseWheel, lbl_spotify.MouseWheel, lbl_spotify_remaining.MouseWheel, grd_spotify.MouseWheel
+    Private Sub lbl_spotify_MouseWheel(sender As Object, e As MouseWheelEventArgs) Handles grd_spotify.MouseWheel
         If spotify_skip_trackChange = True Then
             spotify_skip_trackChange = False
-            Exit Sub
+        Else
+            'Scroll up > Next Track / Skip | Scroll down > Last Track / Return
+            If e.Delta > 0 Then spotifyapi.Skip() Else spotifyapi.Previous()
+
+            spotify_skip_trackChange = True
         End If
-
-        'Scroll up > Next Track / Skip | Scroll down > Last Track / Return
-        If e.Delta > 0 Then spotifyapi.Skip() Else spotifyapi.Previous()
-
-        spotify_skip_trackChange = True
     End Sub
 
     Private Sub btn_spotify_playpause_Click(sender As Object, e As RoutedEventArgs) Handles icn_spotify.MouseUp, icn_run_spotify.MouseUp
@@ -655,10 +659,6 @@ Class MainWindow
     Dim flyout_media As New wnd_flyout_media
 
     Private Sub lbl_spotify_MouseLeftButtonUp(sender As Object, e As MouseButtonEventArgs) Handles grd_spotify.MouseLeftButtonUp
-        'If icn_spotify.Source.ToString = "pack://application:,,,/Resources/spotify_notification.png" Then
-        '    MessageBox.Show("JUP")
-        'End If
-
         If media_widget_opened = -1 Then flyout_media = New wnd_flyout_media
 
         If media_widget_opened = 1 Then
@@ -669,8 +669,7 @@ Class MainWindow
             media_widget_opened = 1
             wpf_helper.helper_label(lbl_spotify, "Spotify")
             wpf_helper.helper_label(lbl_spotify_remaining, " ")
-            Me.Topmost = False
-            Me.Topmost = True
+            Me.Activate()
         End If
     End Sub
 #End Region

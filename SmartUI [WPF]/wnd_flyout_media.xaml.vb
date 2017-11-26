@@ -5,6 +5,7 @@ Imports System.Threading.Tasks
 Imports System.Windows
 Imports System.Windows.Input
 Imports System.Windows.Media
+Imports System.Windows.Media.Animation
 
 Public Class wnd_flyout_media
 
@@ -17,18 +18,74 @@ Public Class wnd_flyout_media
     Private Sub wnd_flyout_media_IsVisibleChanged(sender As Object, e As DependencyPropertyChangedEventArgs) Handles Me.IsVisibleChanged
         If Me.Visibility = Visibility.Visible Then
             update_widget()
-            tmr_update_trackdata.Start()
-        Else
-            tmr_update_trackdata.Stop()
+            'tmr_update_trackdata.Start()
+
+            anim_slidein()
+            'Else
+            'tmr_update_trackdata.Stop()
         End If
     End Sub
 
     Private Sub wnd_flyout_volume_LostFocus(sender As Object, e As RoutedEventArgs) Handles Me.MouseLeave, Me.LostFocus
-        Me.Hide()
+        'Me.Hide()
         MainWindow.media_widget_opened = 0
+        anim_slideout()
     End Sub
+
+    Private Sub anim_slidein()
+        Dim dblanim As New DoubleAnimation()
+        dblanim.From = -175
+        dblanim.To = 0
+        dblanim.AutoReverse = False
+        dblanim.Duration = TimeSpan.FromSeconds(0.5)
+        dblanim.By = 0.5
+        dblanim.EasingFunction = New QuarticEase
+
+        Dim storyboard As New Storyboard()
+        Storyboard.SetTarget(dblanim, Me)
+        Storyboard.SetTargetProperty(dblanim, New PropertyPath(Window.TopProperty))
+
+        'Timeline.SetDesiredFrameRate(dblanim, 100)
+
+        AddHandler dblanim.Completed, AddressOf dblanim_Completed
+
+        storyboard.Children.Add(dblanim)
+        storyboard.Begin(Me)
+    End Sub
+
+    Private Sub anim_slideout()
+        Dim dblanim As New DoubleAnimation()
+        dblanim.From = 0
+        dblanim.To = -175
+        dblanim.AutoReverse = False
+        dblanim.Duration = TimeSpan.FromSeconds(0.5)
+        dblanim.By = 1
+        dblanim.EasingFunction = New QuarticEase
+
+        Dim storyboard As New Storyboard()
+        Storyboard.SetTarget(dblanim, Me)
+        Storyboard.SetTargetProperty(dblanim, New PropertyPath(Window.TopProperty))
+
+        'Timeline.SetDesiredFrameRate(dblanim, 100)
+
+        AddHandler dblanim.Completed, AddressOf dblanim_Completed
+
+        storyboard.Children.Add(dblanim)
+        storyboard.Begin(Me)
+    End Sub
+
+    Private Sub dblanim_Completed(sender As Object, e As EventArgs)
+        If MainWindow.media_widget_opened = 0 Then
+            Me.Hide()
+            tmr_update_trackdata.Stop()
+        Else
+            tmr_update_trackdata.Start()
+        End If
+    End Sub
+
 #End Region
 
+#Region "MEDIA"
     Public Shared str_media_time As String = ""
 
     'Update timer
@@ -68,6 +125,7 @@ Public Class wnd_flyout_media
         End Try
     End Sub
 
+#End Region
 
 #Region "Cover & String Shortener"
     Dim cache_path As String = AppDomain.CurrentDomain.BaseDirectory & "cache\media\"

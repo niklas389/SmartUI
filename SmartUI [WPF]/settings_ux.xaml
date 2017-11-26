@@ -121,7 +121,7 @@
                     <Separator HorizontalAlignment="Left" Height="10" Margin="15,186,0,0" VerticalAlignment="Top" Width="525" Foreground="#FF13EAAC" Background="#3FFFFFFF"/>
                     <TextBox x:Name="txtBx_weather_cid" HorizontalAlignment="Center" Height="23" Margin="211,240,219,0" TextWrapping="Wrap" Text="&lt;City ID&gt;" VerticalAlignment="Top" Width="120" Background="#0CFFFFFF" BorderBrush="#0CFFFFFF" Foreground="White"/>
                     <Label x:Name="lbl_overlay_description_Copy" Content="Hier fügen Sie die ID ihrer Stadt ein" HorizontalAlignment="Left" Margin="15,201,0,0" VerticalAlignment="Top" Width="221" Foreground="#7FFFFFFF" Height="34"/>
-                    <Label x:Name="lbl_wcom_check" Content="&lt;wcom_check&gt;" HorizontalAlignment="Left" Margin="10,268,0,0" VerticalAlignment="Top" Width="530" Foreground="#3FFFFFFF" Height="30"/>
+                    <Label x:Name="lbl_wcom_check" Content="&lt;wcom_check&gt;" HorizontalAlignment="Left" Margin="10,302,0,0" VerticalAlignment="Top" Width="440" Foreground="#3FFFFFFF" Height="30"/>
                 </Grid>
             </TabItem>
             <TabItem x:Name="matc_changelog" Header="Changelog" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" Width="54" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF707070">

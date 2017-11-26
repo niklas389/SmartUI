@@ -3,6 +3,7 @@ Imports System.Runtime.InteropServices
 Imports System.Windows
 Imports System.Windows.Interop
 Imports System.Windows.Media
+Imports System.Windows.Media.Animation
 
 Public Class wnd_flyout_weather
 
@@ -67,7 +68,8 @@ Public Class wnd_flyout_weather
     End Sub
 
     Private Sub wnd_flyout_volume_LostFocus(sender As Object, e As RoutedEventArgs) Handles Me.MouseLeave
-        Hide()
+        anim_slideout()
+        'Hide()
     End Sub
 
     Private Sub lbl_now_temp_SizeChanged(sender As Object, e As SizeChangedEventArgs) Handles lbl_now_temp.SizeChanged
@@ -78,7 +80,7 @@ Public Class wnd_flyout_weather
 
     Private Sub wwnd_flyout_weather_Loaded(sender As Object, e As DependencyPropertyChangedEventArgs) Handles Me.IsVisibleChanged
         If Me.Visibility = Visibility.Hidden Then Exit Sub
-        Top = 0
+        'Top = 0
         Left = My.Computer.Screen.WorkingArea.Left
         Height = 255
 
@@ -98,5 +100,47 @@ Public Class wnd_flyout_weather
         lbl_now_pressure.Content = cls_weather.get_pressure.ToString
 
         lbl_now_rain.Content = cls_weather.wcom_rain
+
+        anim_slidein()
+    End Sub
+
+    Private Sub anim_slidein()
+        Dim dblanim As New DoubleAnimation()
+        dblanim.From = (Me.Height * -1)
+        dblanim.To = 0
+        dblanim.AutoReverse = False
+        dblanim.Duration = TimeSpan.FromSeconds(0.5)
+        dblanim.By = 0.5
+        dblanim.EasingFunction = New QuarticEase
+
+        Dim storyboard As New Storyboard()
+        Storyboard.SetTarget(dblanim, Me)
+        Storyboard.SetTargetProperty(dblanim, New PropertyPath(Window.TopProperty))
+
+        storyboard.Children.Add(dblanim)
+        storyboard.Begin(Me)
+    End Sub
+
+    Private Sub anim_slideout()
+        Dim dblanim As New DoubleAnimation()
+        dblanim.From = 0
+        dblanim.To = (Me.Height * -1)
+        dblanim.AutoReverse = False
+        dblanim.Duration = TimeSpan.FromSeconds(0.5)
+        dblanim.By = 1
+        dblanim.EasingFunction = New QuarticEase
+
+        Dim storyboard As New Storyboard()
+        Storyboard.SetTarget(dblanim, Me)
+        Storyboard.SetTargetProperty(dblanim, New PropertyPath(Window.TopProperty))
+
+        AddHandler dblanim.Completed, AddressOf dblanim_Completed
+
+        storyboard.Children.Add(dblanim)
+        storyboard.Begin(Me)
+    End Sub
+
+    Private Sub dblanim_Completed(sender As Object, e As EventArgs)
+        Hide()
     End Sub
 End Class

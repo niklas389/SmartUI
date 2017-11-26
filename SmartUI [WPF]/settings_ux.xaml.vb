@@ -81,7 +81,8 @@ Public Class wnd_settings
 
     Private Sub btn_wnd_hide_MouseLeftButtonDown(sender As Object, e As RoutedEventArgs) Handles btn_wnd_hide.Click
         Me.Hide()
-        matc_tabctrl.SelectedIndex = 5
+        'matc_tabctrl.SelectedIndex = 5
+        matc_tabctrl.Visibility = Visibility.Hidden
     End Sub
 
     Private Sub btn_wnd_minimize_MouseLeftButtonUp(sender As Object, e As RoutedEventArgs) Handles btn_wnd_minimize.Click
@@ -92,7 +93,7 @@ Public Class wnd_settings
         EnableBlur() 'enable blurred window bg
         lib_hVOSD.Init() 'bring up lib_HVOSD
         Me.Hide()
-        matc_tabctrl.SelectedIndex = 5
+        'matc_tabctrl.SelectedIndex = 5
 
         matc_tabctrl.Visibility = Visibility.Visible
         matc_main.Visibility = Visibility.Hidden
@@ -106,20 +107,6 @@ Public Class wnd_settings
         flyout_settings_saved.IsOpen = False
         pring_flyout_settings_saved.Visibility = Visibility.Hidden
 
-        'Spotify Check
-        If IO.File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Spotify\Spotify.exe") Then
-            lbl_spotifyCheck.Content = "Spotify installiert (v" & MainWindow._sAPI_ClientVersion & ") und " & If(Process.GetProcessesByName("Spotify").Length > 1, "gestartet", "nicht gestartet (!)")
-        Else
-            lbl_spotifyCheck.Content = "Spotify ist nicht Installiert."
-        End If
-
-        If cls_weather.conf_wcom_enabled = True Then
-            lbl_wcom_check.Content = "( ! ) wetter.com wird zum abrufen der aktuellen Wetterlage genutzt."
-        Else
-            lbl_wcom_check.Visibility = Visibility.Hidden
-        End If
-
-        'lbl_cpr.Content = "Version: " & My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & " - " & IO.File.GetLastWriteTime(AppDomain.CurrentDomain.BaseDirectory & "\SmartUI.exe").ToString("yyMMdd")
         lbl_cpr.Content = "Version: " & MainWindow.suiversion & " - " & IO.File.GetLastWriteTime(AppDomain.CurrentDomain.BaseDirectory & "\SmartUI.exe").ToString("yyMMdd")
 
         load_settings()
@@ -130,6 +117,8 @@ Public Class wnd_settings
 
     Private Sub wnd_settings_IsVisibleChanged(sender As Object, e As DependencyPropertyChangedEventArgs) Handles Me.IsVisibleChanged
         If Me.Visibility = Visibility.Hidden Then Exit Sub
+
+        matc_tabctrl.SelectedIndex = 0
 
         ComboBox_net_interface.Items.Clear()
         ComboBox_net_interface.Items.Add("Deaktiviert")
@@ -150,9 +139,6 @@ Public Class wnd_settings
         flyout_cache_reset.IsOpen = False
         matc_tabctrl.Effect = Nothing
 
-        cache_getSize()
-
-        matc_tabctrl.SelectedIndex = 0
         lbl_header.Content = "EINSTELLUNGEN"
     End Sub
 #End Region
@@ -350,6 +336,12 @@ Public Class wnd_settings
     Private Sub btn_overlay_show_Click(sender As Object, e As RoutedEventArgs) Handles btn_overlay_show.Click
         matc_tabctrl.SelectedIndex = 1
         lbl_header.Content = "WETTER"
+
+        If cls_weather.conf_wcom_enabled = True Then
+            lbl_wcom_check.Content = "( ! ) wetter.com wird zum abrufen der aktuellen Wetterlage genutzt."
+        Else
+            lbl_wcom_check.Visibility = Visibility.Hidden
+        End If
     End Sub
 
     Private Sub btn_oww_getKey_Click(sender As Object, e As RoutedEventArgs) Handles btn_oww_getKey.Click
@@ -413,6 +405,15 @@ Public Class wnd_settings
     Private Sub btn_spotify_Click(sender As Object, e As RoutedEventArgs) Handles btn_spotify.Click
         matc_tabctrl.SelectedIndex = 3
         lbl_header.Content = "SPOTIFY"
+
+        cache_getSize()
+
+        'Spotify Check
+        If IO.File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Spotify\Spotify.exe") Then
+            lbl_spotifyCheck.Content = "Spotify installiert (v" & MainWindow._sAPI_ClientVersion & ") und " & If(Process.GetProcessesByName("Spotify").Length > 1, "gestartet", "nicht gestartet (!)")
+        Else
+            lbl_spotifyCheck.Content = "Spotify ist nicht Installiert."
+        End If
     End Sub
 
     Private Sub btn_restart_spotify_Click(sender As Object, e As RoutedEventArgs) Handles btn_restart_spotify.Click
@@ -520,7 +521,7 @@ Public Class wnd_settings
         matc_tabctrl.SelectedIndex = 4
         lbl_header.Content = "UPDATES"
 
-        updater_hiddensearch()
+        'updater_hiddensearch()
     End Sub
 
     Private Sub updater_hiddensearch()
