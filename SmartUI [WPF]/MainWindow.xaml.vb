@@ -499,11 +499,16 @@ Class MainWindow
     '    'volumeLabel.Text = (e.NewVolume * 100).ToString(CultureInfo.InvariantCulture)
     'End Sub
 
+    Dim lasttrack As String
     Private Sub spotifyapi_OnTrackTimeChange(sender As Object, e As TrackTimeChangeEventArgs)
         sui_media_update(_currentTrack.TrackResource.Name, _currentTrack.ArtistResource.Name, DateTime.MinValue.AddSeconds(_currentTrack.Length - CInt(e.TrackTime)).ToString("m:ss"), e.TrackTime, CDbl(_currentTrack.Length), e_playing)
         dbg_sptfy = (_currentTrack.TrackResource.Name & _currentTrack.ArtistResource.Name & DateTime.MinValue.AddSeconds(_currentTrack.Length - CInt(e.TrackTime)).ToString("m:ss") & e.TrackTime.ToString & _currentTrack.Length.ToString & e_playing)
-    End Sub
 
+        If lasttrack <> _currentTrack.TrackResource.Name Then
+            media_newtrack = True
+            lasttrack = _currentTrack.TrackResource.Name
+        End If
+    End Sub
 
     Private Sub spotifyapi_OnTrackChange(sender As Object, e As TrackChangeEventArgs)
         _currentTrack = e.NewTrack
@@ -537,24 +542,22 @@ Class MainWindow
 #Region "MIP (Media Info Processing)"
     Dim trk_show_progess As Boolean = False ' BOL = Toggles visibility of progressbar on top of main overlay
 
-    Dim media_last_title As String = ""
+    Dim media_newtrack As Boolean
     Dim media_last_artist_time As String = ""
     Dim test_trk_rest As String = ""
 
     Private Sub sui_media_update(ByVal e_title As String, ByVal e_artist As String, ByVal e_Tremaining As String, ByVal e_pb_val As Double, ByVal e_pb_max As Double, ByVal e_playing As Boolean)
         'Title ------------------ don't update label if title didn't change
 
-        If wpf_helper.helper_label_gc(lbl_spotify) <> media_last_title And media_widget_opened <> 1 Then
+        If media_newtrack = True And media_widget_opened <> 1 Then
             Select Case True
                 Case e_title.Contains("(") And Not e_title.StartsWith("(")
-                    wpf_helper.helper_label(lbl_spotify, e_title.Substring(0, (e_title.IndexOf("(") - 1)))
-                    'check & add info in SubLabel
-                    test_trk_rest = media_trk_adinfo(e_title.Substring(e_title.IndexOf("("), e_title.Length - e_title.IndexOf("("))) & " ٠ "
+                    wpf_helper.helper_label(lbl_spotify, e_title.Substring(0, (e_title.IndexOf("(") - 1))) 'main title
+                    test_trk_rest = media_trk_adinfo(e_title.Substring(e_title.IndexOf("("), e_title.Length - e_title.IndexOf("("))) & " ٠ " 'check & add info in SubLabel
 
                 Case e_title.Contains("- ")
-                    wpf_helper.helper_label(lbl_spotify, e_title.Substring(0, (e_title.IndexOf("-") - 1)))
-                    'check & add info in SubLabel
-                    test_trk_rest = media_trk_adinfo(e_title.Substring(e_title.IndexOf("-"), e_title.Length - e_title.IndexOf("-"))) & " ٠ "
+                    wpf_helper.helper_label(lbl_spotify, e_title.Substring(0, (e_title.IndexOf("-") - 1))) 'main title
+                    test_trk_rest = media_trk_adinfo(e_title.Substring(e_title.IndexOf("-"), e_title.Length - e_title.IndexOf("-"))) & " ٠ "  'check & add info in SubLabel
 
                 Case Else
                     test_trk_rest = ""
@@ -566,7 +569,7 @@ Class MainWindow
                     End If
             End Select
 
-            media_last_title = wpf_helper.helper_label_gc(lbl_spotify)
+            media_newtrack = False
         End If
 
         If Not e_artist & " -" & e_Tremaining = media_last_artist_time Or wpf_helper.helper_label_gc(lbl_spotify_remaining) = " " Then
@@ -837,7 +840,7 @@ Class MainWindow
 
     'convert bytes
     Private Function get_formatted_bytes(bytes As Integer) As String
-        If bytes < 1024 Then
+        If bytes <1024 Then
             Return Math.Round(CDbl(bytes), 0) & "B/s"
         ElseIf bytes < 1048576 Then
             Return Math.Round(CDbl(bytes / 1024), 0) & "KB/s"

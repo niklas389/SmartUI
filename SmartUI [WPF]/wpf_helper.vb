@@ -47,6 +47,12 @@ Public Class wpf_helper
         End If
     End Sub
 
+    Public Shared Sub helper_label_tag(ByVal ctrl As Label, ByVal Optional e_tag As String = Nothing)
+        If Not e_tag = Nothing Then
+            Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Normal, New ThreadStart(Sub() ctrl.Tag = e_tag))
+        End If
+    End Sub
+
     Public Shared Sub helper_progressBar(ByVal ctrl As MahApps.Metro.Controls.MetroProgressBar, ByVal Optional e_value As Double = -1, ByVal Optional e_max As Double = -1, ByVal Optional e_visible As Boolean = Nothing)
         Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Normal, New ThreadStart(Sub()
 
@@ -68,4 +74,18 @@ Public Class wpf_helper
         Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Normal, New ThreadStart(Sub() tmp_str = ctrl.Content.ToString))
         Return tmp_str
     End Function
+
+    Public Shared Function helper_label_get_tag(ByVal ctrl As Label) As String
+        Dim tmp_str As String = ""
+        Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Normal,
+                                              New ThreadStart(Sub()
+                                                                  Try
+                                                                      tmp_str = ctrl.Tag.ToString
+                                                                  Catch ex As Exception
+                                                                      tmp_str = "null"
+                                                                  End Try
+                                                              End Sub))
+        Return tmp_str
+    End Function
+
 End Class
