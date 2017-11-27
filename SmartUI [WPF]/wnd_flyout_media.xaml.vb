@@ -13,39 +13,34 @@ Public Class wnd_flyout_media
     Private Sub wnd_flyout_media_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
         Me.Top = My.Computer.Screen.WorkingArea.Top - 25
         Me.Left = My.Computer.Screen.WorkingArea.Left
+        pr_loading.IsActive = False
     End Sub
 
     Private Sub wnd_flyout_media_IsVisibleChanged(sender As Object, e As DependencyPropertyChangedEventArgs) Handles Me.IsVisibleChanged
         If Me.Visibility = Visibility.Visible Then
             update_widget()
-            'tmr_update_trackdata.Start()
-
             anim_slidein()
-            'Else
-            'tmr_update_trackdata.Stop()
         End If
     End Sub
 
     Private Sub wnd_flyout_volume_LostFocus(sender As Object, e As RoutedEventArgs) Handles Me.MouseLeave, Me.LostFocus
-        'Me.Hide()
         MainWindow.media_widget_opened = 0
         anim_slideout()
     End Sub
 
-    Private Sub anim_slidein()
+    Private Sub anim_slidein()        'Timeline.SetDesiredFrameRate(dblanim, 100)
+
         Dim dblanim As New DoubleAnimation()
         dblanim.From = -175
         dblanim.To = 0
         dblanim.AutoReverse = False
         dblanim.Duration = TimeSpan.FromSeconds(0.5)
-        dblanim.By = 0.5
+        'dblanim.By = 0.5
         dblanim.EasingFunction = New QuarticEase
 
         Dim storyboard As New Storyboard()
         Storyboard.SetTarget(dblanim, Me)
         Storyboard.SetTargetProperty(dblanim, New PropertyPath(Window.TopProperty))
-
-        'Timeline.SetDesiredFrameRate(dblanim, 100)
 
         AddHandler dblanim.Completed, AddressOf dblanim_Completed
 
@@ -53,20 +48,19 @@ Public Class wnd_flyout_media
         storyboard.Begin(Me)
     End Sub
 
-    Private Sub anim_slideout()
+    Private Sub anim_slideout()        'Timeline.SetDesiredFrameRate(dblanim, 100)
+
         Dim dblanim As New DoubleAnimation()
         dblanim.From = 0
         dblanim.To = -175
         dblanim.AutoReverse = False
         dblanim.Duration = TimeSpan.FromSeconds(0.5)
-        dblanim.By = 1
+        'dblanim.By = 1
         dblanim.EasingFunction = New QuarticEase
 
         Dim storyboard As New Storyboard()
         Storyboard.SetTarget(dblanim, Me)
         Storyboard.SetTargetProperty(dblanim, New PropertyPath(Window.TopProperty))
-
-        'Timeline.SetDesiredFrameRate(dblanim, 100)
 
         AddHandler dblanim.Completed, AddressOf dblanim_Completed
 
@@ -119,10 +113,10 @@ Public Class wnd_flyout_media
             End If
 
         Catch ex As Exception
-            Me.Hide()
+            anim_slideout()
             MainWindow.media_widget_opened = 0
-
         End Try
+
     End Sub
 
 #End Region

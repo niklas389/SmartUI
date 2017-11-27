@@ -542,12 +542,9 @@ Class MainWindow
     Dim test_trk_rest As String = ""
 
     Private Sub sui_media_update(ByVal e_title As String, ByVal e_artist As String, ByVal e_Tremaining As String, ByVal e_pb_val As Double, ByVal e_pb_max As Double, ByVal e_playing As Boolean)
-        'Title ------------------
-        'If title didn't change - don't update label
+        'Title ------------------ don't update label if title didn't change
 
-        If e_title <> media_last_title Or wpf_helper.helper_label_gc(lbl_spotify) = "Spotify" And media_widget_opened = 0 Then
-            media_last_title = e_title
-
+        If wpf_helper.helper_label_gc(lbl_spotify) <> media_last_title And media_widget_opened <> 1 Then
             Select Case True
                 Case e_title.Contains("(") And Not e_title.StartsWith("(")
                     wpf_helper.helper_label(lbl_spotify, e_title.Substring(0, (e_title.IndexOf("(") - 1)))
@@ -568,12 +565,14 @@ Class MainWindow
                         wpf_helper.helper_label(lbl_spotify, e_title)
                     End If
             End Select
+
+            media_last_title = wpf_helper.helper_label_gc(lbl_spotify)
         End If
 
         If Not e_artist & " -" & e_Tremaining = media_last_artist_time Or wpf_helper.helper_label_gc(lbl_spotify_remaining) = " " Then
             media_last_artist_time = test_trk_rest & e_artist & " ٠ " & e_Tremaining
 
-            If Not media_widget_opened = 1 Then
+            If media_widget_opened = 0 Then
                 wpf_helper.helper_label(lbl_spotify_remaining, media_last_artist_time)
             Else
                 wnd_flyout_media.str_media_time = e_pb_val & "%" & e_pb_max & "#" & e_Tremaining
