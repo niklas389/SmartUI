@@ -25,6 +25,7 @@ Public Class wnd_flyout_media
 
     Private Sub wnd_flyout_volume_LostFocus(sender As Object, e As RoutedEventArgs) Handles Me.MouseLeave, Me.LostFocus
         MainWindow.media_widget_opened = 0
+        MainWindow.media_newtrack = True
         anim_slideout()
     End Sub
 

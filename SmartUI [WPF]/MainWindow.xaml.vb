@@ -310,19 +310,17 @@ Class MainWindow
             sAPI_error_count += 1
 
             If sAPI_error_count > 4 Then
-                wpf_helper.helper_grid(grd_spotify, False) 'grid is only visible if Spotify is playing something.
+                wpf_helper.helper_grid(grd_spotify, False)
                 wpf_helper.helper_grid(grd_link, True)
                 wpf_helper.helper_image(icn_run_spotify, "pack://application:,,,/Resources/ic_error_outline_white_24dp.png")
             Else
-
                 flyout_media.Close() 'close media widget
                 media_widget_opened = -1
 
                 init_spotifyAPI()
-                wnd_log.AddLine("ATT" & "-MEDIA", " - Spotify API restarted")
+                wnd_log.AddLine("ATT" & "-MEDIA", " - restarting Spotify API")
                 sAPI_error = True
             End If
-
         Else
             sAPI_error_count = 0
         End If
@@ -466,7 +464,6 @@ Class MainWindow
         AddHandler spotifyapi.OnPlayStateChange, AddressOf spotifyapi_OnPlayStateChange
         AddHandler spotifyapi.OnTrackChange, AddressOf spotifyapi_OnTrackChange
         AddHandler spotifyapi.OnTrackTimeChange, AddressOf spotifyapi_OnTrackTimeChange
-        'AddHandler spotifyapi.OnVolumeChange, AddressOf spotifyapi_OnVolumeChange
     End Sub
 
     Public Sub sAPI_UpdateInfos()
@@ -474,11 +471,7 @@ Class MainWindow
         wnd_log.AddLine("INFO" & "-MEDIA", "Spotify-Client Version: " & spotifyapi.GetStatus.ClientVersion.ToString)
         _sAPI_ClientVersion = spotifyapi.GetStatus.ClientVersion.ToString
 
-        'Basic Spotify Infos
-        'repeatShuffleLabel.Text = status.Repeat + " and " + status.Shuffle
-
-        If status.Track IsNot Nothing Then
-            'Update track infos
+        If status.Track IsNot Nothing Then            'Update track infos
             _currentTrack = status.Track
             e_playing = status.Playing
         End If
@@ -490,8 +483,6 @@ Class MainWindow
     '    'titleLinkLabel.Text = track.TrackResource.Name
     '    'titleLinkLabel.Tag = track.TrackResource.Uri
 
-    '    'Dim uri As SpotifyUri = track.TrackResource.ParseUri()
-
     '    bigAlbumPicture.Image = Await track.GetAlbumArtAsync(AlbumArtSize.Size640)
     '    smallAlbumPicture.Image = Await track.GetAlbumArtAsync(AlbumArtSize.Size160)
 
@@ -499,14 +490,17 @@ Class MainWindow
     '    'volumeLabel.Text = (e.NewVolume * 100).ToString(CultureInfo.InvariantCulture)
     'End Sub
 
-    Dim lasttrack As String
+    Dim lasttrack As Track
     Private Sub spotifyapi_OnTrackTimeChange(sender As Object, e As TrackTimeChangeEventArgs)
-        sui_media_update(_currentTrack.TrackResource.Name, _currentTrack.ArtistResource.Name, DateTime.MinValue.AddSeconds(_currentTrack.Length - CInt(e.TrackTime)).ToString("m:ss"), e.TrackTime, CDbl(_currentTrack.Length), e_playing)
-        dbg_sptfy = (_currentTrack.TrackResource.Name & _currentTrack.ArtistResource.Name & DateTime.MinValue.AddSeconds(_currentTrack.Length - CInt(e.TrackTime)).ToString("m:ss") & e.TrackTime.ToString & _currentTrack.Length.ToString & e_playing)
+        'sui_media_update(_currentTrack.TrackResource.Name, _currentTrack.ArtistResource.Name, Date.MinValue.AddSeconds(_currentTrack.Length - CInt(e.TrackTime)).ToString("m:ss"), e.TrackTime, _currentTrack.Length, e_playing)
+        dbg_sptfy = (_currentTrack.TrackResource.Uri & e.TrackTime & _currentTrack.Length & e_playing)
 
-        If lasttrack <> _currentTrack.TrackResource.Name Then
+        If Not lasttrack Is _currentTrack Or media_newtrack = True Then
             media_newtrack = True
-            lasttrack = _currentTrack.TrackResource.Name
+            lasttrack = _currentTrack
+            sui_media_update(_currentTrack.TrackResource.Name, _currentTrack.ArtistResource.Name, Date.MinValue.AddSeconds(_currentTrack.Length - CInt(e.TrackTime)).ToString("m:ss"), e.TrackTime, _currentTrack.Length, e_playing)
+        Else
+            sui_media_update(Nothing, Nothing, Date.MinValue.AddSeconds(_currentTrack.Length - CInt(e.TrackTime)).ToString("m:ss"), e.TrackTime, _currentTrack.Length, e_playing)
         End If
     End Sub
 
@@ -535,32 +529,31 @@ Class MainWindow
         wpf_helper.helper_grid(grd_link, Not e_playing)
         tmr_mediaInfo_delay.Stop()
     End Sub
-
-
 #End Region
 
 #Region "MIP (Media Info Processing)"
     Dim trk_show_progess As Boolean = False ' BOL = Toggles visibility of progressbar on top of main overlay
 
-    Dim media_newtrack As Boolean
-    Dim media_last_artist_time As String = ""
-    Dim test_trk_rest As String = ""
+    Public Shared media_newtrack As Boolean
+    Dim media_last_time As String
+    Dim media_artist As String
+    Dim media_additional_text As String
 
     Private Sub sui_media_update(ByVal e_title As String, ByVal e_artist As String, ByVal e_Tremaining As String, ByVal e_pb_val As Double, ByVal e_pb_max As Double, ByVal e_playing As Boolean)
         'Title ------------------ don't update label if title didn't change
 
-        If media_newtrack = True And media_widget_opened <> 1 Then
+        If e_title <> Nothing And media_widget_opened <> 1 Then
             Select Case True
                 Case e_title.Contains("(") And Not e_title.StartsWith("(")
                     wpf_helper.helper_label(lbl_spotify, e_title.Substring(0, (e_title.IndexOf("(") - 1))) 'main title
-                    test_trk_rest = media_trk_adinfo(e_title.Substring(e_title.IndexOf("("), e_title.Length - e_title.IndexOf("("))) & " ٠ " 'check & add info in SubLabel
+                    media_additional_text = media_trk_adinfo(e_title.Substring(e_title.IndexOf("("), e_title.Length - e_title.IndexOf("("))) & " ٠ " 'check & add info in SubLabel
 
                 Case e_title.Contains("- ")
                     wpf_helper.helper_label(lbl_spotify, e_title.Substring(0, (e_title.IndexOf("-") - 1))) 'main title
-                    test_trk_rest = media_trk_adinfo(e_title.Substring(e_title.IndexOf("-"), e_title.Length - e_title.IndexOf("-"))) & " ٠ "  'check & add info in SubLabel
+                    media_additional_text = media_trk_adinfo(e_title.Substring(e_title.IndexOf("-"), e_title.Length - e_title.IndexOf("-"))) & " ٠ "  'check & add info in SubLabel
 
                 Case Else
-                    test_trk_rest = ""
+                    media_additional_text = ""
 
                     If e_title.Length > 41 Then
                         wpf_helper.helper_label(lbl_spotify, e_title.Remove(40, e_title.Length - 40) & "...")
@@ -569,23 +562,20 @@ Class MainWindow
                     End If
             End Select
 
+            media_artist = media_additional_text & e_artist
             media_newtrack = False
         End If
 
-        If Not e_artist & " -" & e_Tremaining = media_last_artist_time Or wpf_helper.helper_label_gc(lbl_spotify_remaining) = " " Then
-            media_last_artist_time = test_trk_rest & e_artist & " ٠ " & e_Tremaining
-
-            If media_widget_opened = 0 Then
-                wpf_helper.helper_label(lbl_spotify_remaining, media_last_artist_time)
-            Else
-                wnd_flyout_media.str_media_time = e_pb_val & "%" & e_pb_max & "#" & e_Tremaining
-            End If
+        If Not media_last_time = e_Tremaining And media_widget_opened = 0 Then
+            wpf_helper.helper_label(lbl_spotify_remaining, media_artist & " ٠ " & e_Tremaining)
+            media_last_time = e_Tremaining
         End If
 
-        If trk_show_progess = True Then
+        If trk_show_progess = True And media_widget_opened = 0 Then
             wpf_helper.helper_progressBar(mpb_indicateLoading, e_pb_val, e_pb_max, e_playing)
         Else
             If mpb_indicateLoading.Visibility = Visibility.Visible Then wpf_helper.helper_progressBar(mpb_indicateLoading, , , False)
+            wnd_flyout_media.str_media_time = e_pb_val & "%" & e_pb_max & "#" & e_Tremaining
         End If
     End Sub
 
@@ -661,17 +651,18 @@ Class MainWindow
     Dim flyout_media As New wnd_flyout_media
 
     Private Sub lbl_spotify_MouseLeftButtonUp(sender As Object, e As MouseButtonEventArgs) Handles grd_spotify.MouseLeftButtonUp
-        If media_widget_opened = -1 Then flyout_media = New wnd_flyout_media
-
         If media_widget_opened = 1 Then
+            media_newtrack = True
             flyout_media.Hide()
             media_widget_opened = 0
-        Else
+        ElseIf media_widget_opened = 0 Then
             flyout_media.Show()
             media_widget_opened = 1
             wpf_helper.helper_label(lbl_spotify, "Spotify")
             wpf_helper.helper_label(lbl_spotify_remaining, " ")
             Me.Activate()
+        Else
+            flyout_media = New wnd_flyout_media
         End If
     End Sub
 #End Region

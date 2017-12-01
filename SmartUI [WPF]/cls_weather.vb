@@ -262,7 +262,14 @@ Public Class cls_weather
 
         'Quelltext herunterladen
         Dim wStationData_request As WebRequest = WebRequest.Create("http://netzwerk.wetter.com/api/stationdata/" & e_station & "/1/")
-        Dim wStationData_respone As WebResponse = Await wStationData_request.GetResponseAsync()
+        Dim wStationData_respone As WebResponse '= Await wStationData_request.GetResponseAsync()
+
+        Try
+            wStationData_respone = Await wStationData_request.GetResponseAsync()
+        Catch ex As Exception
+            wcom_error(e_station)
+            Exit Sub
+        End Try
 
         ' Get the stream containing content returned by the server.
         Dim wStationData_dataStream As Stream = wStationData_respone.GetResponseStream()
