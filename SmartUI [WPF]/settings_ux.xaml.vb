@@ -15,6 +15,7 @@ Imports System.Windows.Media
 Imports nUpdate.Updating
 
 Public Class wnd_settings
+    Dim updater_enabled As Boolean = False
 
 #Region "Blur"
     'Blur
@@ -80,9 +81,7 @@ Public Class wnd_settings
     End Sub
 
     Private Sub btn_wnd_hide_MouseLeftButtonDown(sender As Object, e As RoutedEventArgs) Handles btn_wnd_hide.Click
-        Me.Hide()
-        'matc_tabctrl.SelectedIndex = 5
-        matc_tabctrl.Visibility = Visibility.Hidden
+        Me.Visibility = Visibility.Hidden
     End Sub
 
     Private Sub btn_wnd_minimize_MouseLeftButtonUp(sender As Object, e As RoutedEventArgs) Handles btn_wnd_minimize.Click
@@ -93,7 +92,6 @@ Public Class wnd_settings
         EnableBlur() 'enable blurred window bg
         lib_hVOSD.Init() 'bring up lib_HVOSD
         Me.Hide()
-        'matc_tabctrl.SelectedIndex = 5
 
         matc_tabctrl.Visibility = Visibility.Visible
         matc_main.Visibility = Visibility.Hidden
@@ -101,11 +99,10 @@ Public Class wnd_settings
         matc_changelog.Visibility = Visibility.Hidden
         matc_spotify.Visibility = Visibility.Hidden
         matc_updates.Visibility = Visibility.Hidden
-        matc_start.Visibility = Visibility.Hidden
 
         flyout_cache_reset.IsOpen = False
-        flyout_settings_saved.IsOpen = False
-        pring_flyout_settings_saved.Visibility = Visibility.Hidden
+        flyout_message.IsOpen = False
+        pring_flyout_message.Visibility = Visibility.Hidden
 
         lbl_cpr.Content = "Version: " & MainWindow.suiversion & " - " & IO.File.GetLastWriteTime(AppDomain.CurrentDomain.BaseDirectory & "\SmartUI.exe").ToString("yyMMdd")
 
@@ -155,20 +152,16 @@ Public Class wnd_settings
         ini.WriteValue("Spotify", "cb_wndmain_spotify_progress", CType(cb_wndmain_spotify_progress.IsChecked, String))
 
         'Weather
-        'ini.WriteValue("Weather", "cb_wndmain_weather_enabled", CType(cb_wndmain_weather_enabled.IsChecked, String))
         cls_weather.enabled(cb_wndmain_weather_enabled.IsChecked.Value)
-        'If Not txtBx_weather_zipcode.Text = "<City ID>" Then ini.WriteValue("Weather", "txtBx_weather_zipcode", txtBx_weather_zipcode.Text)
-        'If Not txtBx_weather_APIkey.Text = "<API Key>" Then ini.WriteValue("Weather", "txtBx_weather_APIkey", txtBx_weather_APIkey.Text)
 
-        If Not txtBx_weather_cid.Text = "<City ID>" And Not txtBx_weather_APIkey.Text = "<API Key>" Then cls_weather.oww_set_data(CInt(txtBx_weather_cid.Text), txtBx_weather_APIkey.Text)
+        If Not txtBx_weather_cid.Text = "<City ID>" And Not txtBx_weather_APIkey.Text = "<API Key>" Then _
+            cls_weather.oww_set_data(CInt(txtBx_weather_cid.Text), txtBx_weather_APIkey.Text)
 
         'Network
-        If Not ComboBox_net_interface.SelectedIndex = -1 Then
-            If Not ComboBox_net_interface.SelectedItem.ToString = "Deaktiviert" Then
-                ini.WriteValue("NET", "ComboBox_net_interface", ComboBox_net_interface.SelectedItem.ToString)
-            Else
-                ini.WriteValue("NET", "ComboBox_net_interface", "null")
-            End If
+        If Not ComboBox_net_interface.SelectedIndex = -1 And Not ComboBox_net_interface.SelectedIndex = 0 Then
+            ini.WriteValue("NET", "ComboBox_net_interface", ComboBox_net_interface.SelectedItem.ToString)
+        Else
+            ini.WriteValue("NET", "ComboBox_net_interface", "null")
         End If
 
         ini.WriteValue("UI", "cb_wndmain_net_iconDisableSpeedLimit", CType(cb_wndmain_net_iconDisableSpeedLimit.IsChecked, String))
@@ -180,26 +173,10 @@ Public Class wnd_settings
 
         'Show flyout after saving settings
         grd_bottom_strip.Visibility = Visibility.Hidden
-        lbl_flyout_settings_text.Content = "Änderungen gespeichert!"
-        flyout_settings_saved.IsAutoCloseEnabled = True
-        flyout_settings_saved.IsOpen = True
+
+        show_flyout("Änderungen gespeichert!", False)
 
         MainWindow.settings_update_needed = True
-    End Sub
-
-    'Hide settings flyout
-    Private Sub flyout_settings_saved_ClosingFinished(sender As Object, e As RoutedEventArgs) Handles flyout_settings_saved.ClosingFinished
-        If flyout_settings_saved.IsAutoCloseEnabled = False Then Exit Sub
-
-        grd_bottom_strip.Visibility = Visibility.Visible
-
-        'GoTo Main Page and Make Btn visible again
-        If matc_tabctrl.SelectedIndex = 1 Then
-            matc_tabctrl.SelectedIndex = 0
-            btn_ovlay_setKey.Visibility = Visibility.Visible
-
-            If IO.File.Exists(".\config\wcom_allowed") Then lbl_wcom_check.Visibility = Visibility.Visible
-        End If
     End Sub
 
     Private Sub load_settings()
@@ -211,9 +188,8 @@ Public Class wnd_settings
         cb_wndmain_spotify_progress.IsChecked = CType(ini.ReadValue("Spotify", "cb_wndmain_spotify_progress", "False"), Boolean)
 
         'Weather
-        'cb_wndmain_weather_enabled.IsChecked = CType(ini.ReadValue("Weather", "cb_wndmain_weather_enabled", "False"), Boolean)
-
         cb_wndmain_weather_enabled.IsChecked = cls_weather.conf_enabled
+
         txtBx_weather_cid.Text = cls_weather.oww_API_cityID.ToString
         txtBx_weather_APIkey.Text = cls_weather.oww_API_key
 
@@ -230,7 +206,6 @@ Public Class wnd_settings
         'Others
         cb_other_disableVolumeOSD.IsChecked = CType(ini.ReadValue("SYS", "cb_other_disableVolumeOSD", "False"), Boolean)
         cb_other_startup_play.IsChecked = CType(ini.ReadValue("SYS", "cb_other_startup_play", "False"), Boolean)
-
         'Others End
     End Sub
 
@@ -255,14 +230,20 @@ Public Class wnd_settings
 
 #End Region
 
+#Region "Tab Navigation"
     Private Sub btn_changelog_back_Click(sender As Object, e As RoutedEventArgs) Handles ico_backToStart.MouseLeftButtonDown
         matc_tabctrl.SelectedIndex = 0
         lbl_header.Content = "EINSTELLUNGEN"
     End Sub
 
-    Private Sub flyout_settings_saved_closed(sender As Object, e As RoutedEventArgs) Handles flyout_settings_saved.ClosingFinished
-        pring_flyout_settings_saved.Visibility = Visibility.Hidden
+    Private Sub matc_tabctrl_SelectionChanged(sender As Object, e As SelectionChangedEventArgs) Handles matc_tabctrl.SelectionChanged
+        If Not matc_tabctrl.SelectedIndex = 0 Then
+            ico_backToStart.Visibility = Visibility.Visible
+        Else
+            ico_backToStart.Visibility = Visibility.Hidden
+        End If
     End Sub
+#End Region
 
 #Region "Weather & API-Key Overlay"
     Private Sub cb_wndmain_weather_enabled_Checked(sender As Object, e As RoutedEventArgs) Handles cb_wndmain_weather_enabled.Click
@@ -278,10 +259,7 @@ Public Class wnd_settings
         lbl_wcom_check.Visibility = Visibility.Hidden
         btn_ovlay_setKey.Visibility = Visibility.Hidden
 
-        flyout_settings_saved.IsAutoCloseEnabled = False
-        flyout_settings_saved.IsOpen = True
-
-        lbl_flyout_settings_text.Content = "Einen moment, bitte..."
+        show_flyout("Einen moment, bitte...", True, 0)
 
         Dim oww_api_request As WebRequest = WebRequest.Create("http://api.openweathermap.org/data/2.5/weather?id=" & txtBx_weather_cid.Text & "&APPID=" & txtBx_weather_APIkey.Text & "&mode=xml&units=metric&lang=DE")
         Dim oww_api_respone As WebResponse
@@ -296,19 +274,14 @@ Public Class wnd_settings
             oww_api_txt = oww_api_reader.ReadToEnd
 
             If oww_api_txt.Length > 1 And oww_api_txt.Contains("temp") Then
-                lbl_flyout_settings_text.Content = "API-Test Erfolgreich!"
+                show_flyout("API-Test Erfolgreich!", False, 0)
                 Await Task.Run(Sub() Threading.Thread.Sleep(2500))
-                lbl_flyout_settings_text.Content = "Vergessen Sie nicht, ihre Änderungen zu Speichern!"
-                Await Task.Run(Sub() Threading.Thread.Sleep(2500))
-                flyout_settings_saved.IsOpen = False
+                show_flyout("Vergessen Sie nicht, ihre Änderungen zu Speichern!", False)
                 matc_tabctrl.SelectedIndex = 0
-
             Else
-                lbl_flyout_settings_text.Content = "Fehler beim API-Test (!)"
+                show_flyout("Fehler beim API-Test (!)", False, 0)
                 Await Task.Run(Sub() Threading.Thread.Sleep(2500))
-                lbl_flyout_settings_text.Content = "API-Key & City-ID prüfen"
-                Await Task.Run(Sub() Threading.Thread.Sleep(2500))
-                flyout_settings_saved.IsOpen = False
+                show_flyout("API-Key & City-ID prüfen", False)
             End If
 
             lbl_wcom_check.Visibility = Visibility.Visible
@@ -320,10 +293,8 @@ Public Class wnd_settings
 
     End Sub
 
-    Private Async Sub api_errmsg(e_str As String)
-        lbl_flyout_settings_text.Content = e_str
-        Await Task.Run(Sub() Threading.Thread.Sleep(2500))
-        flyout_settings_saved.IsOpen = False
+    Private Sub api_errmsg(e_str As String)
+        show_flyout(e_str, False)
         lbl_wcom_check.Visibility = Visibility.Visible
         btn_ovlay_setKey.Visibility = Visibility.Visible
     End Sub
@@ -393,43 +364,39 @@ Public Class wnd_settings
     End Sub
 #End Region
 
-    Private Sub matc_tabctrl_SelectionChanged(sender As Object, e As SelectionChangedEventArgs) Handles matc_tabctrl.SelectionChanged
-        If Not matc_tabctrl.SelectedIndex = 0 Then
-            ico_backToStart.Visibility = Visibility.Visible
-        Else
-            ico_backToStart.Visibility = Visibility.Hidden
-        End If
-    End Sub
-
 #Region "Spotify"
+    Dim bol_spotify_installed As Boolean
+
     Private Sub btn_spotify_Click(sender As Object, e As RoutedEventArgs) Handles btn_spotify.Click
         matc_tabctrl.SelectedIndex = 3
         lbl_header.Content = "SPOTIFY"
 
-        cache_getSize()
+        lbl_cacheSize.Content = get_cache_size()
 
         'Spotify Check
         If IO.File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Spotify\Spotify.exe") Then
             lbl_spotifyCheck.Content = "Spotify installiert (v" & MainWindow._sAPI_ClientVersion & ") und " & If(Process.GetProcessesByName("Spotify").Length > 1, "gestartet", "nicht gestartet (!)")
+            bol_spotify_installed = True
         Else
             lbl_spotifyCheck.Content = "Spotify ist nicht Installiert."
+            bol_spotify_installed = False
         End If
     End Sub
 
     Private Sub btn_restart_spotify_Click(sender As Object, e As RoutedEventArgs) Handles btn_restart_spotify.Click
-        flyout_spotify("force_restart")
+        If bol_spotify_installed = True Then flyout_spotify("force_restart") Else show_flyout("Spotify nicht installiert!", False)
     End Sub
 
-    Private Sub flyout_spotify(ctnt As String)
+    Private Sub flyout_spotify(ctnt As String, ByVal Optional e_csize As String = "")
         Select Case ctnt
             Case "del_cache"
                 btn_flyout_spotify_confirm.Tag = "del_cache"
-                lbl_flyout_spotify_msg.Content = "Alle Zwischengespeicherten Album-Cover werden entfernt, sodass" & NewLine & "diese erneut heruntergeladen werden müssen"
+                lbl_flyout_spotify_msg.Content = "Alle Album-Cover werden entfernt, dabei werden " & e_csize & " freigegeben." & NewLine & "Die Cover werden bei bedarf erneut heruntergeladen."
                 btn_flyout_spotify_confirm.Content = "Löschen"
 
             Case "force_restart"
                 btn_flyout_spotify_confirm.Tag = "force_restart"
-                lbl_flyout_spotify_msg.Content = "Die Spotify App wird beendet und wieder gestartet"
+                lbl_flyout_spotify_msg.Content = "Spotify wird beendet und neu-gestartet"
                 btn_flyout_spotify_confirm.Content = "Neu starten"
 
         End Select
@@ -440,34 +407,12 @@ Public Class wnd_settings
     End Sub
 
 #Region "AlbumArt Cache"
-    Private Sub cache_getSize()
-        Dim cache_size As Int64
-        Dim files_count As Integer
-        If IO.Directory.Exists(AppDomain.CurrentDomain.BaseDirectory & "cache\media\") Then
-            For Each file As String In System.IO.Directory.EnumerateFiles(AppDomain.CurrentDomain.BaseDirectory & "cache\media\", "*.*", System.IO.SearchOption.AllDirectories)
-                cache_size += My.Computer.FileSystem.GetFileInfo(file).Length
-                files_count += 1
-            Next
-
-            If cache_size = 0 Then
-                lbl_cacheSize.Content = "Keine Album-Cover zwischengespeichert"
-            ElseIf cache_size < 1048576 Then
-                lbl_cacheSize.Content = "Album-Cover zwischengespeichert: " & files_count & " (" & (cache_size / 1024).ToString("0") & "KB)"
-            Else
-                lbl_cacheSize.Content = "Album-Cover zwischengespeichert: " & files_count & " (" & (cache_size / 1048576).ToString("0.0") & "MB)"
-            End If
-        Else
-            lbl_cacheSize.Content = "Keine Album-Cover zwischengespeichert"
-        End If
-
-    End Sub
-
     Private Sub btn_cache_refresh_Click(sender As Object, e As RoutedEventArgs) Handles btn_cache_refresh.Click
-        cache_getSize()
+        lbl_cacheSize.Content = get_cache_size()
     End Sub
 
     Private Sub btn_cache_reset_Click(sender As Object, e As RoutedEventArgs) Handles btn_cache_reset.Click
-        flyout_spotify("del_cache")
+        flyout_spotify("del_cache", get_cache_size(True))
     End Sub
 
     Private Sub btn_reset_cache_confirm_Click(sender As Object, e As RoutedEventArgs) Handles btn_flyout_spotify_confirm.Click
@@ -481,12 +426,11 @@ Public Class wnd_settings
                     End Try
                 Next
             End If
-            cache_getSize()
+
+            lbl_cacheSize.Content = get_cache_size()
 
         ElseIf btn_flyout_spotify_confirm.Tag Is "force_restart" Then
-            flyout_settings_saved.IsOpen = True
-            lbl_flyout_settings_text.Content = "Spotify wird neu-gestartet..."
-            pring_flyout_settings_saved.Visibility = Visibility.Visible
+            show_flyout("Spotify wird neu-gestartet...", True)
 
             For Each prog As Process In Process.GetProcesses
                 If prog.ProcessName = "Spotify" Or prog.ProcessName = "SpotifyWebHelper" Then
@@ -507,9 +451,72 @@ Public Class wnd_settings
     End Sub
 
     Private Sub cb_other_startup_play_Checked(sender As Object, e As RoutedEventArgs) Handles cb_other_startup_play.Checked
-        My.Computer.Audio.Play(System.AppDomain.CurrentDomain.BaseDirectory & "\Resources\win_vis_beta_startup.wav")
+        My.Computer.Audio.Play(AppDomain.CurrentDomain.BaseDirectory & "\Resources\win_vis_beta_startup.wav")
     End Sub
+
+    Private Function get_cache_size(ByVal Optional e_notext As Boolean = False) As String
+        Dim files_count As Integer
+        Dim cache_size As Integer
+
+        If IO.Directory.Exists(AppDomain.CurrentDomain.BaseDirectory & "cache\media\") Then
+            For Each file As String In System.IO.Directory.EnumerateFiles(AppDomain.CurrentDomain.BaseDirectory & "cache\media\", "*.*", System.IO.SearchOption.AllDirectories)
+                cache_size += CInt(My.Computer.FileSystem.GetFileInfo(file).Length)
+                files_count += 1
+            Next
+        Else
+            If e_notext = False Then
+                Return "Keine Album-Cover zwischengespeichert"
+            Else
+                Return "0MB"
+            End If
+        End If
+
+        If e_notext = False Then
+            If cache_size = 0 Then
+                Return "Keine Album-Cover zwischengespeichert"
+            ElseIf cache_size < 1048576 Then
+                Return "Album-Cover zwischengespeichert: " & files_count & " (" & (cache_size / 1024).ToString("0") & "KB)"
+            Else
+                Return "Album-Cover zwischengespeichert: " & files_count & " (" & (cache_size / 1048576).ToString("0.0") & "MB)"
+            End If
+        Else
+            Return (cache_size / 1048576).ToString("0.0") & "MB"
+        End If
+    End Function
 #End Region
+
+#End Region
+
+#Region "Flyout Message"
+    Private Sub show_flyout(ByVal e_msg As String, ByVal e_show_pring As Boolean, ByVal Optional e_timeout As Integer = -1)
+        lbl_flyout_message.Content = e_msg
+        If e_show_pring = True Then pring_flyout_message.Visibility = Visibility.Visible
+
+        If e_timeout = -1 Then
+            flyout_message.IsAutoCloseEnabled = True
+        ElseIf e_timeout = 0 Then
+            flyout_message.IsAutoCloseEnabled = False
+        Else
+            flyout_message.IsAutoCloseEnabled = True
+            flyout_message.AutoCloseInterval = e_timeout
+        End If
+
+        grd_bottom_strip.Visibility = Visibility.Hidden
+        grd_bottom_strip_weather.Visibility = Visibility.Hidden
+
+        flyout_message.IsOpen = True
+    End Sub
+
+    Private Sub close_flyout()
+        flyout_message.IsOpen = False
+    End Sub
+
+    Private Sub flyout_message_closed(sender As Object, e As RoutedEventArgs) Handles flyout_message.ClosingFinished
+        pring_flyout_message.Visibility = Visibility.Hidden
+        grd_bottom_strip.Visibility = Visibility.Visible
+        grd_bottom_strip_weather.Visibility = Visibility.Visible
+        If matc_tabctrl.SelectedIndex = 1 Then matc_tabctrl.SelectedIndex = 0
+    End Sub
 
 #End Region
 
@@ -518,10 +525,13 @@ Public Class wnd_settings
     Dim updaterUI As New UpdaterUI(manager, SynchronizationContext.Current)
 
     Private Sub btn_updates_Click(sender As Object, e As RoutedEventArgs) Handles btn_updates.Click
+        If updater_enabled = False Then
+            show_flyout("Die suche nach Updates ist in diesem Build deaktiviert", False)
+            Exit Sub
+        End If
+
         matc_tabctrl.SelectedIndex = 4
         lbl_header.Content = "UPDATES"
-
-        'updater_hiddensearch()
     End Sub
 
     Private Sub updater_hiddensearch()

@@ -51,11 +51,11 @@ Public Class cls_weather
             oww_update()
             wcom_update()
         ElseIf e_update = 1 Then
-            MainWindow.wnd_log.AddLine(logcat & "-INFO", "Updating OpenWeather...")
+            'MainWindow.wnd_log.AddLine(logcat & "-INFO", "Updating OpenWeather...")
             oww_update()
         ElseIf e_update = 2 Then
             If conf_wcom_enabled = True Then
-                MainWindow.wnd_log.AddLine(logcat & "-INFO", "Updating Wetter.com...")
+                'MainWindow.wnd_log.AddLine(logcat & "-INFO", "Updating Wetter.com...")
                 wcom_update()
             Else
                 MainWindow.wnd_log.AddLine(logcat & "-INFO", "Wetter.com... diabled (e_update = 2)")
@@ -157,9 +157,9 @@ Public Class cls_weather
                         If .AttributeCount > 0 Then
                             While .MoveToNextAttribute ' nächstes 
                                 If xmlid = "city" And .Name = "name" Then oww_data_location = .Value
-                                If xmlid = "temperature" And .Name = "value" Then oww_temp_now = .Value.Remove(.Value.Length - 1, 1)
-                                If xmlid = "temperature" And .Name = "max" Then oww_temp_max = .Value.Remove(.Value.Length - 1, 1)
-                                If xmlid = "temperature" And .Name = "min" Then oww_temp_min = .Value.Remove(.Value.Length - 1, 1)
+                                If xmlid = "temperature" And .Name = "value" Then oww_temp_now = .Value
+                                If xmlid = "temperature" And .Name = "max" Then oww_temp_max = .Value
+                                If xmlid = "temperature" And .Name = "min" Then oww_temp_min = .Value '.Remove(.Value.Length - 1, 1)
                                 If xmlid = "humidity" And .Name = "value" Then oww_humidity = CInt(.Value)
                                 If xmlid = "pressure" And .Name = "value" Then oww_pressure = CInt(.Value)
                                 'If xmlid = "pressure" And .Name = "unit" Then oww_pressure_unit = .Value
@@ -299,7 +299,7 @@ Public Class cls_weather
 
         'temperature
         If ssSplit(3).Substring(0, ssSplit(3).Length - 5) = "null" Then
-            wcom_temp_now = "--°"
+            wcom_temp_now = "--"
         Else
             wcom_temp_now = ssSplit(3).Substring(0, ssSplit(3).Length - 5) '& "°"
         End If
@@ -350,7 +350,7 @@ Public Class cls_weather
 #End Region
 
     Public Shared Function get_temp() As String
-        If conf_wcom_enabled = True Then Return wcom_temp_now & "°" Else Return oww_temp_now & "°"
+        If conf_wcom_enabled = True And Not wcom_temp_now = "--" Then Return wcom_temp_now & "°" Else Return oww_temp_now & "°²"
     End Function
 
     Public Shared Function get_humidity() As Integer

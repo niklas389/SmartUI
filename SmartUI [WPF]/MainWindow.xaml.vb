@@ -20,7 +20,7 @@ Class MainWindow
     Public Shared settings_update_needed As Boolean = False
     Public Shared weather_update_needed As Boolean = False
 
-    Public Shared suiversion As String = My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & ".4"
+    Public Shared suiversion As String = My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & ".5"
 
 #Region "Blur & Dock"
     'Dock
@@ -48,6 +48,7 @@ Class MainWindow
 
     Private Sub MainWindow_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
         apiSHAppBarMessage(ABM_REMOVE, abd)
+        RemoveHandler NetworkChange.NetworkAddressChanged, AddressOf AddressChangedCallback
     End Sub
 
     'LC
@@ -140,9 +141,10 @@ Class MainWindow
 
         ' Dieser Aufruf ist für den Designer erforderlich.
         InitializeComponent()
-
         ' Fügen Sie Initialisierungen nach dem InitializeComponent()-Aufruf hinzu.
     End Sub
+
+
 
     Private Sub MainWindow_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
         sui_dock_blur()
@@ -188,8 +190,8 @@ Class MainWindow
         End If
 
         'Network
-        net_allSpeeds = CType(ini.ReadValue("UI", "cb_wndmain_net_iconDisableSpeedLimit", "False"), Boolean)
-        net_textAllSpeeds = CType(ini.ReadValue("UI", "cb_wndmain_net_textDisableSpeedLimit", "False"), Boolean)
+        net_conf_thres_icons = CType(ini.ReadValue("UI", "cb_wndmain_net_iconDisableSpeedLimit", "False"), Boolean)
+        net_conf_thres_text = CType(ini.ReadValue("UI", "cb_wndmain_net_textDisableSpeedLimit", "False"), Boolean)
 
         'media 
         trk_show_progess = CType(ini.ReadValue("Spotify", "cb_wndmain_spotify_progress", "False"), Boolean)
@@ -317,11 +319,12 @@ Class MainWindow
                 flyout_media.Close() 'close media widget
                 media_widget_opened = -1
 
-                init_spotifyAPI()
-                wnd_log.AddLine("ATT" & "-MEDIA", " - restarting Spotify API")
                 sAPI_error = True
+                sAPI_error_count = 0
+                init_spotifyAPI()
             End If
         Else
+            sAPI_error = False
             sAPI_error_count = 0
         End If
 
@@ -431,64 +434,51 @@ Class MainWindow
     Public Shared _sAPI_ClientVersion As String
 
     Sub init_spotifyAPI() 'Init and connect Spotify-API
-        wnd_log.AddLine("INFO" & "-MEDIA", "Init Spotify-API .NET...")
+        If sAPI_error = False Then wnd_log.AddLine("INFO" & "-MEDIA", "Init Spotify-API .NET...") Else wnd_log.AddLine("ATT" & "-MEDIA", "(!) Restarting Spotify-API .NET...")
         spotifyapi = New SpotifyLocalAPI
 
         'Check if Spotify (and WebHelper) are running
-        If Not SpotifyLocalAPI.IsSpotifyRunning() Then
-            wnd_log.AddLine("INFO" & "-MEDIA", "Spotify isn't running!")
-        End If
-
-        If Not SpotifyLocalAPI.IsSpotifyWebHelperRunning() Then
-            wnd_log.AddLine("INFO" & "-MEDIA", "SpotifyWebHelper isn't running!")
-        End If
+        If Not SpotifyLocalAPI.IsSpotifyRunning() Then wnd_log.AddLine("INFO" & "-MEDIA", "Spotify isn't running!")
+        If Not SpotifyLocalAPI.IsSpotifyWebHelperRunning() Then wnd_log.AddLine("INFO" & "-MEDIA", "SpotifyWebHelper isn't running!")
 
         Try
-            Dim sAPI_connected As Boolean = spotifyapi.Connect
-            sAPI_allowed = sAPI_connected
-            If sAPI_connected = True Then
-                wnd_log.AddLine("INFO" & "-MEDIA", "Connection established succesfully!")
+            sAPI_allowed = spotifyapi.Connect
+
+            If sAPI_allowed = True Then
+                wnd_log.AddLine("INFO" & "-MEDIA", "Connected to Spotify Client (Version: " & spotifyapi.GetStatus.ClientVersion.ToString & ")")
                 sAPI_UpdateInfos()
 
                 spotifyapi.ListenForEvents = True
                 sAPI_error = False
+
+                AddHandler spotifyapi.OnPlayStateChange, AddressOf spotifyapi_OnPlayStateChange
+                AddHandler spotifyapi.OnTrackChange, AddressOf spotifyapi_OnTrackChange
+                AddHandler spotifyapi.OnTrackTimeChange, AddressOf spotifyapi_OnTrackTimeChange
             Else
-                wnd_log.AddLine("INFO" & "-MEDIA", "Couldn't connect - API disabled until next start!")
+                wnd_log.AddLine("INFO" & "-MEDIA", "Couldn't connect - API disabled until next app start!")
                 sAPI_error = True
             End If
 
         Catch ex As Exception
             wnd_log.AddLine("INFO" & "-MEDIA", "Well, here's something really fucked up...")
         End Try
-
-        AddHandler spotifyapi.OnPlayStateChange, AddressOf spotifyapi_OnPlayStateChange
-        AddHandler spotifyapi.OnTrackChange, AddressOf spotifyapi_OnTrackChange
-        AddHandler spotifyapi.OnTrackTimeChange, AddressOf spotifyapi_OnTrackTimeChange
     End Sub
 
     Public Sub sAPI_UpdateInfos()
-        Dim status As StatusResponse = spotifyapi.GetStatus
-        wnd_log.AddLine("INFO" & "-MEDIA", "Spotify-Client Version: " & spotifyapi.GetStatus.ClientVersion.ToString)
         _sAPI_ClientVersion = spotifyapi.GetStatus.ClientVersion.ToString
 
-        If status.Track IsNot Nothing Then            'Update track infos
-            _currentTrack = status.Track
-            e_playing = status.Playing
+        If spotifyapi.GetStatus.Track IsNot Nothing Then        'Update track infos
+            _currentTrack = spotifyapi.GetStatus.Track
+            e_playing = spotifyapi.GetStatus.Playing
         End If
     End Sub
 
     '    'advertLabel.Text = If(track.IsAd(), "ADVERT", "")
 
-    '    track.IsAd()
-    '    'titleLinkLabel.Text = track.TrackResource.Name
-    '    'titleLinkLabel.Tag = track.TrackResource.Uri
-
     '    bigAlbumPicture.Image = Await track.GetAlbumArtAsync(AlbumArtSize.Size640)
     '    smallAlbumPicture.Image = Await track.GetAlbumArtAsync(AlbumArtSize.Size160)
 
-    'Private Sub spotifyapi_OnVolumeChange(sender As Object, e As VolumeChangeEventArgs)
     '    'volumeLabel.Text = (e.NewVolume * 100).ToString(CultureInfo.InvariantCulture)
-    'End Sub
 
     Dim lasttrack As Track
     Private Sub spotifyapi_OnTrackTimeChange(sender As Object, e As TrackTimeChangeEventArgs)
@@ -537,12 +527,13 @@ Class MainWindow
     Public Shared media_newtrack As Boolean
     Dim media_last_time As String
     Dim media_artist As String
-    Dim media_additional_text As String
 
     Private Sub sui_media_update(ByVal e_title As String, ByVal e_artist As String, ByVal e_Tremaining As String, ByVal e_pb_val As Double, ByVal e_pb_max As Double, ByVal e_playing As Boolean)
         'Title ------------------ don't update label if title didn't change
 
         If e_title <> Nothing And media_widget_opened <> 1 Then
+            Dim media_additional_text As String
+
             Select Case True
                 Case e_title.Contains("(") And Not e_title.StartsWith("(")
                     wpf_helper.helper_label(lbl_spotify, e_title.Substring(0, (e_title.IndexOf("(") - 1))) 'main title
@@ -566,7 +557,7 @@ Class MainWindow
             media_newtrack = False
         End If
 
-        If Not media_last_time = e_Tremaining And media_widget_opened = 0 Then
+        If Not media_last_time = e_Tremaining And media_widget_opened <> 1 Then
             wpf_helper.helper_label(lbl_spotify_remaining, media_artist & " ٠ " & e_Tremaining)
             media_last_time = e_Tremaining
         End If
@@ -651,18 +642,19 @@ Class MainWindow
     Dim flyout_media As New wnd_flyout_media
 
     Private Sub lbl_spotify_MouseLeftButtonUp(sender As Object, e As MouseButtonEventArgs) Handles grd_spotify.MouseLeftButtonUp
+        If media_widget_opened = -1 Then flyout_media = New wnd_flyout_media
+
         If media_widget_opened = 1 Then
             media_newtrack = True
             flyout_media.Hide()
             media_widget_opened = 0
-        ElseIf media_widget_opened = 0 Then
+        Else
+            weather_flyout.Hide()
             flyout_media.Show()
             media_widget_opened = 1
             wpf_helper.helper_label(lbl_spotify, "Spotify")
             wpf_helper.helper_label(lbl_spotify_remaining, " ")
             Me.Activate()
-        Else
-            flyout_media = New wnd_flyout_media
         End If
     End Sub
 #End Region
@@ -689,8 +681,8 @@ Class MainWindow
 
 #Region "Network Monitoring"
     'Settings
-    Dim net_allSpeeds As Boolean = False
-    Dim net_textAllSpeeds As Boolean = False
+    Dim net_conf_thres_icons As Boolean = False
+    Dim net_conf_thres_text As Boolean = False
 
     Dim net_monitoring_allowed As Integer = 0 '0 = disabled / 1 = enabled / -1 = error
     Dim net_monitoredInterface As NetworkInterface
@@ -707,6 +699,7 @@ Class MainWindow
     'NetMon Step 1
     Private Sub net_get_interfaces()
         If net_monitoring_allowed = -1 Then Exit Sub
+        AddHandler NetworkChange.NetworkAddressChanged, AddressOf AddressChangedCallback
 
         Try
             Dim net_allNICs As NetworkInterface() = NetworkInterface.GetAllNetworkInterfaces()
@@ -730,6 +723,7 @@ Class MainWindow
             wpf_helper.helper_grid(grd_network, True)
             net_monitoring_allowed = 1
 
+            net_available()
         Catch
             wnd_log.AddLine("ERR" & "-NET", "Error in 'net_get_interfaces'")
             net_monitoring_allowed = -1
@@ -744,9 +738,25 @@ Class MainWindow
     Dim net_stat_bSent_speed As Integer
     Dim net_stat_bReceived_speed As Integer
 
+    Private Sub AddressChangedCallback(ByVal sender As Object, ByVal e As EventArgs)
+        net_available()
+    End Sub
+
+    Private Sub net_available()
+        Try
+            If My.Computer.Network.Ping("www.google.com") Then
+                wpf_helper.helper_image(icn_network_state, "pack://application:,,,/Resources/ic_lan_connected.png")
+            Else
+                wpf_helper.helper_image(icn_network_state, "pack://application:,,,/Resources/ic_ethernet_cable_off_white_21px.png")
+            End If
+        Catch ex As Exception
+            wpf_helper.helper_image(icn_network_state, "pack://application:,,,/Resources/ic_ethernet_cable_off_white_21px.png")
+        End Try
+    End Sub
+
     Private Sub net_monitoring()
         If net_monitoring_allowed = 0 Then
-            wnd_log.AddLine("INFO" & "-NET", "Network monitoring disabled or no interface selected, GoTo 'net_get_interfaces'")
+            wnd_log.AddLine("INFO" & "-NET", "Network monitoring disabled / no interface selected, -> 'net_get_interfaces'")
 
             net_get_interfaces()
             ' helper_grid(grd_network, False)
@@ -766,11 +776,11 @@ Class MainWindow
             Exit Sub
         End Try
 
-        If net_monitoredInterface.OperationalStatus = OperationalStatus.Up Then
-            wpf_helper.helper_image(icn_network_state, "pack://application:,,,/Resources/ic_lan_connected.png")
-        Else
-            wpf_helper.helper_image(icn_network_state, "pack://application:,,,/Resources/ic_ethernet_cable_off_white_21px.png")
-        End If
+        'If net_monitoredInterface.OperationalStatus = OperationalStatus.Up Then
+        '    wpf_helper.helper_image(icn_network_state, "pack://application:,,,/Resources/ic_lan_connected.png")
+        'Else
+        '    wpf_helper.helper_image(icn_network_state, "pack://application:,,,/Resources/ic_ethernet_cable_off_white_21px.png")
+        'End If
 
         If net_stat_bSent = 0 And net_stat_bReceived = 0 Then
             net_stat_bSent = net_NIC_statistic.BytesSent
@@ -796,13 +806,13 @@ Class MainWindow
         End If
 
         net_stat_bSent = net_NIC_statistic.BytesSent
-        net_stat_bReceived = net_NIC_statistic.BytesReceived
+            net_stat_bReceived = net_NIC_statistic.BytesReceived
 
         'visualize sent v2
         If net_stat_bSent_speed > 0 Then
-            If net_allSpeeds = True Or net_stat_bSent_speed > 4096 Then
+            If net_conf_thres_icons = True Or net_stat_bSent_speed > 4096 Then
                 icn_network_send.Visibility = Visibility.Visible
-                If net_stat_bSent_speed > 51200 Or net_textAllSpeeds = True Then Me.lbl_network_traffic_send.Content = get_formatted_bytes(net_stat_bSent_speed)
+                If net_stat_bSent_speed > 51200 Or net_conf_thres_text = True Then Me.lbl_network_traffic_send.Content = get_formatted_bytes(net_stat_bSent_speed)
             Else
                 lbl_network_traffic_send.Content = Nothing
                 icn_network_send.Visibility = Visibility.Hidden
@@ -815,9 +825,9 @@ Class MainWindow
 
         'visualize received v2
         If net_stat_bReceived_speed > 0 Then
-            If net_allSpeeds = True Or net_stat_bReceived_speed > 4096 Then
+            If net_conf_thres_icons = True Or net_stat_bReceived_speed > 4096 Then
                 icn_network_receive.Visibility = Visibility.Visible
-                If net_stat_bReceived_speed > 51200 Or net_textAllSpeeds = True Then Me.lbl_network_traffic_receive.Content = get_formatted_bytes(net_stat_bReceived_speed)
+                If net_stat_bReceived_speed > 51200 Or net_conf_thres_text = True Then Me.lbl_network_traffic_receive.Content = get_formatted_bytes(net_stat_bReceived_speed)
             Else
                 lbl_network_traffic_receive.Content = Nothing
                 icn_network_receive.Visibility = Visibility.Hidden
@@ -827,6 +837,8 @@ Class MainWindow
             lbl_network_traffic_receive.Content = Nothing
             icn_network_receive.Visibility = Visibility.Hidden
         End If
+
+
     End Sub
 
     'convert bytes
@@ -881,6 +893,12 @@ Class MainWindow
 
     Dim weather_flyout As New wnd_flyout_weather
     Private Sub icn_weather_MouseUp(sender As Object, e As MouseButtonEventArgs) Handles grd_weather.MouseUp
+        If media_widget_opened = 1 Then
+            media_newtrack = True
+            flyout_media.Hide()
+            media_widget_opened = 0
+        End If
+
         weather_flyout.Show()
         Me.Topmost = False
         Me.Topmost = True

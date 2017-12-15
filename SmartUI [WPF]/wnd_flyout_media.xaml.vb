@@ -19,6 +19,7 @@ Public Class wnd_flyout_media
     Private Sub wnd_flyout_media_IsVisibleChanged(sender As Object, e As DependencyPropertyChangedEventArgs) Handles Me.IsVisibleChanged
         If Me.Visibility = Visibility.Visible Then
             update_widget()
+            tmr_update_trackdata.Start()
             anim_slidein()
         End If
     End Sub
@@ -43,7 +44,7 @@ Public Class wnd_flyout_media
         Storyboard.SetTarget(dblanim, Me)
         Storyboard.SetTargetProperty(dblanim, New PropertyPath(Window.TopProperty))
 
-        AddHandler dblanim.Completed, AddressOf dblanim_Completed
+        'AddHandler dblanim.Completed, AddressOf dblanim_Completed
 
         storyboard.Children.Add(dblanim)
         storyboard.Begin(Me)
@@ -70,12 +71,10 @@ Public Class wnd_flyout_media
     End Sub
 
     Private Sub dblanim_Completed(sender As Object, e As EventArgs)
-        If MainWindow.media_widget_opened = 0 Then
-            Me.Hide()
-            tmr_update_trackdata.Stop()
-        Else
-            tmr_update_trackdata.Start()
-        End If
+        'If MainWindow.media_widget_opened = 0 Then
+        Me.Hide()
+        tmr_update_trackdata.Stop()
+        'End If
     End Sub
 
 #End Region
@@ -131,14 +130,12 @@ Public Class wnd_flyout_media
         pr_loading.IsActive = True
         albumCover_overlay(True)
 
-        'MessageBox.Show(MainWindow._currentTrack.TrackResource.ParseUri.ToString)
         Dim trk_uri As String = MainWindow._currentTrack.TrackResource.ParseUri.ToString.Remove(0, 14)
 
         Try
             If Not IO.Directory.Exists(cache_path) Then IO.Directory.CreateDirectory(cache_path)
 
             'get URI before DL image to avoid mismatching info (eg.: user changes track while downloading)
-
             If Not IO.File.Exists(cache_path & trk_uri) Then
                 'Construct a bitmap
                 Dim img As New Bitmap(Await Task.Run(Function() MainWindow._currentTrack.GetAlbumArtAsync(SpotifyAPI.Local.Enums.AlbumArtSize.Size320))) 'cover DL
@@ -156,7 +153,7 @@ Public Class wnd_flyout_media
             img_albumCover.Source = CType(New ImageSourceConverter().ConvertFromString("pack://application:,,,/Resources/mediaservice_albums.png"), ImageSource)
             img_bg.Source = CType(New ImageSourceConverter().ConvertFromString(AppDomain.CurrentDomain.BaseDirectory & "Resources\no_cover.jpg"), ImageSource)
             img_cover_error.Visibility = Visibility.Visible
-            img_cover_error.ToolTip = "Wir hatten bei diesem Titel probleme das Cover abzurufen." & NewLine & "Prüfe deine Internetverbindung und probiere es noch einmal."
+            img_cover_error.ToolTip = "Wir hatten bei diesem Titel probleme das Cover abzurufen." & NewLine & "Versuch es später nochmal."
             If IO.File.Exists(cache_path & trk_uri) And err = False Then media_cache_albumArt(True)
         End Try
 
@@ -188,7 +185,7 @@ Public Class wnd_flyout_media
 
         End Try
     End Function
-#End Region 'ReWork of Local Track needed!
+#End Region
 
 #Region "Buttons"
     'Spotify Change Track 
