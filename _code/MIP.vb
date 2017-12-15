@@ -49,3 +49,10 @@
 '        wnd_flyout_media.str_media_time = e_pb_val & "%" & e_pb_max & "#" & e_Tremaining
 '    End If
 'End If
+
+
+'OTHER THINGS .NET SPOTIFY API
+'    'advertLabel.Text = If(track.IsAd(), "ADVERT", "")
+'    bigAlbumPicture.Image = Await track.GetAlbumArtAsync(AlbumArtSize.Size640)
+'    smallAlbumPicture.Image = Await track.GetAlbumArtAsync(AlbumArtSize.Size160)
+'    'volumeLabel.Text = (e.NewVolume * 100).ToString(CultureInfo.InvariantCulture)

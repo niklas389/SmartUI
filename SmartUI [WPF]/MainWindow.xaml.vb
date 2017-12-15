@@ -20,7 +20,7 @@ Class MainWindow
     Public Shared settings_update_needed As Boolean = False
     Public Shared weather_update_needed As Boolean = False
 
-    Public Shared suiversion As String = My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & ".5"
+    Public Shared suiversion As String = My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & ".6"
 
 #Region "Blur & Dock"
     'Dock
@@ -473,16 +473,8 @@ Class MainWindow
         End If
     End Sub
 
-    '    'advertLabel.Text = If(track.IsAd(), "ADVERT", "")
-
-    '    bigAlbumPicture.Image = Await track.GetAlbumArtAsync(AlbumArtSize.Size640)
-    '    smallAlbumPicture.Image = Await track.GetAlbumArtAsync(AlbumArtSize.Size160)
-
-    '    'volumeLabel.Text = (e.NewVolume * 100).ToString(CultureInfo.InvariantCulture)
-
     Dim lasttrack As Track
     Private Sub spotifyapi_OnTrackTimeChange(sender As Object, e As TrackTimeChangeEventArgs)
-        'sui_media_update(_currentTrack.TrackResource.Name, _currentTrack.ArtistResource.Name, Date.MinValue.AddSeconds(_currentTrack.Length - CInt(e.TrackTime)).ToString("m:ss"), e.TrackTime, _currentTrack.Length, e_playing)
         dbg_sptfy = (_currentTrack.TrackResource.Uri & e.TrackTime & _currentTrack.Length & e_playing)
 
         If Not lasttrack Is _currentTrack Or media_newtrack = True Then
@@ -537,11 +529,11 @@ Class MainWindow
             Select Case True
                 Case e_title.Contains("(") And Not e_title.StartsWith("(")
                     wpf_helper.helper_label(lbl_spotify, e_title.Substring(0, (e_title.IndexOf("(") - 1))) 'main title
-                    media_additional_text = media_trk_adinfo(e_title.Substring(e_title.IndexOf("("), e_title.Length - e_title.IndexOf("("))) & " ٠ " 'check & add info in SubLabel
+                    media_additional_text = media_trk_adinfo(e_title.Substring(e_title.IndexOf("("), e_title.Length - e_title.IndexOf("("))) & " ٠ " 'check & add_info in SubLabel
 
                 Case e_title.Contains("- ")
                     wpf_helper.helper_label(lbl_spotify, e_title.Substring(0, (e_title.IndexOf("-") - 1))) 'main title
-                    media_additional_text = media_trk_adinfo(e_title.Substring(e_title.IndexOf("-"), e_title.Length - e_title.IndexOf("-"))) & " ٠ "  'check & add info in SubLabel
+                    media_additional_text = media_trk_adinfo(e_title.Substring(e_title.IndexOf("-"), e_title.Length - e_title.IndexOf("-"))) & " ٠ "  'check & add_info in SubLabel
 
                 Case Else
                     media_additional_text = ""
@@ -691,8 +683,11 @@ Class MainWindow
     'Update timer
     Private WithEvents tmr_network As New Threading.DispatcherTimer With {.Interval = New TimeSpan(0, 0, 0, 0, 500), .IsEnabled = False}
     Private Sub tmr_network_Tick(ByVal sender As Object, ByVal e As System.EventArgs) Handles tmr_network.Tick
-        If net_monitoring_allowed = -1 Then wnd_log.AddLine("INFO" & "-NET", "Network monitoring state: " & net_monitoring_allowed.ToString)
-        If net_monitoring_allowed = -1 Then tmr_network.Stop()
+        If net_monitoring_allowed = -1 Then
+            wnd_log.AddLine("INFO" & "-NET", "Network monitoring state: " & net_monitoring_allowed.ToString)
+            tmr_network.Stop()
+        End If
+
         net_monitoring()
     End Sub
 
