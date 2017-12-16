@@ -19,7 +19,7 @@
         </Grid.Background>
         <Label x:Name="label" Content="Info: Designtest - Die &quot;Sonstiges&quot; Einstellungen haben keine funktion" HorizontalAlignment="Left" Margin="0,357,0,0" VerticalAlignment="Top" Width="390" Foreground="#33FFFFFF" Visibility="Hidden"/>
         <Button x:Name="btn_wnd_minimize" Content="0" Template="{StaticResource custbtn_transBG}" HorizontalAlignment="Left" Margin="480,0,0,0" VerticalAlignment="Top" Width="35" Foreground="#3FFFFFFF" Background="{x:Null}" BorderBrush="{x:Null}" Height="25" FontFamily="Webdings"/>
-        <Button x:Name="btn_wnd_hide" Content="r" Template="{StaticResource custbtn_transBG}" Margin="515,0,0,358" VerticalAlignment="Bottom" Foreground="#3FFFFFFF" Background="{x:Null}" BorderBrush="{x:Null}" Height="25" FontFamily="Webdings"/>
+        <Button x:Name="btn_wnd_hide" Content="r" Template="{StaticResource custbtn_transBG}" Margin="515,0,0,0" VerticalAlignment="Top" Foreground="#3FFFFFFF" Background="{x:Null}" BorderBrush="{x:Null}" Height="25" FontFamily="Webdings"/>
         <Custom:MetroContentControl x:Name="lbl_header" Content="EINSTELLUNGEN" HorizontalAlignment="Center" Margin="0,8,0,0" VerticalAlignment="Top" Foreground="White" FontSize="18.667" FontFamily="Segoe UI Light" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
 
         <Custom:MetroAnimatedTabControl x:Name="matc_tabctrl" Margin="0,25,0,0">
@@ -114,12 +114,12 @@
                     <TextBox x:Name="txtBx_weather_APIkey" HorizontalAlignment="Center" Height="23" Margin="144,90,144,0" TextWrapping="Wrap" Text="&lt;API-Key&gt;" VerticalAlignment="Top" Width="262" Background="#0CFFFFFF" BorderBrush="#0CFFFFFF" Foreground="White"/>
                     <Label Content="API-Key" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light" Margin="10,5,0,0"/>
                     <Separator HorizontalAlignment="Left" Height="10" Margin="15,30,0,0" VerticalAlignment="Top" Width="525" Foreground="#FF13EAAC" Background="#3FFFFFFF"/>
-                    <Label x:Name="lbl_overlay_description" Content="Fügen Sie hier ihren API-Key ein:" HorizontalAlignment="Left" Margin="15,45,0,0" VerticalAlignment="Top" Width="525" Foreground="#7FFFFFFF" Height="34"/>
+                    <Label Content="Fügen Sie hier ihren API-Key ein:" HorizontalAlignment="Left" Margin="15,45,0,0" VerticalAlignment="Top" Width="525" Foreground="#7FFFFFFF" Height="34"/>
                     <Button x:Name="btn_oww_getKey" Content="API-Key erhalten" Template="{StaticResource custbtn}" HorizontalAlignment="Right" Margin="0,126,10,0" VerticalAlignment="Top" Width="120" Foreground="#3FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25" ToolTip="Öffnet den Browser und leitet sie zu OpenWeather weiter, dort erhalten sie ihren API-Key"/>
                     <Label Content="City-ID" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light" Margin="10,159,0,0"/>
                     <Separator HorizontalAlignment="Left" Height="10" Margin="15,186,0,0" VerticalAlignment="Top" Width="525" Foreground="#FF13EAAC" Background="#3FFFFFFF"/>
                     <TextBox x:Name="txtBx_weather_cid" HorizontalAlignment="Center" Height="23" Margin="211,240,219,0" TextWrapping="Wrap" Text="&lt;City ID&gt;" VerticalAlignment="Top" Width="120" Background="#0CFFFFFF" BorderBrush="#0CFFFFFF" Foreground="White" MaxLength="20" MaxLines="1" IsUndoEnabled="True"/>
-                    <Label x:Name="lbl_overlay_description_Copy" Content="Hier fügen Sie die ID ihrer Stadt ein" HorizontalAlignment="Left" Margin="15,201,0,0" VerticalAlignment="Top" Width="221" Foreground="#7FFFFFFF" Height="34"/>
+                    <Label Content="Hier fügen Sie die ID ihrer Stadt ein" HorizontalAlignment="Left" Margin="15,201,0,0" VerticalAlignment="Top" Width="221" Foreground="#7FFFFFFF" Height="34"/>
                     <Grid x:Name="grd_bottom_strip_weather" Height="28" VerticalAlignment="Bottom" Margin="0">
                         <Button x:Name="btn_ovlay_setKey" Content="Anwenden" Template="{StaticResource custbtn}" HorizontalAlignment="Right" Margin="0,-6,10,9" VerticalAlignment="Center" Width="85" Foreground="#7FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25"/>
                         <Label x:Name="lbl_wcom_check" Content="&lt;wcom_check&gt;" HorizontalAlignment="Left" Margin="10,-11,0,9" VerticalAlignment="Bottom" Width="445" Foreground="#3FFFFFFF" Height="30" VerticalContentAlignment="Bottom"/>
@@ -128,7 +128,7 @@
             </TabItem>
             <TabItem x:Name="matc_changelog" Header="Changelog" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" Width="54" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF707070">
                 <Grid x:Name="matc_tab_changelog">
-                    <Label x:Name="lbl_header_Copy2" Content="Was ist neu in dieser Version?" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light" Margin="10,5,0,0"/>
+                    <Label Content="Was ist neu in dieser Version?" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light" Margin="10,5,0,0"/>
                     <Separator Height="10" Margin="15,30,15,0" VerticalAlignment="Top" Foreground="#FF13EAAC" Background="#3FFFFFFF"/>
                     <RichTextBox x:Name="rtb_chLog" Margin="15,45,15,40" Background="Transparent" BorderBrush="#00ABADB3" Foreground="White" BorderThickness="0" IsReadOnlyCaretVisible="True" SelectionBrush="#FF00F19F" Block.LineHeight="7" SelectionOpacity="0.3" IsDocumentEnabled="True" IsReadOnly="True">
                         <FlowDocument IsColumnWidthFlexible="False" AllowDrop="False" Language="de-de" IsEnabled="False"/>
@@ -144,7 +144,7 @@
                     <Label x:Name="lbl_cacheSize" Content="&lt;cache_size&gt;" HorizontalAlignment="Left" Margin="15,80,0,0" VerticalAlignment="Top" Width="331" Foreground="#3FFFFFFF" Height="30"/>
                     <Button x:Name="btn_cache_reset" Content="Cache löschen" Template="{StaticResource custbtn}" Margin="441,81,15,0" VerticalAlignment="Top" Foreground="#7FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25"/>
                     <Button x:Name="btn_cache_refresh" Content="Aktualisieren" Template="{StaticResource custbtn}" HorizontalAlignment="Left" Margin="351,81,0,0" VerticalAlignment="Top" Width="85" Foreground="#7FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25"/>
-                    <Label x:Name="lbl_header_spfy" Content="Spotify Integration" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light" Margin="10,5,0,0"/>
+                    <Label Content="Spotify Integration" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light" Margin="10,5,0,0"/>
                     <Separator Height="10" Margin="15,30,15,0" VerticalAlignment="Top" Foreground="#FF13EAAC" Background="#3FFFFFFF"/>
                     <Button x:Name="btn_restart_spotify" Content="Spotify Neu starten" Template="{StaticResource custbtn}" Margin="351,111,15,0" VerticalAlignment="Top" Foreground="#7FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25"/>
                 </Grid>
@@ -154,22 +154,85 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
-                    <Label x:Name="lbl_header_spfy_Copy" Content="Updates" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light" Margin="10,5,0,0"/>
+                    <Label Content="Updates" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light" Margin="10,5,0,0"/>
                     <Separator Height="10" Margin="15,30,15,0" VerticalAlignment="Top" Foreground="#FF13EAAC" Background="#3FFFFFFF"/>
                     <Button x:Name="btn_updates_search" Content="Nach Updates suchen" Template="{StaticResource custbtn}" HorizontalAlignment="Center" Margin="201,65,201,0" VerticalAlignment="Top" Width="148" Foreground="#7FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25" ToolTip="Öffnet die Unterseite der Wetter-Einstellungen"/>
                 </Grid>
             </TabItem>
+            <TabItem x:Name="matc_3rdpty" Header="3rdpty SW" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" Width="54" Foreground="#FF767676" BorderBrush="{x:Null}" Background="{x:Null}">
+                <Grid x:Name="matc_tab_3rdpty">
+                    <ScrollViewer x:Name="scrlvwr_3rdpty" Margin="0,40,0,0" ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                        <Grid x:Name="grd_software" Height="615" VerticalAlignment="Top" Width="500">
+                            <Grid x:Name="grd_coreaudio" HorizontalAlignment="Left" Height="85" VerticalAlignment="Top" Width="470">
+                                <Label x:Name="lbl_coreaudio_header" Content="CoreAudioAPI" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light"/>
+                                <Label x:Name="lbl_coreaudio_version" Content="Version: 2.0" HorizontalAlignment="Left" Margin="10,29,0,30" Width="450" Foreground="White" Background="{x:Null}"/>
+                                <Label x:Name="lbl_coreaudio_dev" Content="by Ray Molenkamp" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,55,0,0" Width="450" Foreground="White" Background="{x:Null}"/>
+                                <Separator HorizontalAlignment="Left" Height="1" Margin="0" VerticalAlignment="Bottom" Width="470" Foreground="#FF13EAAC" Background="#19FFFFFF"/>
+                            </Grid>
+                            <Grid x:Name="grd_mahapps" HorizontalAlignment="Left" Height="85" VerticalAlignment="Top" Width="470" Margin="0,90,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="101*"/>
+                                    <ColumnDefinition Width="134*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label x:Name="lbl_mahapps_header" Content="MahApps.Metro" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light"/>
+                                <Label x:Name="lbl_mahapps_version" Content="Version: 1.5" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,29,0,0" Width="450" Foreground="White" Background="{x:Null}" Grid.ColumnSpan="2"/>
+                                <Label x:Name="lbl_mahapps_url" Content="mahapps.com" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,55,0,0" Width="450" Foreground="White" Background="{x:Null}" Grid.ColumnSpan="2"/>
+                                <Separator HorizontalAlignment="Left" Height="1" Margin="0" VerticalAlignment="Bottom" Width="470" Foreground="#FF13EAAC" Background="#19FFFFFF" Grid.ColumnSpan="2"/>
+                            </Grid>
+                            <Grid x:Name="grd_newtonsoft" HorizontalAlignment="Left" Height="85" VerticalAlignment="Top" Width="470" Margin="0,180,0,0">
+                                <Label x:Name="lbl_newtonsoft_header" Content="Newtonsoft Json" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light"/>
+                                <Label x:Name="lbl_newtonsoft_version" Content="Version: 10.0" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,29,0,0" Width="450" Foreground="White" Background="{x:Null}"/>
+                                <Label x:Name="lbl_newtonsoft_url" Content="newtonsoft.com/json" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,55,0,0" Width="450" Foreground="White" Background="{x:Null}"/>
+                                <Separator HorizontalAlignment="Left" Height="1" Margin="0" VerticalAlignment="Bottom" Width="470" Foreground="#FF13EAAC" Background="#19FFFFFF"/>
+                            </Grid>
+                            <Grid x:Name="grd_sAPI" HorizontalAlignment="Left" Height="110" VerticalAlignment="Top" Width="470" Margin="0,270,0,0">
+                                <Label x:Name="lbl_sAPI_header" Content="SpotifyAPI-NET" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light"/>
+                                <Label x:Name="lbl_sAPI_version" Content="Version: 2.16.0" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,29,0,0" Width="450" Foreground="White" Background="{x:Null}"/>
+                                <Label x:Name="lbl_sAPI_url" Content="https://github.com/JohnnyCrazy/SpotifyAPI-NET/releases" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,55,0,0" Width="450" Foreground="White" Background="{x:Null}"/>
+                                <Label x:Name="lbl_sAPI_dev" Content="by JohnnyCrazy" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,81,0,0" Width="450" Foreground="White" Background="{x:Null}"/>
+                                <Separator Height="1" Margin="0" VerticalAlignment="Bottom" Foreground="#FF13EAAC" Background="#19FFFFFF"/>
+                                <Button x:Name="btn_sAPI_license" Content="Lizenz" HorizontalAlignment="Right" Margin="0,0,3,6" VerticalAlignment="Bottom" Width="75" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#7FFFFFFF"/>
+                            </Grid>
+                            <Grid x:Name="grd_hvOSD" HorizontalAlignment="Left" Height="111" VerticalAlignment="Top" Width="470" Margin="0,385,0,0">
+                                <Label x:Name="lbl_hvOSD_header" Content="Lib HideVolumeOSD" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light"/>
+                                <Label x:Name="lbl_hvOSD_version" Content="Version: 1.2" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,29,0,0" Width="450" Foreground="White" Background="{x:Null}"/>
+                                <Label x:Name="lbl_hvOSD_url" Content="wordpress.venturi.de/?p=1" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,55,0,-2" Width="341" Foreground="White" Background="{x:Null}"/>
+                                <Label x:Name="lbl_coreaudio_dev_Copy" Content="by Marcus Venturi" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,81,0,0" Width="450" Foreground="White" Background="{x:Null}"/>
+                                <Button x:Name="btn_hvOSD_license" Content="Lizenz" HorizontalAlignment="Right" Margin="0,0,3,7" VerticalAlignment="Bottom" Width="75" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#7FFFFFFF"/>
+                                <Separator Height="1" Margin="0" VerticalAlignment="Bottom" Foreground="#FF13EAAC" Background="#19FFFFFF"/>
+                            </Grid>
+                            <Grid x:Name="grd_nUpdate" HorizontalAlignment="Left" Height="111" VerticalAlignment="Top" Width="470" Margin="0,500,0,0">
+                                <Label x:Name="lbl_nUpdate_header" Content="nUpdate" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light"/>
+                                <Label x:Name="lbl_nUpdate_version" Content="Version: 1.2" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,29,0,0" Width="450" Foreground="White" Background="{x:Null}"/>
+                                <Label x:Name="lbl_nUpdate_url" Content="https://www.nupdate.net/" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,55,0,-2" Width="341" Foreground="White" Background="{x:Null}"/>
+                                <Label x:Name="lbl_nUpdate_Copy" Content="by Dominic Beger (Trade)" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,81,0,0" Width="450" Foreground="White" Background="{x:Null}"/>
+                                <Button x:Name="btn_nUpdate_license" Content="Lizenz" HorizontalAlignment="Right" Margin="0,0,3,7" VerticalAlignment="Bottom" Width="75" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#7FFFFFFF"/>
+                            </Grid>
+                        </Grid>
+                    </ScrollViewer>
+                    <Label x:Name="lbl_test" Content="Dieses Projekt nutzt folgende Software" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light" Margin="10,5,0,0"/>
+                    <Separator Height="10" Margin="15,30,15,0" VerticalAlignment="Top" Foreground="#FF13EAAC" Background="#3FFFFFFF"/>
+                    <Grid x:Name="grd_3rdpty_shadow" Height="40" Margin="0" VerticalAlignment="Bottom">
+                        <Grid.Background>
+                            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                <GradientStop Color="Black" Offset="0.9"/>
+                                <GradientStop Color="#00000000" Offset="0.35"/>
+                            </LinearGradientBrush>
+                        </Grid.Background>
+                    </Grid>
+                </Grid>
+            </TabItem>
         </Custom:MetroAnimatedTabControl>
-        
+
         <Image x:Name="ico_backToStart" HorizontalAlignment="Left" Height="25" VerticalAlignment="Top" Width="25" Margin="12,10,0,0" Source="Resources/ic_arrow_back_white_24dp.png"/>
-      
+
         <Custom:Flyout x:Name="flyout_message" VerticalAlignment="Bottom" CloseButtonVisibility="Collapsed" Position="Bottom" TitleVisibility="Collapsed" HorizontalAlignment="Center" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="65" Background="#19FFFFFF" AnimateOpacity="True" AnimateOnPositionChange="False" AutoCloseInterval="2500" IsAutoCloseEnabled="True">
             <Grid x:Name="grd_flyout_message" HorizontalAlignment="Center" Height="30" Margin="-27,0,0,0" VerticalAlignment="Center">
                 <Label x:Name="lbl_flyout_message" Content="Ihre Änderungen wurden gespeichert!" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Background="{x:Null}" VerticalContentAlignment="Center" FontSize="14.5" HorizontalContentAlignment="Center" FontFamily="Segoe UI Light" TextOptions.TextHintingMode="Fixed" Margin="27,0,0,0"/>
                 <Custom:ProgressRing x:Name="pring_flyout_message" HorizontalAlignment="Left" Margin="0,3,0,0" VerticalAlignment="Top" Width="23" Height="23"/>
             </Grid>
         </Custom:Flyout>
-       
+
         <Custom:Flyout x:Name="flyout_cache_reset" Header="" HorizontalAlignment="Left" Height="125" VerticalAlignment="Bottom" Margin="0" AnimateOpacity="True" AutoCloseInterval="0" CloseButtonVisibility="Collapsed" Position="Bottom" Background="#26FFFFFF">
             <Grid x:Name="grd_reset_cache_confirmation_Copy" Margin="-35,0,0,0">
                 <Custom:MetroContentControl x:Name="lbl_reset_cache_header" Content="Sind Sie sicher?" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top" Foreground="White" FontSize="18.667" FontFamily="Segoe UI Light" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>

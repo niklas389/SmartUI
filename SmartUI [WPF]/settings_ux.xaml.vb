@@ -99,6 +99,7 @@ Public Class wnd_settings
         matc_changelog.Visibility = Visibility.Hidden
         matc_spotify.Visibility = Visibility.Hidden
         matc_updates.Visibility = Visibility.Hidden
+        matc_3rdpty.Visibility = Visibility.Hidden
 
         flyout_cache_reset.IsOpen = False
         flyout_message.IsOpen = False
@@ -107,7 +108,7 @@ Public Class wnd_settings
         lbl_cpr.Content = "Version: " & MainWindow.suiversion & " - " & IO.File.GetLastWriteTime(AppDomain.CurrentDomain.BaseDirectory & "\SmartUI.exe").ToString("yyMMdd")
 
         load_settings()
-        changelog_load()
+        get_3rdptysw_versions()
     End Sub
 
     Public Shared net_NIC_list As String = ";"
@@ -322,45 +323,96 @@ Public Class wnd_settings
 #End Region
 
 #Region "Changelog & 3rd Party"
+    Dim chglog_loaded As Integer = 0
     Private Sub btn_changelog_Click(sender As Object, e As RoutedEventArgs) Handles btn_changelog.Click
         matc_tabctrl.SelectedIndex = 2
         lbl_header.Content = "CHANGELOG"
+
+        If chglog_loaded <> 1 Then changelog_load()
     End Sub
 
     Private Sub changelog_load()
-        If IO.File.Exists(".\changelog") Then
+        If File.Exists(".\changelog") Then
             Dim docpath As String = ".\changelog"
             Dim range As System.Windows.Documents.TextRange
             Dim fStream As System.IO.FileStream
             If System.IO.File.Exists(docpath) Then
                 Try
-                    ' Open the document in the RichTextBox.
+                    'Open the document in the RichTextBox.
                     range = New System.Windows.Documents.TextRange(rtb_chLog.Document.ContentStart, rtb_chLog.Document.ContentEnd)
-                    fStream = New System.IO.FileStream(docpath, System.IO.FileMode.Open)
+                    fStream = New System.IO.FileStream(docpath, IO.FileMode.Open)
                     range.Load(fStream, DataFormats.Text)
                     fStream.Close()
+                    chglog_loaded = 1
 
                 Catch generatedExceptionName As System.Exception
-                    'MessageBox.Show("Couldn't load Changelog.")
-                    rtb_chLog.Document.ContentStart.InsertTextInRun("Changelog nicht verfügbar")
+                    show_flyout("Couldn't load Changelog", False)
+                    If chglog_loaded = -1 Then Exit Sub
+
+                    rtb_chLog.Document.ContentStart.InsertTextInRun("Changelog konnte nicht geladen werden")
+                    chglog_loaded = -1
                 End Try
             End If
         Else
+            show_flyout("Couldn't load Changelog", False)
+            If chglog_loaded = -1 Then Exit Sub
+
             rtb_chLog.Document.ContentStart.InsertTextInRun("Changelog nicht verfügbar")
+            chglog_loaded = -1
         End If
     End Sub
 
-
-    '3rd PTY
+    '3rd Party Software
     Private Sub btn_info_3rdpty_Click(sender As Object, e As RoutedEventArgs) Handles btn_info_3rdpty.Click
-        Dim wnd_3rdparty As New thirdparty_ui
-        Me.Visibility = Visibility.Hidden
+        matc_tabctrl.SelectedIndex = 5
+        lbl_header.Content = "DRITTANBIETER SOFTWARE"
+    End Sub
 
-        wnd_3rdparty.ShowDialog()
+    Private Sub scrlvwr_3rdpty_ScrollChanged(sender As Object, e As ScrollChangedEventArgs) Handles scrlvwr_3rdpty.ScrollChanged
+        'lbl_test.Content = e.VerticalOffset
+        If e.VerticalOffset < 310 Then grd_3rdpty_shadow.Visibility = Visibility.Visible Else grd_3rdpty_shadow.Visibility = Visibility.Hidden
+    End Sub
 
-        If (wnd_3rdparty.DialogResult.HasValue And wnd_3rdparty.DialogResult.Value) Then
-            Me.Visibility = Visibility.Visible
-        End If
+#Region "Credits"
+    Private Sub lbl_mahapps_url_Click(sender As Object, e As RoutedEventArgs) Handles lbl_mahapps_url.MouseLeftButtonDown
+        Process.Start("http://mahapps.com")
+    End Sub
+
+    Private Sub lbl_newtonsoft_url_Click(sender As Object, e As RoutedEventArgs) Handles lbl_newtonsoft_url.MouseLeftButtonDown
+        Process.Start("http://www.newtonsoft.com/json")
+    End Sub
+
+    Private Sub lbl_nSpotify_url_Click(sender As Object, e As RoutedEventArgs) Handles lbl_sAPI_url.MouseLeftButtonDown
+        Process.Start("https://github.com/JohnnyCrazy/SpotifyAPI-NET/releases")
+    End Sub
+
+    Private Sub lbl_hvOSD_url_Click(sender As Object, e As RoutedEventArgs) Handles lbl_hvOSD_url.MouseLeftButtonDown
+        Process.Start("http://wordpress.venturi.de/?p=1")
+    End Sub
+
+    Private Sub lbl_nUpdate_url_Click(sender As Object, e As RoutedEventArgs) Handles lbl_nUpdate_url.MouseLeftButtonDown
+        Process.Start("https://www.nupdate.net/")
+    End Sub
+    Private Sub btn_hvOSD_license_Click(sender As Object, e As RoutedEventArgs) Handles btn_hvOSD_license.Click
+        Process.Start(".\licenses\hvOSD_license.txt")
+    End Sub
+
+    Private Sub btn_sAPI_license_Click(sender As Object, e As RoutedEventArgs) Handles btn_sAPI_license.Click
+        Process.Start(".\licenses\sAPI_license.txt")
+    End Sub
+
+    Private Sub btn_nUpdate_license_Click(sender As Object, e As RoutedEventArgs) Handles btn_nUpdate_license.Click
+        Process.Start(".\licenses\nUpdate_license.txt")
+    End Sub
+
+#End Region
+
+    Private Sub get_3rdptysw_versions()
+        lbl_coreaudio_version.Content = "Version: " & FileVersionInfo.GetVersionInfo(".\CoreAudioApi.dll").FileVersion
+        lbl_mahapps_version.Content = "Version: " & FileVersionInfo.GetVersionInfo(".\MahApps.Metro.dll").FileVersion
+        lbl_newtonsoft_version.Content = "Version: " & FileVersionInfo.GetVersionInfo(".\Newtonsoft.Json.dll").FileVersion
+        lbl_sAPI_version.Content = "Version: 2.17.0"
+        lbl_nUpdate_version.Content = "Version: " & FileVersionInfo.GetVersionInfo(".\nUpdate.Internal.dll").FileVersion
     End Sub
 #End Region
 
@@ -490,7 +542,7 @@ Public Class wnd_settings
 #Region "Flyout Message"
     Private Sub show_flyout(ByVal e_msg As String, ByVal e_show_pring As Boolean, ByVal Optional e_timeout As Integer = -1)
         lbl_flyout_message.Content = e_msg
-        If e_show_pring = True Then pring_flyout_message.Visibility = Visibility.Visible
+        If e_show_pring = True Then pring_flyout_message.Visibility = Visibility.Visible Else pring_flyout_message.Visibility = Visibility.Hidden
 
         If e_timeout = -1 Then
             flyout_message.IsAutoCloseEnabled = True

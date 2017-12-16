@@ -153,9 +153,6 @@
     <Compile Include="settings_ux.xaml.vb">
       <DependentUpon>settings_ux.xaml</DependentUpon>
     </Compile>
-    <Compile Include="thirdparty_ui.xaml.vb">
-      <DependentUpon>thirdparty_ui.xaml</DependentUpon>
-    </Compile>
     <Compile Include="cls_weather.vb" />
     <Compile Include="wnd_flyout_appmenu.xaml.vb">
       <DependentUpon>wnd_flyout_appmenu.xaml</DependentUpon>
@@ -188,10 +185,6 @@
     <Page Include="settings_ux.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="thirdparty_ui.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="wnd_flyout_appmenu.xaml">
       <SubType>Designer</SubType>
