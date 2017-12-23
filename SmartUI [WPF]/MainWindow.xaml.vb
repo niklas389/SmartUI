@@ -6,7 +6,6 @@ Imports System.Runtime.InteropServices
 Imports System.Threading
 Imports System.Windows
 Imports System.Windows.Input
-Imports System.Windows.Interop
 Imports System.Windows.Media
 Imports CoreAudioApi
 'Imports for SPOTIFY-API .NET
@@ -58,39 +57,7 @@ Class MainWindow
         Me.Left = 0
     End Sub
 
-    'Blur
-    <DllImport("user32.dll")>
-    Friend Shared Function SetWindowCompositionAttribute(hwnd As IntPtr, ByRef data As WindowCompositionAttributeData) As Integer
-    End Function
-
-    <StructLayout(LayoutKind.Sequential)>
-    Friend Structure WindowCompositionAttributeData
-        Public Attribute As WindowCompositionAttribute
-        Public Data As IntPtr
-        Public SizeOfData As Integer
-    End Structure
-
-    Friend Enum WindowCompositionAttribute
-        WCA_ACCENT_POLICY = 19
-    End Enum
-
-    Friend Enum AccentState
-        ACCENT_DISABLED = 0
-        ACCENT_ENABLE_GRADIENT = 1
-        ACCENT_ENABLE_TRANSPARENTGRADIENT = 2
-        ACCENT_ENABLE_BLURBEHIND = 3
-        ACCENT_INVALID_STATE = 4
-    End Enum
-
-    <StructLayout(LayoutKind.Sequential)>
-    Friend Structure AccentPolicy
-        Public AccentState As AccentState
-        Public AccentFlags As Integer
-        Public GradientColor As Integer
-        Public AnimationId As Integer
-    End Structure
-
-    Private Sub sui_dock_blur(ByVal Optional e_blur As Boolean = True)
+    Private Sub sui_dock()
         'DOCK
         On Error Resume Next
         apiSHAppBarMessage(ABM_REMOVE, abd)
@@ -108,26 +75,6 @@ Class MainWindow
         Me.Topmost = True
         Me.Top = 0
         Me.Left = 0
-
-        If e_blur = True Then
-            Dim windowHelper = New WindowInteropHelper(Me)
-
-            Dim accent = New AccentPolicy()
-            Dim accentStructSize = Marshal.SizeOf(accent)
-            accent.AccentState = AccentState.ACCENT_ENABLE_BLURBEHIND
-
-            Dim accentPtr = Marshal.AllocHGlobal(accentStructSize)
-            Marshal.StructureToPtr(accent, accentPtr, False)
-
-            Dim data = New WindowCompositionAttributeData() With {
-            .Attribute = WindowCompositionAttribute.WCA_ACCENT_POLICY,
-            .SizeOfData = accentStructSize,
-            .Data = accentPtr}
-
-            SetWindowCompositionAttribute(windowHelper.Handle, data)
-
-            Marshal.FreeHGlobal(accentPtr)
-        End If
     End Sub
 #End Region
 
@@ -144,10 +91,8 @@ Class MainWindow
         ' Fügen Sie Initialisierungen nach dem InitializeComponent()-Aufruf hinzu.
     End Sub
 
-
-
     Private Sub MainWindow_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
-        sui_dock_blur()
+        sui_dock()
 
         'If IO.File.Exists(".\config\wcom_allowed") Then wnd_log.Show()
 
@@ -188,6 +133,9 @@ Class MainWindow
             If CType(ini.ReadValue("UI", "cb_wndmain_clock_seconds", "False"), Boolean) = True Then ui_clock_style = 2
             If CBool(ini.ReadValue("UI", "cb_wndmain_clock_weekday", "True")) = True Then ui_clock_style += 10 'Weekday
         End If
+
+        'window blur
+        cls_blur_behind.blur(Me, CType(ini.ReadValue("UI", "cb_wndmain_blur_enabled", "True"), Boolean))
 
         'Network
         net_conf_thres_icons = CType(ini.ReadValue("UI", "cb_wndmain_net_iconDisableSpeedLimit", "False"), Boolean)
@@ -376,10 +324,12 @@ Class MainWindow
     Private Sub ca_update(ByVal e_volume As Double, ByVal e_muted As Boolean)
         If e_volume < 1 Or e_muted = True Then
             wpf_helper.helper_image(icn_volume, "pack://application:,,,/Resources/snd_off.png")
-            wpf_helper.helper_label(lbl_volume, "Mute")
+            wpf_helper.helper_label(lbl_volume, Nothing, Visibility.Hidden)
+            wpf_helper.helper_label(lbl_volume_unit, "Mute")
 
         Else
-            wpf_helper.helper_label(lbl_volume, e_volume & "%")
+            wpf_helper.helper_label(lbl_volume_unit, "%")
+            wpf_helper.helper_label(lbl_volume, e_volume.ToString, Visibility.Visible) '& "%"
 
             Select Case e_volume
                 Case < 10
@@ -399,23 +349,37 @@ Class MainWindow
         If ca_skip_volChange = True Then
             ca_skip_volChange = False
             Exit Sub
-        End If
-
-        ca_skip_volChange = True
-
-        If e.Delta > 0 Then
-            audio_device.AudioEndpointVolume.VolumeStepUp()
         Else
-            audio_device.AudioEndpointVolume.VolumeStepDown()
+            ca_skip_volChange = True
+
+            If e.Delta > 0 Then
+                audio_device.AudioEndpointVolume.VolumeStepUp()
+            Else
+                audio_device.AudioEndpointVolume.VolumeStepDown()
+            End If
         End If
     End Sub
 
-    Private Sub lbl_volume_SizeChanged(sender As Object, e As SizeChangedEventArgs) Handles lbl_volume.SizeChanged
-        icn_volume.Margin = New Thickness(3, 3, 0, 0)
-        grd_network.Margin = New Thickness(0, 0, grd_volume.RenderSize.Width + grd_link.RenderSize.Width + 6, 0)
+    '---- RWork
+    Private Sub grd_volume_SizeChanged(sender As Object, e As SizeChangedEventArgs) Handles grd_volume.SizeChanged, lbl_volume.SizeChanged
+        If lbl_volume.Visibility = Visibility.Visible Then
+            lbl_volume_unit.Margin = New Thickness(17 + lbl_volume.RenderSize.Width, -1, 0, 0)
+        Else
+            lbl_volume_unit.Margin = New Thickness(19, -1, 0, 0)
+        End If
+
+        grd_network.Margin = New Thickness(0, 0, grd_volume.RenderSize.Width + grd_volume.Margin.Right + 6, 0)
     End Sub
 
-    Private Sub lbl_clock_MouseUp(sender As Object, e As MouseButtonEventArgs) Handles lbl_volume.MouseUp, icn_volume.MouseUp
+    Private Sub lbl_volume_IsVisibleChanged(sender As Object, e As DependencyPropertyChangedEventArgs) Handles grd_volume.IsVisibleChanged
+        If lbl_volume.Visibility = Visibility.Hidden Then
+            lbl_volume_unit.Margin = New Thickness(17 + lbl_volume.RenderSize.Width, -1, 0, 0)
+        Else
+            lbl_volume_unit.Margin = New Thickness(19, -1, 0, 0)
+        End If
+    End Sub
+    '-----
+    Private Sub lbl_clock_MouseUp(sender As Object, e As MouseButtonEventArgs) Handles lbl_volume.MouseUp, icn_volume.MouseUp, lbl_volume_unit.MouseUp
         audio_device.AudioEndpointVolume.Mute = Not audio_device.AudioEndpointVolume.Mute
     End Sub
 
@@ -898,6 +862,7 @@ Class MainWindow
         Me.Topmost = False
         Me.Topmost = True
     End Sub
+
 #End Region
 
 End Class

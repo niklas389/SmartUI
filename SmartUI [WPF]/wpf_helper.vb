@@ -33,17 +33,13 @@ Public Class wpf_helper
         End If
     End Sub
 
-    Public Shared Sub helper_label(ByVal ctrl As Label, ByVal Optional e_content As String = Nothing, ByVal Optional e_visible As Boolean = Nothing)
+    Public Shared Sub helper_label(ByVal ctrl As Label, ByVal Optional e_content As String = Nothing, ByVal Optional e_visible As Visibility = Visibility.Collapsed)
         If Not e_content = Nothing Then
             Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Normal, New ThreadStart(Sub() ctrl.Content = e_content))
         End If
 
-        If Not e_visible = Nothing Then
-            If e_visible = True Then
-                Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Normal, New ThreadStart(Sub() ctrl.Visibility = Visibility.Visible))
-            Else
-                Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Normal, New ThreadStart(Sub() ctrl.Visibility = Visibility.Hidden))
-            End If
+        If Not e_visible = Visibility.Collapsed Then
+            Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Normal, New ThreadStart(Sub() ctrl.Visibility = e_visible))
         End If
     End Sub
 

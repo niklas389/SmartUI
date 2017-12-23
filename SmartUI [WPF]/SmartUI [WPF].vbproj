@@ -142,6 +142,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="cls_blur-behind.vb" />
     <Compile Include="GlobalSuppressions.vb" />
     <Compile Include="hideVolumeOSD.vb" />
     <Compile Include="ini_file.vb" />
@@ -165,6 +166,9 @@
     </Compile>
     <Compile Include="wnd_flyout_weather.xaml.vb">
       <DependentUpon>wnd_flyout_weather.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="wnd_licensevwr.xaml.vb">
+      <DependentUpon>wnd_licensevwr.xaml</DependentUpon>
     </Compile>
     <Compile Include="wnd_log.xaml.vb">
       <DependentUpon>wnd_log.xaml</DependentUpon>
@@ -201,6 +205,10 @@
     <Page Include="wnd_flyout_weather.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="wnd_licensevwr.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="wnd_log.xaml">
       <SubType>Designer</SubType>

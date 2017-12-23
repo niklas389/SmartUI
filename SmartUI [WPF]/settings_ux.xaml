@@ -18,8 +18,8 @@
             </LinearGradientBrush>
         </Grid.Background>
         <Label x:Name="label" Content="Info: Designtest - Die &quot;Sonstiges&quot; Einstellungen haben keine funktion" HorizontalAlignment="Left" Margin="0,357,0,0" VerticalAlignment="Top" Width="390" Foreground="#33FFFFFF" Visibility="Hidden"/>
-        <Button x:Name="btn_wnd_minimize" Content="0" Template="{StaticResource custbtn_transBG}" HorizontalAlignment="Left" Margin="480,0,0,0" VerticalAlignment="Top" Width="35" Foreground="#3FFFFFFF" Background="{x:Null}" BorderBrush="{x:Null}" Height="25" FontFamily="Webdings"/>
-        <Button x:Name="btn_wnd_hide" Content="r" Template="{StaticResource custbtn_transBG}" Margin="515,0,0,0" VerticalAlignment="Top" Foreground="#3FFFFFFF" Background="{x:Null}" BorderBrush="{x:Null}" Height="25" FontFamily="Webdings"/>
+        <Button x:Name="btn_wnd_minimize" Content="0" Template="{StaticResource custbtn_transBG}" HorizontalAlignment="Right" Margin="0,0,35,0" VerticalAlignment="Top" Width="35" Foreground="#3FFFFFFF" Background="{x:Null}" BorderBrush="{x:Null}" Height="25" FontFamily="Webdings"/>
+        <Button x:Name="btn_wnd_hide" Content="r" Template="{StaticResource custbtn_transBG}" Margin="0" VerticalAlignment="Top" Foreground="#3FFFFFFF" Background="{x:Null}" BorderBrush="{x:Null}" Height="25" FontFamily="Webdings" HorizontalAlignment="Right" Width="35"/>
         <Custom:MetroContentControl x:Name="lbl_header" Content="EINSTELLUNGEN" HorizontalAlignment="Center" Margin="0,8,0,0" VerticalAlignment="Top" Foreground="White" FontSize="18.667" FontFamily="Segoe UI Light" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
 
         <Custom:MetroAnimatedTabControl x:Name="matc_tabctrl" Margin="0,25,0,0">
@@ -90,6 +90,7 @@
                         <CheckBox x:Name="cb_wndmain_spotify_progress" Content="Zeitleiste (Spotify)" HorizontalAlignment="Left" Margin="15,105,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="122"/>
                         <CheckBox x:Name="cb_other_disableVolumeOSD" Content="Verstecke Lautst. OSD" HorizontalAlignment="Left" Margin="153,96,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="148"/>
                         <CheckBox x:Name="cb_other_startup_play" Content="Play StartUp Sound" HorizontalAlignment="Left" Margin="153,113,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="148"/>
+                        <CheckBox x:Name="cb_wndmain_blur_enabled" Content="Hintergrund unscharf" HorizontalAlignment="Left" Margin="153,130,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="148"/>
                     </Grid>
                     <Grid HorizontalAlignment="Left" Height="145" Margin="0,155,0,0" VerticalAlignment="Top" Width="550">
                         <Label Content="Sonstiges" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light" Margin="10,5,0,0"/>
@@ -191,14 +192,14 @@
                                 <Label x:Name="lbl_sAPI_url" Content="https://github.com/JohnnyCrazy/SpotifyAPI-NET/releases" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,55,0,0" Width="450" Foreground="White" Background="{x:Null}"/>
                                 <Label x:Name="lbl_sAPI_dev" Content="by JohnnyCrazy" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,81,0,0" Width="450" Foreground="White" Background="{x:Null}"/>
                                 <Separator Height="1" Margin="0" VerticalAlignment="Bottom" Foreground="#FF13EAAC" Background="#19FFFFFF"/>
-                                <Button x:Name="btn_sAPI_license" Content="Lizenz" HorizontalAlignment="Right" Margin="0,0,3,6" VerticalAlignment="Bottom" Width="75" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#7FFFFFFF"/>
+                                <Button x:Name="btn_sAPI_license" Content="Lizenz" Template="{StaticResource custbtn}" HorizontalAlignment="Right" Margin="0,0,3,6" VerticalAlignment="Bottom" Width="75" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#7FFFFFFF"/>
                             </Grid>
                             <Grid x:Name="grd_hvOSD" HorizontalAlignment="Left" Height="111" VerticalAlignment="Top" Width="470" Margin="0,385,0,0">
                                 <Label x:Name="lbl_hvOSD_header" Content="Lib HideVolumeOSD" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light"/>
                                 <Label x:Name="lbl_hvOSD_version" Content="Version: 1.2" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,29,0,0" Width="450" Foreground="White" Background="{x:Null}"/>
                                 <Label x:Name="lbl_hvOSD_url" Content="wordpress.venturi.de/?p=1" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,55,0,-2" Width="341" Foreground="White" Background="{x:Null}"/>
                                 <Label x:Name="lbl_coreaudio_dev_Copy" Content="by Marcus Venturi" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,81,0,0" Width="450" Foreground="White" Background="{x:Null}"/>
-                                <Button x:Name="btn_hvOSD_license" Content="Lizenz" HorizontalAlignment="Right" Margin="0,0,3,7" VerticalAlignment="Bottom" Width="75" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#7FFFFFFF"/>
+                                <Button x:Name="btn_hvOSD_license" Content="Lizenz" Template="{StaticResource custbtn}" HorizontalAlignment="Right" Margin="0,0,3,7" VerticalAlignment="Bottom" Width="75" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#7FFFFFFF"/>
                                 <Separator Height="1" Margin="0" VerticalAlignment="Bottom" Foreground="#FF13EAAC" Background="#19FFFFFF"/>
                             </Grid>
                             <Grid x:Name="grd_nUpdate" HorizontalAlignment="Left" Height="111" VerticalAlignment="Top" Width="470" Margin="0,500,0,0">
@@ -206,7 +207,7 @@
                                 <Label x:Name="lbl_nUpdate_version" Content="Version: 1.2" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,29,0,0" Width="450" Foreground="White" Background="{x:Null}"/>
                                 <Label x:Name="lbl_nUpdate_url" Content="https://www.nupdate.net/" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,55,0,-2" Width="341" Foreground="White" Background="{x:Null}"/>
                                 <Label x:Name="lbl_nUpdate_Copy" Content="by Dominic Beger (Trade)" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,81,0,0" Width="450" Foreground="White" Background="{x:Null}"/>
-                                <Button x:Name="btn_nUpdate_license" Content="Lizenz" HorizontalAlignment="Right" Margin="0,0,3,7" VerticalAlignment="Bottom" Width="75" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#7FFFFFFF"/>
+                                <Button x:Name="btn_nUpdate_license" Content="Lizenz" Template="{StaticResource custbtn}" HorizontalAlignment="Right" Margin="0,0,3,7" VerticalAlignment="Bottom" Width="75" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#7FFFFFFF"/>
                             </Grid>
                         </Grid>
                     </ScrollViewer>

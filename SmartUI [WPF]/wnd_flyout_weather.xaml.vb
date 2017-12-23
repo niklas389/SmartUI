@@ -1,75 +1,17 @@
 ﻿Imports System
-Imports System.Runtime.InteropServices
 Imports System.Windows
-Imports System.Windows.Interop
 Imports System.Windows.Media
 Imports System.Windows.Media.Animation
 
 Public Class wnd_flyout_weather
 
-#Region "Blur"
-    'Blur
-    <DllImport("user32.dll")>
-    Friend Shared Function SetWindowCompositionAttribute(hwnd As IntPtr, ByRef data As WindowCompositionAttributeData) As Integer
-    End Function
-
-    <StructLayout(LayoutKind.Sequential)>
-    Friend Structure WindowCompositionAttributeData
-        Public Attribute As WindowCompositionAttribute
-        Public Data As IntPtr
-        Public SizeOfData As Integer
-    End Structure
-
-    Friend Enum WindowCompositionAttribute
-        WCA_ACCENT_POLICY = 19
-    End Enum
-
-    Friend Enum AccentState
-        ACCENT_DISABLED = 0
-        ACCENT_ENABLE_GRADIENT = 1
-        ACCENT_ENABLE_TRANSPARENTGRADIENT = 2
-        ACCENT_ENABLE_BLURBEHIND = 3
-        ACCENT_INVALID_STATE = 4
-    End Enum
-
-    <StructLayout(LayoutKind.Sequential)>
-    Friend Structure AccentPolicy
-        Public AccentState As AccentState
-        Public AccentFlags As Integer
-        Public GradientColor As Integer
-        Public AnimationId As Integer
-    End Structure
-
-    Friend Sub EnableBlur()
-        Dim windowHelper = New WindowInteropHelper(Me)
-
-        Dim accent = New AccentPolicy()
-        Dim accentStructSize = Marshal.SizeOf(accent)
-        accent.AccentState = AccentState.ACCENT_ENABLE_BLURBEHIND
-
-        Dim accentPtr = Marshal.AllocHGlobal(accentStructSize)
-        Marshal.StructureToPtr(accent, accentPtr, False)
-
-        Dim data = New WindowCompositionAttributeData() With {
-            .Attribute = WindowCompositionAttribute.WCA_ACCENT_POLICY,
-            .SizeOfData = accentStructSize,
-            .Data = accentPtr
-        }
-
-        SetWindowCompositionAttribute(windowHelper.Handle, data)
-
-        Marshal.FreeHGlobal(accentPtr)
-    End Sub
-#End Region
-
 #Region "Window"
-    Private Sub wnd_flyout_weather_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
-        EnableBlur()
-    End Sub
+    'Private Sub wnd_flyout_weather_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
+
+    'End Sub
 
     Private Sub wnd_flyout_volume_LostFocus(sender As Object, e As RoutedEventArgs) Handles Me.MouseLeave
         anim_slideout()
-        'Hide()
     End Sub
 
     Private Sub lbl_now_temp_SizeChanged(sender As Object, e As SizeChangedEventArgs) Handles lbl_now_temp.SizeChanged
@@ -80,7 +22,8 @@ Public Class wnd_flyout_weather
 
     Private Sub wwnd_flyout_weather_Loaded(sender As Object, e As DependencyPropertyChangedEventArgs) Handles Me.IsVisibleChanged
         If Me.Visibility = Visibility.Hidden Then Exit Sub
-        'Top = 0
+        cls_blur_behind.blur(Me, wnd_settings.ui_blur_enabled)
+
         Left = My.Computer.Screen.WorkingArea.Left
         Height = 255
 

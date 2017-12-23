@@ -4,75 +4,18 @@ Imports System.Diagnostics
 Imports System.Globalization
 Imports System.IO
 Imports System.Net
-Imports System.Runtime.InteropServices
 Imports System.Threading
 Imports System.Threading.Tasks
 Imports System.Windows
 Imports System.Windows.Controls
 Imports System.Windows.Input
-Imports System.Windows.Interop
 Imports System.Windows.Media
 Imports nUpdate.Updating
 
 Public Class wnd_settings
     Dim updater_enabled As Boolean = False
 
-#Region "Blur"
-    'Blur
-    <DllImport("user32.dll")>
-    Friend Shared Function SetWindowCompositionAttribute(hwnd As IntPtr, ByRef data As WindowCompositionAttributeData) As Integer
-    End Function
-
-    <StructLayout(LayoutKind.Sequential)>
-    Friend Structure WindowCompositionAttributeData
-        Public Attribute As WindowCompositionAttribute
-        Public Data As IntPtr
-        Public SizeOfData As Integer
-    End Structure
-
-    Friend Enum WindowCompositionAttribute
-        ' ...
-        WCA_ACCENT_POLICY = 19
-        ' ...
-    End Enum
-
-    Friend Enum AccentState
-        ACCENT_DISABLED = 0
-        ACCENT_ENABLE_GRADIENT = 1
-        ACCENT_ENABLE_TRANSPARENTGRADIENT = 2
-        ACCENT_ENABLE_BLURBEHIND = 3
-        ACCENT_INVALID_STATE = 4
-    End Enum
-
-    <StructLayout(LayoutKind.Sequential)>
-    Friend Structure AccentPolicy
-        Public AccentState As AccentState
-        Public AccentFlags As Integer
-        Public GradientColor As Integer
-        Public AnimationId As Integer
-    End Structure
-
-    Friend Sub EnableBlur()
-        Dim windowHelper = New WindowInteropHelper(Me)
-
-        Dim accent = New AccentPolicy()
-        Dim accentStructSize = Marshal.SizeOf(accent)
-        accent.AccentState = AccentState.ACCENT_ENABLE_BLURBEHIND
-
-        Dim accentPtr = Marshal.AllocHGlobal(accentStructSize)
-        Marshal.StructureToPtr(accent, accentPtr, False)
-
-        Dim data = New WindowCompositionAttributeData() With {
-            .Attribute = WindowCompositionAttribute.WCA_ACCENT_POLICY,
-            .SizeOfData = accentStructSize,
-            .Data = accentPtr
-        }
-
-        SetWindowCompositionAttribute(windowHelper.Handle, data)
-
-        Marshal.FreeHGlobal(accentPtr)
-    End Sub
-#End Region
+    Public Shared ui_blur_enabled As Boolean
 
 #Region "Window CMD"
     'Move Window
@@ -82,6 +25,7 @@ Public Class wnd_settings
 
     Private Sub btn_wnd_hide_MouseLeftButtonDown(sender As Object, e As RoutedEventArgs) Handles btn_wnd_hide.Click
         Me.Visibility = Visibility.Hidden
+        lasttab_lic = False
     End Sub
 
     Private Sub btn_wnd_minimize_MouseLeftButtonUp(sender As Object, e As RoutedEventArgs) Handles btn_wnd_minimize.Click
@@ -89,7 +33,8 @@ Public Class wnd_settings
     End Sub
 
     Private Sub wnd_settings_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
-        EnableBlur() 'enable blurred window bg
+        cls_blur_behind.blur(Me, ui_blur_enabled)
+
         lib_hVOSD.Init() 'bring up lib_HVOSD
         Me.Hide()
 
@@ -114,7 +59,7 @@ Public Class wnd_settings
     Public Shared net_NIC_list As String = ";"
 
     Private Sub wnd_settings_IsVisibleChanged(sender As Object, e As DependencyPropertyChangedEventArgs) Handles Me.IsVisibleChanged
-        If Me.Visibility = Visibility.Hidden Then Exit Sub
+        If Me.Visibility = Visibility.Hidden Or lasttab_lic = True Then Exit Sub
 
         matc_tabctrl.SelectedIndex = 0
 
@@ -148,6 +93,8 @@ Public Class wnd_settings
         ini.WriteValue("UI", "cb_wndmain_clock_enabled", CType(cb_wndmain_clock_enabled.IsChecked, String))
         ini.WriteValue("UI", "cb_wndmain_clock_seconds", CType(cb_wndmain_clock_seconds.IsChecked, String))
         ini.WriteValue("UI", "cb_wndmain_clock_weekday", CType(cb_wndmain_clock_weekday.IsChecked, String))
+        'Window Blur
+        ini.WriteValue("UI", "cb_wndmain_blur_enabled", CType(cb_wndmain_blur_enabled.IsChecked, String))
 
         'Spotify
         ini.WriteValue("Spotify", "cb_wndmain_spotify_progress", CType(cb_wndmain_spotify_progress.IsChecked, String))
@@ -178,12 +125,15 @@ Public Class wnd_settings
         show_flyout("Änderungen gespeichert!", False)
 
         MainWindow.settings_update_needed = True
+        cls_blur_behind.blur(Me, ui_blur_enabled)
     End Sub
 
     Private Sub load_settings()
         cb_wndmain_clock_enabled.IsChecked = CType(ini.ReadValue("UI", "cb_wndmain_clock_enabled", "True"), Boolean)
         cb_wndmain_clock_seconds.IsChecked = CType(ini.ReadValue("UI", "cb_wndmain_clock_seconds", "False"), Boolean)
         cb_wndmain_clock_weekday.IsChecked = CType(ini.ReadValue("UI", "cb_wndmain_clock_weekday", "True"), Boolean)
+        'Window Blur
+        cb_wndmain_blur_enabled.IsChecked = CType(ini.ReadValue("UI", "cb_wndmain_blur_enabled", "True"), Boolean)
 
         'Spotify
         cb_wndmain_spotify_progress.IsChecked = CType(ini.ReadValue("Spotify", "cb_wndmain_spotify_progress", "False"), Boolean)
@@ -229,12 +179,17 @@ Public Class wnd_settings
         If cb_other_disableVolumeOSD.IsChecked = True Then lib_hVOSD.HideOSD() Else lib_hVOSD.ShowOSD()
     End Sub
 
+    Private Sub cb_wndmain_blur_enabled_Checked(sender As Object, e As RoutedEventArgs) Handles cb_wndmain_blur_enabled.Checked, cb_wndmain_blur_enabled.Unchecked
+        ui_blur_enabled = cb_wndmain_blur_enabled.IsChecked.Value
+    End Sub
+
 #End Region
 
 #Region "Tab Navigation"
     Private Sub btn_changelog_back_Click(sender As Object, e As RoutedEventArgs) Handles ico_backToStart.MouseLeftButtonDown
         matc_tabctrl.SelectedIndex = 0
         lbl_header.Content = "EINSTELLUNGEN"
+        lasttab_lic = False
     End Sub
 
     Private Sub matc_tabctrl_SelectionChanged(sender As Object, e As SelectionChangedEventArgs) Handles matc_tabctrl.SelectionChanged
@@ -324,6 +279,8 @@ Public Class wnd_settings
 
 #Region "Changelog & 3rd Party"
     Dim chglog_loaded As Integer = 0
+    Dim lasttab_lic As Boolean = False
+
     Private Sub btn_changelog_Click(sender As Object, e As RoutedEventArgs) Handles btn_changelog.Click
         matc_tabctrl.SelectedIndex = 2
         lbl_header.Content = "CHANGELOG"
@@ -366,6 +323,7 @@ Public Class wnd_settings
     Private Sub btn_info_3rdpty_Click(sender As Object, e As RoutedEventArgs) Handles btn_info_3rdpty.Click
         matc_tabctrl.SelectedIndex = 5
         lbl_header.Content = "DRITTANBIETER SOFTWARE"
+        lasttab_lic = True
     End Sub
 
     Private Sub scrlvwr_3rdpty_ScrollChanged(sender As Object, e As ScrollChangedEventArgs) Handles scrlvwr_3rdpty.ScrollChanged
@@ -374,6 +332,8 @@ Public Class wnd_settings
     End Sub
 
 #Region "Credits"
+    Dim licvwr As New wnd_licensevwr
+
     Private Sub lbl_mahapps_url_Click(sender As Object, e As RoutedEventArgs) Handles lbl_mahapps_url.MouseLeftButtonDown
         Process.Start("http://mahapps.com")
     End Sub
@@ -393,16 +353,17 @@ Public Class wnd_settings
     Private Sub lbl_nUpdate_url_Click(sender As Object, e As RoutedEventArgs) Handles lbl_nUpdate_url.MouseLeftButtonDown
         Process.Start("https://www.nupdate.net/")
     End Sub
+
     Private Sub btn_hvOSD_license_Click(sender As Object, e As RoutedEventArgs) Handles btn_hvOSD_license.Click
-        Process.Start(".\licenses\hvOSD_license.txt")
+        licvwr.show_license(".\licenses\hvOSD_license.txt", "HideVolumeOSD Lizenz")
     End Sub
 
     Private Sub btn_sAPI_license_Click(sender As Object, e As RoutedEventArgs) Handles btn_sAPI_license.Click
-        Process.Start(".\licenses\sAPI_license.txt")
+        licvwr.show_license(".\licenses\sAPI_license.txt", "SpotifyAPI-NET Lizenz")
     End Sub
 
     Private Sub btn_nUpdate_license_Click(sender As Object, e As RoutedEventArgs) Handles btn_nUpdate_license.Click
-        Process.Start(".\licenses\nUpdate_license.txt")
+        licvwr.show_license(".\licenses\nUpdate_license.txt", "nUpdate Lizenz")
     End Sub
 
 #End Region
@@ -595,6 +556,8 @@ Public Class wnd_settings
     Private Sub btn_updates_search_Click(sender As Object, e As RoutedEventArgs) Handles btn_updates_search.Click
         updaterUI.ShowUserInterface()
     End Sub
+
+
 #End Region
 
 End Class
