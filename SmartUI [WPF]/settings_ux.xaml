@@ -163,30 +163,33 @@
             <TabItem x:Name="matc_3rdpty" Header="3rdpty SW" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" Width="54" Foreground="#FF767676" BorderBrush="{x:Null}" Background="{x:Null}">
                 <Grid x:Name="matc_tab_3rdpty">
                     <ScrollViewer x:Name="scrlvwr_3rdpty" Margin="0,40,0,0" ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden">
-                        <Grid x:Name="grd_software" Height="615" VerticalAlignment="Top" Width="500">
-                            <Grid x:Name="grd_coreaudio" HorizontalAlignment="Left" Height="85" VerticalAlignment="Top" Width="470">
-                                <Label x:Name="lbl_coreaudio_header" Content="CoreAudioAPI" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light"/>
-                                <Label x:Name="lbl_coreaudio_version" Content="Version: 2.0" HorizontalAlignment="Left" Margin="10,29,0,30" Width="450" Foreground="White" Background="{x:Null}"/>
-                                <Label x:Name="lbl_coreaudio_dev" Content="by Ray Molenkamp" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,55,0,0" Width="450" Foreground="White" Background="{x:Null}"/>
+                        <Grid x:Name="grd_software" VerticalAlignment="Top" Width="500" Height="650">
+
+                            <Grid x:Name="grd_coreaudio" HorizontalAlignment="Left" Height="110" VerticalAlignment="Top" Width="470">
+                                <Label x:Name="lbl_coreaudio_header" Content="Core Audio .NET Wrapper" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light"/>
+                                <Label x:Name="lbl_coreaudio_version" Content="Version: 2.0" HorizontalAlignment="Left" Margin="10,29,0,30" Width="450" Foreground="White" Background="{x:Null}" Height="26" VerticalAlignment="Top"/>
+                                <Label x:Name="lbl_coreaudio_url" Content="http://whenimbored.xfx.net/download-links/?did=5" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,55,0,0" Width="450" Foreground="White" Background="{x:Null}"/>
+                                <Label x:Name="lbl_coreaudio_dev" Content="by Ray Molenkamp" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,81,0,0" Width="450" Foreground="White" Background="{x:Null}"/>
                                 <Separator HorizontalAlignment="Left" Height="1" Margin="0" VerticalAlignment="Bottom" Width="470" Foreground="#FF13EAAC" Background="#19FFFFFF"/>
+                                <Button x:Name="btn_coreaudio_license" Content="Lizenz" Template="{StaticResource custbtn}" HorizontalAlignment="Right" Margin="0,0,3,6" VerticalAlignment="Bottom" Width="75" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#7FFFFFFF"/>
                             </Grid>
-                            <Grid x:Name="grd_mahapps" HorizontalAlignment="Left" Height="85" VerticalAlignment="Top" Width="470" Margin="0,90,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="101*"/>
-                                    <ColumnDefinition Width="134*"/>
-                                </Grid.ColumnDefinitions>
+
+                            <Grid x:Name="grd_mahapps" HorizontalAlignment="Left" Height="85" VerticalAlignment="Top" Width="470" Margin="0,115,0,0">
                                 <Label x:Name="lbl_mahapps_header" Content="MahApps.Metro" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light"/>
-                                <Label x:Name="lbl_mahapps_version" Content="Version: 1.5" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,29,0,0" Width="450" Foreground="White" Background="{x:Null}" Grid.ColumnSpan="2"/>
-                                <Label x:Name="lbl_mahapps_url" Content="mahapps.com" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,55,0,0" Width="450" Foreground="White" Background="{x:Null}" Grid.ColumnSpan="2"/>
-                                <Separator HorizontalAlignment="Left" Height="1" Margin="0" VerticalAlignment="Bottom" Width="470" Foreground="#FF13EAAC" Background="#19FFFFFF" Grid.ColumnSpan="2"/>
+                                <Label x:Name="lbl_mahapps_version" Content="Version: 1.5" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,29,0,0" Width="450" Foreground="White" Background="{x:Null}"/>
+                                <Label x:Name="lbl_mahapps_url" Content="mahapps.com" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,55,0,0" Width="450" Foreground="White" Background="{x:Null}"/>
+                                <Separator HorizontalAlignment="Left" Height="1" Margin="0" VerticalAlignment="Bottom" Width="470" Foreground="#FF13EAAC" Background="#19FFFFFF"/>
+                                <Button x:Name="btn_mahapps_license" Content="Lizenz" Template="{StaticResource custbtn}" HorizontalAlignment="Right" Margin="0,0,3,6" VerticalAlignment="Bottom" Width="75" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#7FFFFFFF"/>
                             </Grid>
-                            <Grid x:Name="grd_newtonsoft" HorizontalAlignment="Left" Height="85" VerticalAlignment="Top" Width="470" Margin="0,180,0,0">
+                            
+                            <Grid x:Name="grd_newtonsoft" HorizontalAlignment="Left" Height="85" VerticalAlignment="Top" Width="470" Margin="0,205,0,0">
                                 <Label x:Name="lbl_newtonsoft_header" Content="Newtonsoft Json" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light"/>
                                 <Label x:Name="lbl_newtonsoft_version" Content="Version: 10.0" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,29,0,0" Width="450" Foreground="White" Background="{x:Null}"/>
                                 <Label x:Name="lbl_newtonsoft_url" Content="newtonsoft.com/json" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,55,0,0" Width="450" Foreground="White" Background="{x:Null}"/>
                                 <Separator HorizontalAlignment="Left" Height="1" Margin="0" VerticalAlignment="Bottom" Width="470" Foreground="#FF13EAAC" Background="#19FFFFFF"/>
+                                <Button x:Name="btn_newtonsoft_license" Content="Lizenz" Template="{StaticResource custbtn}" HorizontalAlignment="Right" Margin="0,0,3,6" VerticalAlignment="Bottom" Width="75" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#7FFFFFFF"/>
                             </Grid>
-                            <Grid x:Name="grd_sAPI" HorizontalAlignment="Left" Height="110" VerticalAlignment="Top" Width="470" Margin="0,270,0,0">
+                            <Grid x:Name="grd_sAPI" HorizontalAlignment="Left" Height="110" VerticalAlignment="Top" Width="470" Margin="0,295,0,0">
                                 <Label x:Name="lbl_sAPI_header" Content="SpotifyAPI-NET" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light"/>
                                 <Label x:Name="lbl_sAPI_version" Content="Version: 2.16.0" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,29,0,0" Width="450" Foreground="White" Background="{x:Null}"/>
                                 <Label x:Name="lbl_sAPI_url" Content="https://github.com/JohnnyCrazy/SpotifyAPI-NET/releases" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,55,0,0" Width="450" Foreground="White" Background="{x:Null}"/>
@@ -194,7 +197,7 @@
                                 <Separator Height="1" Margin="0" VerticalAlignment="Bottom" Foreground="#FF13EAAC" Background="#19FFFFFF"/>
                                 <Button x:Name="btn_sAPI_license" Content="Lizenz" Template="{StaticResource custbtn}" HorizontalAlignment="Right" Margin="0,0,3,6" VerticalAlignment="Bottom" Width="75" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#7FFFFFFF"/>
                             </Grid>
-                            <Grid x:Name="grd_hvOSD" HorizontalAlignment="Left" Height="111" VerticalAlignment="Top" Width="470" Margin="0,385,0,0">
+                            <Grid x:Name="grd_hvOSD" HorizontalAlignment="Left" Height="110" VerticalAlignment="Top" Width="470" Margin="0,410,0,0">
                                 <Label x:Name="lbl_hvOSD_header" Content="Lib HideVolumeOSD" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light"/>
                                 <Label x:Name="lbl_hvOSD_version" Content="Version: 1.2" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,29,0,0" Width="450" Foreground="White" Background="{x:Null}"/>
                                 <Label x:Name="lbl_hvOSD_url" Content="wordpress.venturi.de/?p=1" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,55,0,-2" Width="341" Foreground="White" Background="{x:Null}"/>
@@ -202,7 +205,8 @@
                                 <Button x:Name="btn_hvOSD_license" Content="Lizenz" Template="{StaticResource custbtn}" HorizontalAlignment="Right" Margin="0,0,3,7" VerticalAlignment="Bottom" Width="75" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#7FFFFFFF"/>
                                 <Separator Height="1" Margin="0" VerticalAlignment="Bottom" Foreground="#FF13EAAC" Background="#19FFFFFF"/>
                             </Grid>
-                            <Grid x:Name="grd_nUpdate" HorizontalAlignment="Left" Height="111" VerticalAlignment="Top" Width="470" Margin="0,500,0,0">
+                            
+                            <Grid x:Name="grd_nUpdate" HorizontalAlignment="Left" Height="111" VerticalAlignment="Top" Width="470" Margin="0,525,0,0">
                                 <Label x:Name="lbl_nUpdate_header" Content="nUpdate" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light"/>
                                 <Label x:Name="lbl_nUpdate_version" Content="Version: 1.2" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,29,0,0" Width="450" Foreground="White" Background="{x:Null}"/>
                                 <Label x:Name="lbl_nUpdate_url" Content="https://www.nupdate.net/" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,55,0,-2" Width="341" Foreground="White" Background="{x:Null}"/>
@@ -211,6 +215,7 @@
                             </Grid>
                         </Grid>
                     </ScrollViewer>
+                    
                     <Label x:Name="lbl_test" Content="Dieses Projekt nutzt folgende Software" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light" Margin="10,5,0,0"/>
                     <Separator Height="10" Margin="15,30,15,0" VerticalAlignment="Top" Foreground="#FF13EAAC" Background="#3FFFFFFF"/>
                     <Grid x:Name="grd_3rdpty_shadow" Height="40" Margin="0" VerticalAlignment="Bottom">
@@ -220,6 +225,7 @@
                                 <GradientStop Color="#00000000" Offset="0.35"/>
                             </LinearGradientBrush>
                         </Grid.Background>
+                        <Image HorizontalAlignment="Center" Height="24" Margin="0" VerticalAlignment="Center" Width="24" Source="Resources/ic_arrow_down_white_24dp.png" Opacity="0.75"/>
                     </Grid>
                 </Grid>
             </TabItem>
@@ -240,7 +246,7 @@
                 <Button x:Name="btn_flyout_spotify_confirm" Template="{StaticResource custbtn_dark}" Content="Löschen" HorizontalAlignment="Right" Margin="0,0,5,5" VerticalAlignment="Bottom" Width="85" Foreground="White" Background="#66000000" BorderBrush="{x:Null}" Height="26"/>
                 <Button x:Name="btn_reset_cache_cancel" Template="{StaticResource custbtn_dark}" Content="Abbrechen" HorizontalAlignment="Right" Margin="0,0,93,5" VerticalAlignment="Bottom" Width="85" Foreground="White" Background="#66000000" BorderBrush="{x:Null}" Height="26"/>
                 <Label x:Name="lbl_flyout_spotify_msg" Content="&lt;msg&gt;" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Foreground="White" Background="{x:Null}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
-                <Image HorizontalAlignment="Left" Height="25" Width="24" Source="Resources/ic_warning_white_24dp.png" SnapsToDevicePixels="True" Margin="10,0,0,0" VerticalAlignment="Center" Opacity="0.5"/>
+                <Image HorizontalAlignment="Left" Height="60" Width="60" Source="Resources/guide_hd_disconnect.png" SnapsToDevicePixels="True" Margin="10,-5,0,0" VerticalAlignment="Center" Opacity="0.5"/>
             </Grid>
         </Custom:Flyout>
     </Grid>

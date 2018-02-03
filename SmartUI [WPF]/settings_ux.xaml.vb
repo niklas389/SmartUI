@@ -132,8 +132,9 @@ Public Class wnd_settings
         cb_wndmain_clock_enabled.IsChecked = CType(ini.ReadValue("UI", "cb_wndmain_clock_enabled", "True"), Boolean)
         cb_wndmain_clock_seconds.IsChecked = CType(ini.ReadValue("UI", "cb_wndmain_clock_seconds", "False"), Boolean)
         cb_wndmain_clock_weekday.IsChecked = CType(ini.ReadValue("UI", "cb_wndmain_clock_weekday", "True"), Boolean)
+
         'Window Blur
-        cb_wndmain_blur_enabled.IsChecked = CType(ini.ReadValue("UI", "cb_wndmain_blur_enabled", "True"), Boolean)
+        cb_wndmain_blur_enabled.IsChecked = CType(ini.ReadValue("UI", "cb_wndmain_blur_enabled", "False"), Boolean)
 
         'Spotify
         cb_wndmain_spotify_progress.IsChecked = CType(ini.ReadValue("Spotify", "cb_wndmain_spotify_progress", "False"), Boolean)
@@ -334,6 +335,10 @@ Public Class wnd_settings
 #Region "Credits"
     Dim licvwr As New wnd_licensevwr
 
+    Private Sub lbl_coreaudio_url_Click(sender As Object, e As RoutedEventArgs) Handles lbl_coreaudio_url.MouseLeftButtonDown
+        Process.Start("http://whenimbored.xfx.net/download-links/?did=5")
+    End Sub
+
     Private Sub lbl_mahapps_url_Click(sender As Object, e As RoutedEventArgs) Handles lbl_mahapps_url.MouseLeftButtonDown
         Process.Start("http://mahapps.com")
     End Sub
@@ -364,6 +369,18 @@ Public Class wnd_settings
 
     Private Sub btn_nUpdate_license_Click(sender As Object, e As RoutedEventArgs) Handles btn_nUpdate_license.Click
         licvwr.show_license(".\licenses\nUpdate_license.txt", "nUpdate Lizenz")
+    End Sub
+
+    Private Sub btn_newtonsoft_license_Click(sender As Object, e As RoutedEventArgs) Handles btn_newtonsoft_license.Click
+        licvwr.show_license(".\licenses\Json.NET_license.txt", "Json.NET Lizenz")
+    End Sub
+
+    Private Sub btn_mahapps_license_Click(sender As Object, e As RoutedEventArgs) Handles btn_mahapps_license.Click
+        licvwr.show_license(".\licenses\MahApps.Metro_license.txt", "mahapps.metro Lizenz")
+    End Sub
+
+    Private Sub btn_coreaudio_license_Click(sender As Object, e As RoutedEventArgs) Handles btn_coreaudio_license.Click
+        licvwr.show_license(".\licenses\coreaudio-dotnet_license.txt", "Core Audio .NET Wrapper Lizenz")
     End Sub
 
 #End Region

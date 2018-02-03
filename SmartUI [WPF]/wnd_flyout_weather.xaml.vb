@@ -5,13 +5,14 @@ Imports System.Windows.Media.Animation
 
 Public Class wnd_flyout_weather
 
+    Dim hda As Boolean = False
 #Region "Window"
     'Private Sub wnd_flyout_weather_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
 
     'End Sub
 
     Private Sub wnd_flyout_volume_LostFocus(sender As Object, e As RoutedEventArgs) Handles Me.MouseLeave
-        anim_slideout()
+        If hda = True Then anim_slideout()
     End Sub
 
     Private Sub lbl_now_temp_SizeChanged(sender As Object, e As SizeChangedEventArgs) Handles lbl_now_temp.SizeChanged
@@ -36,8 +37,8 @@ Public Class wnd_flyout_weather
 
         lbl_now_windspeed.Content = Math.Round(CDbl(cls_weather.get_wind_speed), 1)
         lbl_now_winddir_deg.Content = cls_weather.get_wind_dir
-        img_now_winddir.RenderTransform = New RotateTransform(cls_weather.get_wind_dir - 180)
-        lbl_now_winddir.Content = cls_weather.oww_winddir
+        img_now_winddir.RenderTransform = New RotateTransform(cls_weather.get_wind_dir)
+        lbl_now_winddir.Content = cls_weather.oww_winddir.Replace("E", "O")
 
         lbl_now_humidity.Content = cls_weather.get_humidity
         lbl_now_pressure.Content = cls_weather.get_pressure.ToString
@@ -62,9 +63,13 @@ Public Class wnd_flyout_weather
 
         storyboard.Children.Add(dblanim)
         storyboard.Begin(Me)
+
+        hda = True
     End Sub
 
     Private Sub anim_slideout()
+        hda = False
+
         Dim dblanim As New DoubleAnimation()
         dblanim.From = 0
         dblanim.To = (Me.Height * -1)
@@ -84,6 +89,6 @@ Public Class wnd_flyout_weather
     End Sub
 
     Private Sub dblanim_Completed(sender As Object, e As EventArgs)
-        Hide()
+        Me.Hide()
     End Sub
 End Class

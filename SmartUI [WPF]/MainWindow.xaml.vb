@@ -19,10 +19,9 @@ Class MainWindow
     Public Shared settings_update_needed As Boolean = False
     Public Shared weather_update_needed As Boolean = False
 
-    Public Shared suiversion As String = My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & ".6"
+    Public Shared suiversion As String = My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & ".8"
 
-#Region "Blur & Dock"
-    'Dock
+#Region "Dock"
     Const ABM_NEW As Int32 = 0
     Const ABM_REMOVE As Int32 = 1
     Const ABM_SETPOS As Int32 = 3
@@ -135,7 +134,7 @@ Class MainWindow
         End If
 
         'window blur
-        cls_blur_behind.blur(Me, CType(ini.ReadValue("UI", "cb_wndmain_blur_enabled", "True"), Boolean))
+        cls_blur_behind.blur(Me, CType(ini.ReadValue("UI", "cb_wndmain_blur_enabled", "False"), Boolean))
 
         'Network
         net_conf_thres_icons = CType(ini.ReadValue("UI", "cb_wndmain_net_iconDisableSpeedLimit", "False"), Boolean)
@@ -179,7 +178,7 @@ Class MainWindow
 
 #End Region
 
-#Region "EVENTS"
+#Region "SYS_EVENTS"
     'Update weather on os resume
     Private Sub SystemEvents_PowerModeChanged(ByVal sender As Object, ByVal e As Microsoft.Win32.PowerModeChangedEventArgs)
         'Select Case e.Mode
@@ -243,6 +242,7 @@ Class MainWindow
             Select Case DateTime.Now.Minute
                 Case 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55
                     cls_weather.init_update(False, 2) 'wettercom update
+
                     If DateTime.Now.Minute = 0 Or DateTime.Now.Minute = 30 Then cls_weather.init_update(False, 1) 'oww_update
 
                     ui_clock_weekday = CultureInfo.CurrentCulture.DateTimeFormat.GetShortestDayName(DateTime.Now.DayOfWeek)
@@ -310,11 +310,12 @@ Class MainWindow
 
     Private Sub init_coreaudio()
         wnd_log.AddLine("INFO" & "-CORE AUDIO", "Initializing...")
-        AddHandler audio_device.AudioEndpointVolume.OnVolumeNotification, AddressOf AudioEndpointVolume_OnVolumeNotification
 
         wpf_helper.helper_grid(grd_volume, True)
 
         ca_update(Math.Round(audio_device.AudioEndpointVolume.MasterVolumeLevelScalar * 100, 0), audio_device.AudioEndpointVolume.Mute)
+
+        AddHandler audio_device.AudioEndpointVolume.OnVolumeNotification, AddressOf AudioEndpointVolume_OnVolumeNotification
     End Sub
 
     Private Sub AudioEndpointVolume_OnVolumeNotification(data As AudioVolumeNotificationData)
@@ -329,10 +330,10 @@ Class MainWindow
 
         Else
             wpf_helper.helper_label(lbl_volume_unit, "%")
-            wpf_helper.helper_label(lbl_volume, e_volume.ToString, Visibility.Visible) '& "%"
+            wpf_helper.helper_label(lbl_volume, e_volume.ToString, Visibility.Visible)
 
             Select Case e_volume
-                Case < 10
+                Case < 5
                     wpf_helper.helper_image(icn_volume, "pack://application:,,,/Resources/snd_vLow.png")
                 Case < 30
                     wpf_helper.helper_image(icn_volume, "pack://application:,,,/Resources/snd_low.png")
@@ -363,7 +364,7 @@ Class MainWindow
     '---- RWork
     Private Sub grd_volume_SizeChanged(sender As Object, e As SizeChangedEventArgs) Handles grd_volume.SizeChanged, lbl_volume.SizeChanged
         If lbl_volume.Visibility = Visibility.Visible Then
-            lbl_volume_unit.Margin = New Thickness(17 + lbl_volume.RenderSize.Width, -1, 0, 0)
+            lbl_volume_unit.Margin = New Thickness(17 + Math.Round(lbl_volume.RenderSize.Width, 0), -1, 0, 0)
         Else
             lbl_volume_unit.Margin = New Thickness(19, -1, 0, 0)
         End If
@@ -373,13 +374,13 @@ Class MainWindow
 
     Private Sub lbl_volume_IsVisibleChanged(sender As Object, e As DependencyPropertyChangedEventArgs) Handles grd_volume.IsVisibleChanged
         If lbl_volume.Visibility = Visibility.Hidden Then
-            lbl_volume_unit.Margin = New Thickness(17 + lbl_volume.RenderSize.Width, -1, 0, 0)
+            lbl_volume_unit.Margin = New Thickness(17 + Math.Round(lbl_volume.RenderSize.Width, 0), -1, 0, 0)
         Else
             lbl_volume_unit.Margin = New Thickness(19, -1, 0, 0)
         End If
     End Sub
     '-----
-    Private Sub lbl_clock_MouseUp(sender As Object, e As MouseButtonEventArgs) Handles lbl_volume.MouseUp, icn_volume.MouseUp, lbl_volume_unit.MouseUp
+    Private Sub lbl_clock_MouseUp(sender As Object, e As MouseButtonEventArgs) Handles grd_volume.MouseUp
         audio_device.AudioEndpointVolume.Mute = Not audio_device.AudioEndpointVolume.Mute
     End Sub
 
@@ -617,6 +618,10 @@ Class MainWindow
 
 #Region "NOTIFICATION"
     Private Sub helper_notification(e_msg As String, Optional e_icn As String = Nothing)
+        Dim c_blur As New Effects.BlurEffect With {.Radius = 10}
+        grd_controls.Effect = c_blur
+        grd_controls.Opacity = 0.5
+
         Application.Current.Dispatcher.Invoke(Threading.DispatcherPriority.Normal,
                                               New ThreadStart(Sub()
                                                                   fout_notification.IsOpen = True
@@ -632,6 +637,11 @@ Class MainWindow
                                                                       ConvertFromString("pack://application:,,,/Resources/ic_error_outline_white_24dp.png"), ImageSource)
                                                                   End If
                                                               End Sub))
+    End Sub
+
+    Private Sub fout_notification_ClosingFinished(sender As Object, e As RoutedEventArgs) Handles fout_notification.ClosingFinished
+        grd_controls.Effect = Nothing
+        grd_controls.Opacity = 1
     End Sub
 #End Region
 
@@ -848,6 +858,8 @@ Class MainWindow
     Dim ui_appmenu As New wnd_flyout_appmenu
     Private Sub btn_exit_Click(sender As Object, e As RoutedEventArgs) Handles icn_menu.MouseLeftButtonUp, grd_menu_right.MouseLeftButtonUp
         ui_appmenu.Show()
+        Me.Topmost = False
+        Me.Topmost = True
     End Sub
 
     Dim weather_flyout As New wnd_flyout_weather
@@ -862,6 +874,7 @@ Class MainWindow
         Me.Topmost = False
         Me.Topmost = True
     End Sub
+
 
 #End Region
 

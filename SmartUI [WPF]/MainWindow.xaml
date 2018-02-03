@@ -12,7 +12,17 @@
     </Window.Resources>
 
     <Grid x:Name="grd_main" Margin="0">
-        <Custom:MetroProgressBar x:Name="mpb_indicateLoading" Margin="0" VerticalAlignment="Top" Background="Transparent" EllipseDiameter="4" EllipseOffset="10" Foreground="#FF00F19F" IsIndeterminate="True"/>
+        <!--Notification flyout-->
+        <Custom:Flyout x:Name="fout_notification" Header="Flyout" Height="25" VerticalAlignment="Top" CloseButtonVisibility="Collapsed" Position="Top" TitleVisibility="Collapsed" Foreground="White" AnimateOpacity="True" AutoCloseInterval="2500" IsAutoCloseEnabled="True">
+            <Grid x:Name="grd_fout_notifcation" Height="25" VerticalAlignment="Top" Margin="0">
+                <Label x:Name="lbl_notification" Content="&lt;notification&gt;" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="White" FontFamily="{DynamicResource MainFont}" FontSize="18.667" Height="35" Margin="24,-3,0,0" RenderTransformOrigin="12,0" Background="{x:Null}"/>
+                <Image x:Name="icn_notification" HorizontalAlignment="Left" Margin="5,3,0,0" VerticalAlignment="Top" Width="19" Height="19" Source="Resources/ic_error_outline_white_24dp.png" Stretch="UniformToFill"/>
+            </Grid>
+        </Custom:Flyout>
+
+        <!--Controls below here-->
+        <Grid x:Name="grd_controls" Margin="0">
+            <Custom:MetroProgressBar x:Name="mpb_indicateLoading" Margin="0" VerticalAlignment="Top" Background="Transparent" EllipseDiameter="4" EllipseOffset="10" Foreground="#FF00F19F" IsIndeterminate="True"/>
         
         <Grid x:Name="grd_volume" HorizontalAlignment="Right" Height="25" VerticalAlignment="Top" Margin="0,0,20,0">
             <Label x:Name="lbl_volume" Content="&lt;volume&gt;" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="White" FontFamily="{DynamicResource MainFont}" FontSize="18.667" Height="35" Margin="23,-3,0,0" RenderTransformOrigin="12,0" Background="{x:Null}"/>
@@ -47,18 +57,14 @@
             <Image x:Name="icn_run_spotify" HorizontalAlignment="Left" Margin="0,3,0,0" VerticalAlignment="Top" Width="19" Source="Resources/spotify_notification.png" Height="19"/>
         </Grid>
 
-        <Grid x:Name="grd_clock" HorizontalAlignment="Center" Height="25" Margin="0" VerticalAlignment="Top">
-            <Label x:Name="lbl_clock" Content="&lt;clock&gt;" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="White" FontFamily="{DynamicResource MainFont}" FontSize="18.667" Height="36" Margin="47,-3,0,0" Background="{x:Null}"/>
-            <Label x:Name="lbl_clock_weekday" Content="&lt;day&gt;" HorizontalAlignment="Left" Margin="0,-1,0,0" VerticalAlignment="Top" Background="{x:Null}" FontSize="14" FontFamily="{DynamicResource MainFont}" Opacity="0.6" Foreground="White" Height="30"/>
-        </Grid>
-        
-        <Custom:Flyout x:Name="fout_notification" Header="Flyout" Height="25" VerticalAlignment="Top" CloseButtonVisibility="Collapsed" Position="Top" TitleVisibility="Collapsed" Background="#CC000000" Foreground="White" AnimateOpacity="True" AutoCloseInterval="2500" IsAutoCloseEnabled="True">
-            <Grid x:Name="grd_fout_notifcation" Height="25" VerticalAlignment="Top" Margin="0">
-                <Label x:Name="lbl_notification" Content="&lt;notification&gt;" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="White" FontFamily="{DynamicResource MainFont}" FontSize="18.667" Height="35" Margin="24,-3,0,0" RenderTransformOrigin="12,0" Background="{x:Null}"/>
-                <Image x:Name="icn_notification" HorizontalAlignment="Left" Margin="5,3,0,0" VerticalAlignment="Top" Width="19" Height="19" Source="Resources/ic_error_outline_white_24dp.png" Stretch="UniformToFill"/>
+            <Grid x:Name="grd_clock" HorizontalAlignment="Center" Height="25" Margin="0" VerticalAlignment="Top">
+                <Label x:Name="lbl_clock" Content="&lt;clock&gt;" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="White" FontFamily="{DynamicResource MainFont}" FontSize="18.667" Height="36" Margin="47,-3,0,0" Background="{x:Null}"/>
+                <Label x:Name="lbl_clock_weekday" Content="&lt;day&gt;" HorizontalAlignment="Left" Margin="0,-1,0,0" VerticalAlignment="Top" Background="{x:Null}" FontSize="14" FontFamily="{DynamicResource MainFont}" Opacity="0.6" Foreground="White" Height="30"/>
             </Grid>
-        </Custom:Flyout>
+        </Grid>
     </Grid>
+    
+    
 </Window>
 
     

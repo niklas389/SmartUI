@@ -8,6 +8,7 @@ Imports System.Windows.Media
 Imports System.Windows.Media.Animation
 
 Public Class wnd_flyout_media
+    Dim hda As Boolean = False
 
 #Region "Window"
     Private Sub wnd_flyout_media_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
@@ -25,6 +26,7 @@ Public Class wnd_flyout_media
     End Sub
 
     Private Sub wnd_flyout_volume_LostFocus(sender As Object, e As RoutedEventArgs) Handles Me.MouseLeave, Me.LostFocus
+        If hda = False Then Exit Sub
         MainWindow.media_widget_opened = 0
         MainWindow.media_newtrack = True
         anim_slideout()
@@ -48,9 +50,12 @@ Public Class wnd_flyout_media
 
         storyboard.Children.Add(dblanim)
         storyboard.Begin(Me)
+
+        hda = True
     End Sub
 
     Private Sub anim_slideout()        'Timeline.SetDesiredFrameRate(dblanim, 100)
+        hda = False
 
         Dim dblanim As New DoubleAnimation()
         dblanim.From = 0
@@ -71,10 +76,8 @@ Public Class wnd_flyout_media
     End Sub
 
     Private Sub dblanim_Completed(sender As Object, e As EventArgs)
-        'If MainWindow.media_widget_opened = 0 Then
         Me.Hide()
         tmr_update_trackdata.Stop()
-        'End If
     End Sub
 
 #End Region
@@ -83,15 +86,17 @@ Public Class wnd_flyout_media
     Public Shared str_media_time As String = ""
 
     'Update timer
-    Private WithEvents tmr_update_trackdata As New System.Windows.Threading.DispatcherTimer With {.Interval = New TimeSpan(0, 0, 0, 0, 250), .IsEnabled = False}
+    Private WithEvents tmr_update_trackdata As New Threading.DispatcherTimer With {.Interval = New TimeSpan(0, 0, 0, 0, 250), .IsEnabled = False}
     Private Sub tmr_update_trackdata_Tick(ByVal sender As Object, ByVal e As System.EventArgs) Handles tmr_update_trackdata.Tick
         update_widget()
     End Sub
 
+    Dim uw_err As Boolean = False
     Private Sub update_widget()
         Try
             If Not lbl_trk_title.Content.ToString = short_string(MainWindow._currentTrack.TrackResource.Name, True) Then
                 'Update TRACK data
+                lbl_trk_album.Content = Nothing
                 lbl_trk_title.Content = short_string(MainWindow._currentTrack.TrackResource.Name, True)
                 lbl_trk_artist.Content = short_string(MainWindow._currentTrack.ArtistResource.Name)
                 lbl_trk_album.Content = short_string(MainWindow._currentTrack.AlbumResource.Name)
@@ -112,9 +117,16 @@ Public Class wnd_flyout_media
                 btn_media_play.Source = CType(New ImageSourceConverter().ConvertFromString("pack://application:,,,/Resources/ic_play_arrow_white_24dp.png"), ImageSource)
             End If
 
+            uw_err = False
         Catch ex As Exception
-            anim_slideout()
-            MainWindow.media_widget_opened = 0
+            If uw_err = True Then
+                hda = False
+                anim_slideout()
+                MainWindow.media_widget_opened = 0
+            End If
+
+            media_cache_albumArt()
+            uw_err = True
         End Try
 
     End Sub
@@ -125,22 +137,20 @@ Public Class wnd_flyout_media
     Dim cache_path As String = AppDomain.CurrentDomain.BaseDirectory & "cache\media\"
 
     Private Async Sub media_cache_albumArt(ByVal Optional err As Boolean = False)
-        'Show loading ani
-        grd_loading.Visibility = Visibility.Visible
-        pr_loading.IsActive = True
-        albumCover_overlay(True)
+        albumCover_overlay(True)        'Show loading ani
 
-        Dim trk_uri As String = MainWindow._currentTrack.TrackResource.ParseUri.ToString.Remove(0, 14)
+        Dim trk_uri As String = ""
 
         Try
+            trk_uri = MainWindow._currentTrack.TrackResource.ParseUri.ToString.Remove(0, 14)
+
             If Not IO.Directory.Exists(cache_path) Then IO.Directory.CreateDirectory(cache_path)
 
-            'get URI before DL image to avoid mismatching info (eg.: user changes track while downloading)
+            'get URI before DL image to avoid mismatching info (eg.: track changes while downloading)
             If Not IO.File.Exists(cache_path & trk_uri) Then
                 'Construct a bitmap
                 Dim img As New Bitmap(Await Task.Run(Function() MainWindow._currentTrack.GetAlbumArtAsync(SpotifyAPI.Local.Enums.AlbumArtSize.Size320))) 'cover DL
-                img.Save(cache_path & trk_uri, Imaging.ImageFormat.Jpeg) 'save cover
-
+                img.Save(cache_path & trk_uri, Imaging.ImageFormat.Jpeg) 'cache cover as jpeg
                 img.Dispose()
             End If
 
@@ -157,10 +167,7 @@ Public Class wnd_flyout_media
             If IO.File.Exists(cache_path & trk_uri) And err = False Then media_cache_albumArt(True)
         End Try
 
-        'hide loading ani
-        grd_loading.Visibility = Visibility.Hidden
-        pr_loading.IsActive = False
-        albumCover_overlay(False, True)
+        albumCover_overlay(False, True)        'hide loading ani
     End Sub
 
     'String shortener
@@ -174,7 +181,6 @@ Public Class wnd_flyout_media
                 End If
             Else
                 If MainWindow._currentTrack.TrackResource.Name.Length > 36 Then
-
                     Return e_str.Remove(35, e_str.Length - 35) & "..."
                 Else
                     Return e_str
@@ -182,7 +188,6 @@ Public Class wnd_flyout_media
             End If
         Catch ex As Exception
             Return e_str
-
         End Try
     End Function
 #End Region
@@ -208,16 +213,12 @@ Public Class wnd_flyout_media
         'Next Track / Skip
         keybd_event(VK_MEDIA_NEXT_TRACK, &H45, KEYEVENTF_EXTENDEDKEY, 0)
         keybd_event(VK_MEDIA_NEXT_TRACK, &H45, KEYEVENTF_EXTENDEDKEY Or KEYEVENTF_KEYUP, 0)
-
-        update_widget()
     End Sub
 
     Private Sub btn_media_prev_MouseLeftButtonUp(sender As Object, e As MouseButtonEventArgs) Handles btn_media_prev.MouseLeftButtonUp
         'Last Track / Return
         keybd_event(VK_MEDIA_PREV_TRACK, &H45, KEYEVENTF_EXTENDEDKEY, 0)
         keybd_event(VK_MEDIA_PREV_TRACK, &H45, KEYEVENTF_EXTENDEDKEY Or KEYEVENTF_KEYUP, 0)
-
-        update_widget()
     End Sub
 #End Region
 

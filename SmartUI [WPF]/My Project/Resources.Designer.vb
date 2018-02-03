@@ -73,6 +73,16 @@ Namespace My.Resources
         '''<summary>
         '''  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         '''</summary>
+        Friend ReadOnly Property guide_hd_disconnect() As System.Drawing.Bitmap
+            Get
+                Dim obj As Object = ResourceManager.GetObject("guide_hd_disconnect", resourceCulture)
+                Return CType(obj,System.Drawing.Bitmap)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        '''</summary>
         Friend ReadOnly Property hygrometer_24() As System.Drawing.Bitmap
             Get
                 Dim obj As Object = ResourceManager.GetObject("hygrometer_24", resourceCulture)
@@ -86,6 +96,16 @@ Namespace My.Resources
         Friend ReadOnly Property ic_arrow_back_white_24dp() As System.Drawing.Bitmap
             Get
                 Dim obj As Object = ResourceManager.GetObject("ic_arrow_back_white_24dp", resourceCulture)
+                Return CType(obj,System.Drawing.Bitmap)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        '''</summary>
+        Friend ReadOnly Property ic_arrow_down_white_24dp() As System.Drawing.Bitmap
+            Get
+                Dim obj As Object = ResourceManager.GetObject("ic_arrow_down_white_24dp", resourceCulture)
                 Return CType(obj,System.Drawing.Bitmap)
             End Get
         End Property

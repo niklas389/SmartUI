@@ -39,31 +39,33 @@ Public Class cls_weather
             oww_API_key = conf_ini.ReadValue("OWW", "key", "0", 1)
 
             'wetter.com file
-            If IO.File.Exists(".\config\wcom_allowed") Then
-                conf_wcom_enabled = True
-            End If
+            conf_wcom_enabled = File.Exists(".\config\wcom_allowed")
 
             MainWindow.wnd_log.AddLine(logcat & "-INFO", "Init - (Service Enabled: " & conf_enabled.ToString & " / wetter.com allowed: " & conf_wcom_enabled & ")")
         End If
 
-        If e_update = 0 Then
-            MainWindow.wnd_log.AddLine(logcat & "-INFO", "Updating...")
-            oww_update()
-            wcom_update()
-        ElseIf e_update = 1 Then
-            'MainWindow.wnd_log.AddLine(logcat & "-INFO", "Updating OpenWeather...")
-            oww_update()
-        ElseIf e_update = 2 Then
-            If conf_wcom_enabled = True Then
-                'MainWindow.wnd_log.AddLine(logcat & "-INFO", "Updating Wetter.com...")
+        Select Case e_update
+            Case 0
+                MainWindow.wnd_log.AddLine(logcat & "-INFO", "Updating...")
+                oww_update()
                 wcom_update()
-            Else
-                MainWindow.wnd_log.AddLine(logcat & "-INFO", "Wetter.com... diabled (e_update = 2)")
-            End If
-        Else
-            MainWindow.wnd_log.AddLine(logcat & "-ERR", "e_update")
-        End If
 
+            Case 1
+                'MainWindow.wnd_log.AddLine(logcat & "-INFO", "Updating OpenWeather...")
+                oww_update()
+
+            Case 2
+                If conf_wcom_enabled = True Then
+                    'MainWindow.wnd_log.AddLine(logcat & "-INFO", "Updating Wetter.com...")
+                    wcom_update()
+                    'Else
+                    '    MainWindow.wnd_log.AddLine(logcat & "-INFO", "wetter.com disabled (e_update = 2)")
+                End If
+
+            Case Else
+                MainWindow.wnd_log.AddLine(logcat & "-ERR", "e_update")
+
+        End Select
     End Sub
 #End Region
 
@@ -71,7 +73,7 @@ Public Class cls_weather
     'OpenWeather API - DATA PATH -> (path_cache & "weather\oww_data.xml")
     Private Shared path_cache_weather As String = AppDomain.CurrentDomain.BaseDirectory & "cache\weather\"
 
-    Shared oww_temp_now As String = "X°"
+    Shared oww_temp_now As String = "--"
     Public Shared oww_temp_min As String = "X°"
     Public Shared oww_temp_max As String = "X°"
     Shared oww_humidity As Integer = -1
@@ -157,7 +159,9 @@ Public Class cls_weather
                         If .AttributeCount > 0 Then
                             While .MoveToNextAttribute ' nächstes 
                                 If xmlid = "city" And .Name = "name" Then oww_data_location = .Value
-                                If xmlid = "temperature" And .Name = "value" Then oww_temp_now = .Value
+                                'REWORK THIS SHIT:
+                                If xmlid = "temperature" And .Name = "value" Then oww_temp_now = Math.Round(CDbl(.Value.Replace(".", ",")), 1).ToString.Replace(",", ".")
+                                '-------------------
                                 If xmlid = "temperature" And .Name = "max" Then oww_temp_max = .Value
                                 If xmlid = "temperature" And .Name = "min" Then oww_temp_min = .Value '.Remove(.Value.Length - 1, 1)
                                 If xmlid = "humidity" And .Name = "value" Then oww_humidity = CInt(.Value)
@@ -246,7 +250,7 @@ Public Class cls_weather
 #End Region
 
 #Region "WETTER.COM"
-    Shared wcom_temp_now As String
+    Shared wcom_temp_now As String = "--"
     'Public Shared wcom_condition As String
     Shared wcom_wind_speed As String
     Shared wcom_wind_direction As Double
@@ -340,7 +344,8 @@ Public Class cls_weather
 
     Private Shared Sub wcom_error(e_station As Integer)
         If e_station = 16549 Then
-            MainWindow.wnd_log.AddLine(logcat & "-ERR", "WCOM - API-Error with Station 16549 - Fallback to OpenWeather")
+            MainWindow.wnd_log.AddLine(logcat & "-ERR", "WCOM - API-Error with Station 16549 - wetter.com disabled")
+            conf_wcom_enabled = False
             Exit Sub
         End If
 
@@ -350,7 +355,7 @@ Public Class cls_weather
 #End Region
 
     Public Shared Function get_temp() As String
-        If conf_wcom_enabled = True And Not wcom_temp_now = "--" Then Return wcom_temp_now & "°" Else Return oww_temp_now & "°²"
+        If conf_wcom_enabled = True And Not wcom_temp_now = "--" Then Return wcom_temp_now & "°" Else Return oww_temp_now.ToString & "°"
     End Function
 
     Public Shared Function get_humidity() As Integer
