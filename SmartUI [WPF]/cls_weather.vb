@@ -4,7 +4,7 @@ Imports System.Net
 Imports System.Xml
 
 Public Class cls_weather
-    Shared conf_ini As New ini_file
+    Shared conf_ini As New cls_config
     Shared logcat As String = "   WEATHER"
     'general config
     Public Shared conf_enabled As Boolean = False
@@ -17,15 +17,15 @@ Public Class cls_weather
     'SETTINGS
     Public Shared Sub enabled(ByVal e_enabled As Boolean)
         conf_enabled = e_enabled
-        conf_ini.WriteValue("GEN", "enabled", conf_enabled.ToString, 1)
+        conf_ini.write("GEN", "enabled", conf_enabled.ToString, 1)
     End Sub
 
     Public Shared Sub oww_set_data(ByVal e_cID As Integer, ByVal e_key As String)
         oww_API_cityID = e_cID
         oww_API_key = e_key
 
-        conf_ini.WriteValue("OWW", "cid", oww_API_cityID.ToString, 1)
-        conf_ini.WriteValue("OWW", "key", oww_API_key, 1)
+        conf_ini.write("OWW", "cid", oww_API_cityID.ToString, 1)
+        conf_ini.write("OWW", "key", oww_API_key, 1)
     End Sub
 
 #End Region
@@ -34,9 +34,9 @@ Public Class cls_weather
     Public Shared Sub init_update(ByVal Optional e_init As Boolean = False, ByVal Optional e_update As Integer = 0)
         If e_init = True Then
             'load settings
-            conf_enabled = CBool(conf_ini.ReadValue("GEN", "enabled", "False", 1))
-            oww_API_cityID = CInt(conf_ini.ReadValue("OWW", "cid", "0", 1))
-            oww_API_key = conf_ini.ReadValue("OWW", "key", "0", 1)
+            conf_enabled = CBool(conf_ini.read("GEN", "enabled", "False", 1))
+            oww_API_cityID = CInt(conf_ini.read("OWW", "cid", "0", 1))
+            oww_API_key = conf_ini.read("OWW", "key", "0", 1)
 
             'wetter.com file
             conf_wcom_enabled = File.Exists(".\config\wcom_allowed")
@@ -135,7 +135,7 @@ Public Class cls_weather
             oww_xml.PreserveWhitespace = True
             oww_xml.Save(path_cache_weather & "oww_data.xml")
 
-            conf_ini.WriteValue("STAT", "oww", Date.Now.ToShortTimeString, 1)
+            conf_ini.write("STAT", "oww", Date.Now.ToShortTimeString, 1)
             'wnd_log.AddLine(log_cat & "-WEATHER", "OWW data updated")
         Else
             MainWindow.wnd_log.AddLine(logcat & "-ERR", "OWW API-Error")
@@ -337,7 +337,7 @@ Public Class cls_weather
         'MessageBox.Show(CDbl(ssSplit(5).Substring(0, ssSplit(5).Length - 5).Replace(".", ",")).ToString())
 
         'last update
-        conf_ini.WriteValue("STAT", "wcom", DateTime.Now.ToString, 1)
+        conf_ini.write("STAT", "wcom", DateTime.Now.ToString, 1)
 
         MainWindow.weather_update_needed = True
     End Sub

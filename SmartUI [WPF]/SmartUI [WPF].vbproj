@@ -143,9 +143,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="cls_blur-behind.vb" />
+    <Compile Include="cls_config.vb" />
     <Compile Include="GlobalSuppressions.vb" />
     <Compile Include="hideVolumeOSD.vb" />
-    <Compile Include="ini_file.vb" />
     <Compile Include="My Project\Resources.Designer.vb">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

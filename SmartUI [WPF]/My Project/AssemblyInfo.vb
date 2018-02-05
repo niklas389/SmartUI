@@ -16,7 +16,7 @@ Imports nUpdate.Core
 <Assembly: AssemblyCopyright("Copyright © 2016 - 2018 by Niklas Wagner")>
 <Assembly: AssemblyTrademark("")>
 <Assembly: ComVisible(False)>
-<Assembly: nUpdateVersion("1.3.10")>
+<Assembly: nUpdateVersion("1.3.13")>
 
 'Um mit dem Erstellen lokalisierbarer Anwendungen zu beginnen, legen Sie 
 '<UICulture>ImCodeVerwendeteKultur</UICulture> in der VBPROJ-Datei

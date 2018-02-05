@@ -25,18 +25,38 @@ Public Class wpf_helper
         End If
     End Sub
 
-    Public Shared Sub helper_grid(ByVal ctrl As Grid, ByVal Optional e_visible As Boolean = Nothing, ByVal Optional e_width As Double = -1)
-        If e_visible = True Then
-            Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Background, New ThreadStart(Sub() ctrl.Visibility = Visibility.Visible))
-        ElseIf e_visible = False Then
-            Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Background, New ThreadStart(Sub() ctrl.Visibility = Visibility.Hidden))
-        End If
+    Public Shared Sub helper_grid(ByVal ctrl As Grid, ByVal Optional e_visible As Boolean = Nothing, ByVal Optional e_width As Double = -1, ByVal Optional e_left As Double = -1)
+        'If e_visible = True Then
+        '    Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Background, New ThreadStart(Sub() ctrl.Visibility = Visibility.Visible))
+        'ElseIf e_visible = False Then
+        '    Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Background, New ThreadStart(Sub() ctrl.Visibility = Visibility.Hidden))
+        'End If
 
-        If e_width > -1 Then
-            Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Background, New ThreadStart(Sub() ctrl.Width = e_width))
-        ElseIf e_width = -5 Then
-            Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Background, New ThreadStart(Sub() ctrl.Width = Double.NaN))
-        End If
+        'If e_width > -1 Then
+        '    Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Background, New ThreadStart(Sub() ctrl.Width = e_width))
+        'ElseIf e_width = -5 Then
+        '    Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Background, New ThreadStart(Sub() ctrl.Width = Double.NaN))
+        'End If
+
+        Application.Current.Dispatcher.Invoke _
+            (Windows.Threading.DispatcherPriority.Background,
+               New ThreadStart(Sub()
+                                   If e_visible = True Then
+                                       ctrl.Visibility = Visibility.Visible
+                                   ElseIf e_visible = False Then
+                                       ctrl.Visibility = Visibility.Hidden
+                                   End If
+
+                                   If e_width > -1 Then
+                                       ctrl.Width = e_width
+                                   ElseIf e_width = -5 Then
+                                       ctrl.Width = Double.NaN
+                                   End If
+
+                                   If e_left > -1 Then
+                                       ctrl.Margin = New Thickness(e_left, 0, 0, 0)
+                                   End If
+                               End Sub))
     End Sub
 
     Public Shared Sub helper_label(ByVal ctrl As Label, ByVal Optional e_content As String = Nothing, ByVal Optional e_visible As Visibility = Visibility.Collapsed)

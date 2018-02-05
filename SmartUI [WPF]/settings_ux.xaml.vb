@@ -10,11 +10,11 @@ Imports System.Windows
 Imports System.Windows.Controls
 Imports System.Windows.Input
 Imports System.Windows.Media
+Imports System.Windows.Media.Animation
 Imports nUpdate.Updating
 
 Public Class wnd_settings
     Dim updater_enabled As Boolean = False
-
     Public Shared ui_blur_enabled As Boolean
 
 #Region "Window CMD"
@@ -36,13 +36,16 @@ Public Class wnd_settings
         lib_hVOSD.Init() 'bring up lib_HVOSD
         Me.Hide()
 
+        grd_navbar.Visibility = Visibility.Visible
         matc_tabctrl.Visibility = Visibility.Visible
+
         matc_main.Visibility = Visibility.Hidden
         matc_weather.Visibility = Visibility.Hidden
         matc_changelog.Visibility = Visibility.Hidden
         matc_spotify.Visibility = Visibility.Hidden
         matc_updates.Visibility = Visibility.Hidden
         matc_3rdpty.Visibility = Visibility.Hidden
+        matc_about.Visibility = Visibility.Hidden
 
         flyout_cache_reset.IsOpen = False
         flyout_message.IsOpen = False
@@ -52,6 +55,9 @@ Public Class wnd_settings
 
         load_settings()
         get_3rdptysw_versions()
+
+        anim_sep_pos(sep_nav_highlight, 0)
+        anim_width(sep_nav_highlight, grd_navbar.ActualWidth)
     End Sub
 
     Public Shared net_NIC_list As String = ";"
@@ -70,11 +76,11 @@ Public Class wnd_settings
         Next
 
         'Network
-        If ini.ReadValue("NET", "ComboBox_net_interface", "") = "null" Then
+        If conf.read("NET", "ComboBox_net_interface", "") = "null" Then
             ComboBox_net_interface.SelectedIndex = 0
         Else
-            ComboBox_net_interface.SelectedItem = ini.ReadValue("NET", "ComboBox_net_interface", "")
-            If Not ComboBox_net_interface.SelectedItem Is ini.ReadValue("NET", "ComboBox_net_interface", "") Then ComboBox_net_interface.SelectedIndex = 1
+            ComboBox_net_interface.SelectedItem = conf.read("NET", "ComboBox_net_interface", "")
+            If Not ComboBox_net_interface.SelectedItem Is conf.read("NET", "ComboBox_net_interface", "") Then ComboBox_net_interface.SelectedIndex = 1
         End If
 
         flyout_cache_reset.IsOpen = False
@@ -85,36 +91,36 @@ Public Class wnd_settings
 #End Region
 
 #Region "Read/Save Settings"
-    Dim ini As New ini_file
+    Dim conf As New cls_config
 
     Private Sub btn_settings_save_Click(sender As Object, e As RoutedEventArgs) Handles btn_settings_save.Click
-        ini.WriteValue("UI", "cb_wndmain_clock_enabled", CType(cb_wndmain_clock_enabled.IsChecked, String))
-        ini.WriteValue("UI", "cb_wndmain_clock_seconds", CType(cb_wndmain_clock_seconds.IsChecked, String))
-        ini.WriteValue("UI", "cb_wndmain_clock_weekday", CType(cb_wndmain_clock_weekday.IsChecked, String))
+        conf.write("UI", "cb_wndmain_clock_enabled", CType(cb_wndmain_clock_enabled.IsChecked, String))
+        conf.write("UI", "cb_wndmain_clock_seconds", CType(cb_wndmain_clock_seconds.IsChecked, String))
+        conf.write("UI", "cb_wndmain_clock_weekday", CType(cb_wndmain_clock_weekday.IsChecked, String))
         'Window Blur
-        ini.WriteValue("UI", "cb_wndmain_blur_enabled", CType(cb_wndmain_blur_enabled.IsChecked, String))
+        conf.write("UI", "cb_wndmain_blur_enabled", CType(cb_wndmain_blur_enabled.IsChecked, String))
 
         'Spotify
-        ini.WriteValue("Spotify", "cb_wndmain_spotify_progress", CType(cb_wndmain_spotify_progress.IsChecked, String))
+        conf.write("Spotify", "cb_wndmain_spotify_progress", CType(cb_wndmain_spotify_progress.IsChecked, String))
 
         'Weather
         cls_weather.enabled(cb_wndmain_weather_enabled.IsChecked.Value)
 
         If Not txtBx_weather_cid.Text = "<City ID>" And Not txtBx_weather_APIkey.Text = "<API Key>" Then _
-            cls_weather.oww_set_data(CInt(txtBx_weather_cid.Text), txtBx_weather_APIkey.Text)
+           cls_weather.oww_set_data(CInt(txtBx_weather_cid.Text), txtBx_weather_APIkey.Text)
 
         'Network
         If Not ComboBox_net_interface.SelectedIndex = -1 And Not ComboBox_net_interface.SelectedIndex = 0 Then
-            ini.WriteValue("NET", "ComboBox_net_interface", ComboBox_net_interface.SelectedItem.ToString)
+            conf.write("NET", "ComboBox_net_interface", ComboBox_net_interface.SelectedItem.ToString)
         Else
-            ini.WriteValue("NET", "ComboBox_net_interface", "null")
+            conf.write("NET", "ComboBox_net_interface", "null")
         End If
 
-        ini.WriteValue("UI", "cb_wndmain_net_iconDisableSpeedLimit", CType(cb_wndmain_net_iconDisableSpeedLimit.IsChecked, String))
+        conf.write("UI", "cb_wndmain_net_iconDisableSpeedLimit", CType(cb_wndmain_net_iconDisableSpeedLimit.IsChecked, String))
 
         'others
-        ini.WriteValue("SYS", "cb_other_disableVolumeOSD", CType(cb_other_disableVolumeOSD.IsChecked, String))
-        ini.WriteValue("SYS", "cb_other_startup_play", CType(cb_other_startup_play.IsChecked, String))
+        conf.write("SYS", "cb_other_disableVolumeOSD", CType(cb_other_disableVolumeOSD.IsChecked, String))
+        conf.write("SYS", "cb_other_startup_play", CType(cb_other_startup_play.IsChecked, String))
 
 
         'Show flyout after saving settings
@@ -127,16 +133,16 @@ Public Class wnd_settings
     End Sub
 
     Private Sub load_settings()
-        cb_wndmain_clock_enabled.IsChecked = CType(ini.ReadValue("UI", "cb_wndmain_clock_enabled", "True"), Boolean)
-        cb_wndmain_clock_seconds.IsChecked = CType(ini.ReadValue("UI", "cb_wndmain_clock_seconds", "False"), Boolean)
-        cb_wndmain_clock_weekday.IsChecked = CType(ini.ReadValue("UI", "cb_wndmain_clock_weekday", "True"), Boolean)
+        cb_wndmain_clock_enabled.IsChecked = CType(conf.read("UI", "cb_wndmain_clock_enabled", "True"), Boolean)
+        cb_wndmain_clock_seconds.IsChecked = CType(conf.read("UI", "cb_wndmain_clock_seconds", "False"), Boolean)
+        cb_wndmain_clock_weekday.IsChecked = CType(conf.read("UI", "cb_wndmain_clock_weekday", "True"), Boolean)
 
         'Window Blur
-        cb_wndmain_blur_enabled.IsChecked = CType(ini.ReadValue("UI", "cb_wndmain_blur_enabled", "False"), Boolean)
+        cb_wndmain_blur_enabled.IsChecked = CType(conf.read("UI", "cb_wndmain_blur_enabled", "False"), Boolean)
         cls_blur_behind.blur(Me, ui_blur_enabled)
 
         'Spotify
-        cb_wndmain_spotify_progress.IsChecked = CType(ini.ReadValue("Spotify", "cb_wndmain_spotify_progress", "False"), Boolean)
+        cb_wndmain_spotify_progress.IsChecked = CType(conf.read("Spotify", "cb_wndmain_spotify_progress", "False"), Boolean)
 
         'Weather
         cb_wndmain_weather_enabled.IsChecked = cls_weather.conf_enabled
@@ -145,18 +151,18 @@ Public Class wnd_settings
         txtBx_weather_APIkey.Text = cls_weather.oww_API_key
 
         'Network
-        If ini.ReadValue("NET", "ComboBox_net_interface", "") = "null" Then
+        If conf.read("NET", "ComboBox_net_interface", "") = "null" Then
             ComboBox_net_interface.SelectedIndex = 0
         Else
-            ComboBox_net_interface.SelectedItem = ini.ReadValue("NET", "ComboBox_net_interface", "")
+            ComboBox_net_interface.SelectedItem = conf.read("NET", "ComboBox_net_interface", "")
         End If
 
-        cb_wndmain_net_iconDisableSpeedLimit.IsChecked = CType(ini.ReadValue("UI", "cb_wndmain_net_iconDisableSpeedLimit", "False"), Boolean)
-        cb_wndmain_net_textDisableSpeedLimit.IsChecked = CType(ini.ReadValue("UI", "cb_wndmain_net_textDisableSpeedLimit", "False"), Boolean)
+        cb_wndmain_net_iconDisableSpeedLimit.IsChecked = CType(conf.read("UI", "cb_wndmain_net_iconDisableSpeedLimit", "False"), Boolean)
+        cb_wndmain_net_textDisableSpeedLimit.IsChecked = CType(conf.read("UI", "cb_wndmain_net_textDisableSpeedLimit", "False"), Boolean)
 
         'Others
-        cb_other_disableVolumeOSD.IsChecked = CType(ini.ReadValue("SYS", "cb_other_disableVolumeOSD", "False"), Boolean)
-        cb_other_startup_play.IsChecked = CType(ini.ReadValue("SYS", "cb_other_startup_play", "False"), Boolean)
+        cb_other_disableVolumeOSD.IsChecked = CType(conf.read("SYS", "cb_other_disableVolumeOSD", "False"), Boolean)
+        cb_other_startup_play.IsChecked = CType(conf.read("SYS", "cb_other_startup_play", "False"), Boolean)
         'Others End
     End Sub
 
@@ -170,7 +176,7 @@ Public Class wnd_settings
     End Sub
 
     Private Sub wnd_settings_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
-        ini.WriteValue("app", "firstrun", CType(My.Application.Info.Version.ToString, String))
+        conf.write("app", "firstrun", CType(My.Application.Info.Version.ToString, String))
     End Sub
 
     Dim lib_hVOSD As New HideVolumeOSD.HideVolumeOSDLib
@@ -186,18 +192,88 @@ Public Class wnd_settings
 #End Region
 
 #Region "Tab Navigation"
-    Private Sub btn_changelog_back_Click(sender As Object, e As RoutedEventArgs) Handles ico_backToStart.MouseLeftButtonDown
+    Private Sub ico_nav_home_Click(sender As Object, e As RoutedEventArgs) Handles ico_nav_home.MouseLeftButtonDown
+        If matc_tabctrl.SelectedIndex = 2 Or matc_tabctrl.SelectedIndex = 5 Then
+            matc_tabctrl.SelectedIndex = 6
+            lbl_header.Content = "INFO & SUPPORT"
+            Exit Sub
+        End If
+
         matc_tabctrl.SelectedIndex = 0
         lbl_header.Content = "EINSTELLUNGEN"
         lasttab_lic = False
+
+        anim_sep_pos(sep_nav_highlight, 0)
+        anim_width(sep_nav_highlight, grd_navbar.ActualWidth)
     End Sub
 
     Private Sub matc_tabctrl_SelectionChanged(sender As Object, e As SelectionChangedEventArgs) Handles matc_tabctrl.SelectionChanged
         If Not matc_tabctrl.SelectedIndex = 0 Then
-            ico_backToStart.Visibility = Visibility.Visible
+            sep_nav_highlight.Background = New SolidColorBrush(Color.FromArgb(255, 0, 241, 159))
+            ico_nav_home.Visibility = Visibility.Visible
+
+            anim_img_pos(ico_nav_home, 104.5)
+            anim_grd_pos(grd_navbar, 25)
         Else
-            ico_backToStart.Visibility = Visibility.Hidden
+            sep_nav_highlight.Background = New SolidColorBrush(Color.FromArgb(80, 255, 255, 255))
+            ico_nav_home.Visibility = Visibility.Hidden
+
+            anim_img_pos(ico_nav_home, 92)
+            anim_grd_pos(grd_navbar, 0)
         End If
+    End Sub
+
+    Private Sub btn_page_weather_Click(sender As Object, e As RoutedEventArgs) Handles btn_page_weather.Click
+        matc_tabctrl.SelectedIndex = 1
+        lbl_header.Content = "WETTER"
+
+        If cls_weather.conf_wcom_enabled = True Then
+            lbl_wcom_check.Content = "( ! ) wetter.com wird zum abrufen der aktuellen Wetterlage genutzt."
+        Else
+            lbl_wcom_check.Visibility = Visibility.Hidden
+        End If
+
+        anim_width(sep_nav_highlight, btn_page_weather.Width)
+        anim_sep_pos(sep_nav_highlight, btn_page_weather.Margin.Left)
+    End Sub
+
+    Private Sub btn_page_media_Click(sender As Object, e As RoutedEventArgs) Handles btn_page_media.Click
+        matc_tabctrl.SelectedIndex = 3
+        lbl_header.Content = "SPOTIFY"
+
+        lbl_cacheSize.Content = get_cache_size()
+
+        'Spotify Check
+        If IO.File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Spotify\Spotify.exe") Then
+            lbl_spotifyCheck.Content = "Spotify installiert (v" & MainWindow._sAPI_ClientVersion & ") und " & If(Process.GetProcessesByName("Spotify").Length > 1, "gestartet", "nicht gestartet (!)")
+            bol_spotify_installed = True
+        Else
+            lbl_spotifyCheck.Content = "Spotify ist nicht Installiert."
+            bol_spotify_installed = False
+        End If
+
+        anim_width(sep_nav_highlight, btn_page_media.Width)
+        anim_sep_pos(sep_nav_highlight, btn_page_media.Margin.Left)
+    End Sub
+
+    Private Sub btn_page_updates_Click(sender As Object, e As RoutedEventArgs) Handles btn_page_updates.Click
+        If updater_enabled = False Then
+            show_flyout("Die suche nach Updates ist in diesem Build deaktiviert", False)
+            Exit Sub
+        End If
+
+        matc_tabctrl.SelectedIndex = 4
+        lbl_header.Content = "UPDATES"
+
+        anim_width(sep_nav_highlight, btn_page_updates.Width)
+        anim_sep_pos(sep_nav_highlight, btn_page_updates.Margin.Left)
+    End Sub
+
+    Private Sub btn_page_about_Click(sender As Object, e As RoutedEventArgs) Handles btn_page_about.Click
+        matc_tabctrl.SelectedIndex = 6
+        lbl_header.Content = "INFO & SUPPORT"
+        anim_width(sep_nav_highlight, btn_page_about.Width)
+        anim_sep_pos(sep_nav_highlight, btn_page_about.Margin.Left)
     End Sub
 #End Region
 
@@ -260,16 +336,16 @@ Public Class wnd_settings
         weather_api_test()
     End Sub
 
-    Private Sub btn_overlay_show_Click(sender As Object, e As RoutedEventArgs) Handles btn_overlay_show.Click
-        matc_tabctrl.SelectedIndex = 1
-        lbl_header.Content = "WETTER"
+    'Private Sub btn_overlay_show_Click(sender As Object, e As RoutedEventArgs) Handles btn_overlay_show.Click
+    '    matc_tabctrl.SelectedIndex = 1
+    '    lbl_header.Content = "WETTER"
 
-        If cls_weather.conf_wcom_enabled = True Then
-            lbl_wcom_check.Content = "( ! ) wetter.com wird zum abrufen der aktuellen Wetterlage genutzt."
-        Else
-            lbl_wcom_check.Visibility = Visibility.Hidden
-        End If
-    End Sub
+    '    If cls_weather.conf_wcom_enabled = True Then
+    '        lbl_wcom_check.Content = "( ! ) wetter.com wird zum abrufen der aktuellen Wetterlage genutzt."
+    '    Else
+    '        lbl_wcom_check.Visibility = Visibility.Hidden
+    '    End If
+    'End Sub
 
     Private Sub btn_oww_getKey_Click(sender As Object, e As RoutedEventArgs) Handles btn_oww_getKey.Click
         Process.Start("http://openweathermap.org/appid")
@@ -395,22 +471,6 @@ Public Class wnd_settings
 
 #Region "Spotify"
     Dim bol_spotify_installed As Boolean
-
-    Private Sub btn_spotify_Click(sender As Object, e As RoutedEventArgs) Handles btn_spotify.Click
-        matc_tabctrl.SelectedIndex = 3
-        lbl_header.Content = "SPOTIFY"
-
-        lbl_cacheSize.Content = get_cache_size()
-
-        'Spotify Check
-        If IO.File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Spotify\Spotify.exe") Then
-            lbl_spotifyCheck.Content = "Spotify installiert (v" & MainWindow._sAPI_ClientVersion & ") und " & If(Process.GetProcessesByName("Spotify").Length > 1, "gestartet", "nicht gestartet (!)")
-            bol_spotify_installed = True
-        Else
-            lbl_spotifyCheck.Content = "Spotify ist nicht Installiert."
-            bol_spotify_installed = False
-        End If
-    End Sub
 
     Private Sub btn_restart_spotify_Click(sender As Object, e As RoutedEventArgs) Handles btn_restart_spotify.Click
         If bol_spotify_installed = True Then flyout_spotify("force_restart") Else show_flyout("Spotify nicht installiert!", False)
@@ -555,15 +615,15 @@ Public Class wnd_settings
     Dim manager As New UpdateManager(New Uri("https://niklas389.lima-city.de/SmartUI/updates.json"), "<RSAKeyValue><Modulus>1l9BYgpTEN2ID5l489eiFDhCUdHPGvJ21PJ2m1FdVlAzKl7zalkjvzYd8th7KOFaepYMWXryAIJ+v+FimyQ/H6/EcZH26sr+0mqo44UuBkiEvNFprwplmzt++TnuKIY6+exc0+S3NyuB9cxf4z9vKZGWwWrV/n+CXEU3GDAsWsRoAobU5/P2o56GlCfqO+ybyr5yO11O5eLoAYcMNjyY16VHa4aJvx9iPtRI0aM7T6BVuYuR1NTZjkdnQIdAJAY0T/zO47Fb2M34Oo7uDyRxZ4CDTpNya6ejR35PwIkTWfqRXjj6IJsF8rrjB/Xj/MCgLLXjbfy8F4pSmfmyJ56mUzNlA6rSmymvjg0hzSNwQqNKJEeK4W8WDd9Y5w/Lz9KMeNYz8Wy/oUHvJgx5DK2PmIAUuYhLTGO6wqG/IDt0xy5PyLa0NocbMcXneRPqXx7b3rT7uxvruuIyTMHovIln3F+3b7WYrsS52V8wWoOCDFElX+Y7L8gK1kQ4pXJvqFUqWYNGYG1yBorJ+eWc0E1PQ7Gv+ZL8CBigN4idfhRg87O87psXekK4RE76Pfx7RliTUH1P9LfwRrUQjamt60ZFGrmSKgqxMBGvWuYDFGEtai2EouqBsnVkyzfWPPqG4z++XvPsm0ah1+xJOCyRoa7NHkeGA/PZEVGHYmi9+GbqaV0hfmNx89I1EGn7cXC4Y67AnxvMy7N0jxrn3iQG3tI8AsX1ZZeUqYWwXpc8e1/cpXQ1POKu+gVj/sviyilZP4lFkGwR3ZIz2FZPLd547P2raz6xF1zgo722KZJCH2wU9uBDWiCwawv6N8cNHEuD+1b26ouot0O0Dg/9IA7ic3uWUA2o2zs5UxEoNQSc8z6HR+WeJmW5tjnr8ZZoFZECl8cnJmCTBfkwYbtv1xTf+VhxUa4aROMxbBaxTEMpbYVFZ7WYhJ4ncmh2JjNGYmKNphNUxrTcL6mzx8Mc9bdmr+sxymdKHnybjT39oGI7bkh8jeQj/qDMcIARu3nI0ORibThwYffiWXWKPE2o3yE3a/+RUqpEleK1+orzfO5cANZpTcTJ6ouSkNTnlQoNOsXHRhnC5wL2jeKjfUqEdtLHxMWhnhNnzWrWMnlgdfsjyUsUTOx0nWVPFSOACB943QmYxt1a+tNfkJZCkrIQtLlMqFYyUOEcSsDyaKft9FYE+ABKWKwRvO0X8hujTm2XWoNjyox7gCXCzD0DlawsegUgmT62gKxhhkOwbGyBbrGnZutcYJPL4KX5dxC6k25IGVSRsymzXqhvhu3f93Vn+/ynoZctjnYEw9SlRSqzIYR8xi1WdpKkLfe89EHD20wEf3xKL6cIhsd4npV/at6n6HOsxrQnjQ==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>", New CultureInfo("en"))
     Dim updaterUI As New UpdaterUI(manager, SynchronizationContext.Current)
 
-    Private Sub btn_updates_Click(sender As Object, e As RoutedEventArgs) Handles btn_updates.Click
-        If updater_enabled = False Then
-            show_flyout("Die suche nach Updates ist in diesem Build deaktiviert", False)
-            Exit Sub
-        End If
+    'Private Sub btn_updates_Click(sender As Object, e As RoutedEventArgs) Handles btn_updates.Click
+    '    If updater_enabled = False Then
+    '        show_flyout("Die suche nach Updates ist in diesem Build deaktiviert", False)
+    '        Exit Sub
+    '    End If
 
-        matc_tabctrl.SelectedIndex = 4
-        lbl_header.Content = "UPDATES"
-    End Sub
+    '    matc_tabctrl.SelectedIndex = 4
+    '    lbl_header.Content = "UPDATES"
+    'End Sub
 
     Private Sub updater_hiddensearch()
         manager.IncludeBeta = True
@@ -574,7 +634,61 @@ Public Class wnd_settings
     Private Sub btn_updates_search_Click(sender As Object, e As RoutedEventArgs) Handles btn_updates_search.Click
         updaterUI.ShowUserInterface()
     End Sub
+#End Region
 
+#Region "Animations"
+    Private Sub anim_grd_pos(ByVal e_ctrl As Grid, ByVal e_pos_left As Double)
+        Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Normal, New ThreadStart(Sub()
+
+
+                                                                                                               Dim ta As ThicknessAnimation = New ThicknessAnimation()
+                                                                                                               ta.From = e_ctrl.Margin
+                                                                                                               ta.[To] = New Thickness(e_pos_left, e_ctrl.Margin.Top, e_ctrl.Margin.Right, e_ctrl.Margin.Bottom)
+                                                                                                               ta.Duration = New Duration(TimeSpan.FromSeconds(0.5))
+                                                                                                               ta.EasingFunction = New QuarticEase
+                                                                                                               e_ctrl.BeginAnimation(Grid.MarginProperty, ta)
+                                                                                                           End Sub))
+    End Sub
+
+    Private Sub anim_sep_pos(ByVal e_ctrl As Separator, ByVal e_pos_left As Double)
+        Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Normal, New ThreadStart(Sub()
+
+
+                                                                                                               Dim ta As ThicknessAnimation = New ThicknessAnimation()
+                                                                                                               ta.From = e_ctrl.Margin
+                                                                                                               ta.[To] = New Thickness(e_pos_left, e_ctrl.Margin.Top, e_ctrl.Margin.Right, e_ctrl.Margin.Bottom)
+                                                                                                               ta.Duration = New Duration(TimeSpan.FromSeconds(0.5))
+                                                                                                               ta.EasingFunction = New QuarticEase
+                                                                                                               e_ctrl.BeginAnimation(Separator.MarginProperty, ta)
+                                                                                                           End Sub))
+    End Sub
+
+    Private Sub anim_img_pos(ByVal e_ctrl As Image, ByVal e_pos_left As Double)
+        Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Normal, New ThreadStart(Sub()
+
+
+                                                                                                               Dim ta As ThicknessAnimation = New ThicknessAnimation()
+                                                                                                               ta.From = e_ctrl.Margin
+                                                                                                               ta.[To] = New Thickness(e_pos_left, e_ctrl.Margin.Top, e_ctrl.Margin.Right, e_ctrl.Margin.Bottom)
+                                                                                                               ta.Duration = New Duration(TimeSpan.FromSeconds(0.5))
+                                                                                                               ta.EasingFunction = New QuarticEase
+                                                                                                               e_ctrl.BeginAnimation(Grid.MarginProperty, ta)
+                                                                                                           End Sub))
+    End Sub
+
+    Private Sub anim_width(ByVal e_ctrl As Separator, ByVal e_width As Double)
+        Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Normal, New ThreadStart(Sub()
+
+
+                                                                                                               Dim ta As DoubleAnimation = New DoubleAnimation With {
+                                                                                                                   .From = e_ctrl.ActualWidth,
+                                                                                                                   .[To] = e_width,
+                                                                                                                   .Duration = New Duration(TimeSpan.FromSeconds(0.5)),
+                                                                                                                   .EasingFunction = New QuarticEase
+                                                                                                               }
+                                                                                                               e_ctrl.BeginAnimation(Separator.WidthProperty, ta)
+                                                                                                           End Sub))
+    End Sub
 
 #End Region
 

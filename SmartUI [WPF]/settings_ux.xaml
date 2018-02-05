@@ -17,12 +17,11 @@
                 <GradientStop Offset="0.11" Color="#00000000"/>
             </LinearGradientBrush>
         </Grid.Background>
-        <Label x:Name="label" Content="Info: Designtest - Die &quot;Sonstiges&quot; Einstellungen haben keine funktion" HorizontalAlignment="Left" Margin="0,357,0,0" VerticalAlignment="Top" Width="390" Foreground="#33FFFFFF" Visibility="Hidden"/>
         <Button x:Name="btn_wnd_minimize" Content="0" Template="{StaticResource custbtn_transBG}" HorizontalAlignment="Right" Margin="0,0,35,0" VerticalAlignment="Top" Width="35" Foreground="#3FFFFFFF" Background="{x:Null}" BorderBrush="{x:Null}" Height="25" FontFamily="Webdings"/>
         <Button x:Name="btn_wnd_hide" Content="r" Template="{StaticResource custbtn_transBG}" Margin="0" VerticalAlignment="Top" Foreground="#3FFFFFFF" Background="{x:Null}" BorderBrush="{x:Null}" Height="25" FontFamily="Webdings" HorizontalAlignment="Right" Width="35"/>
         <Custom:MetroContentControl x:Name="lbl_header" Content="EINSTELLUNGEN" HorizontalAlignment="Center" Margin="0,8,0,0" VerticalAlignment="Top" Foreground="White" FontSize="18.667" FontFamily="Segoe UI Light" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
 
-        <Custom:MetroAnimatedTabControl x:Name="matc_tabctrl" Margin="0,25,0,0">
+        <Custom:MetroAnimatedTabControl x:Name="matc_tabctrl" Margin="0,40,0,0" Visibility="Hidden">
             <TabItem x:Name="matc_main" Header="Settings Main" Background="{x:Null}" Foreground="#FF838383" BorderBrush="{x:Null}">
                 <Grid x:Name="matc_tab_main">
                     <Grid HorizontalAlignment="Left" Height="155" VerticalAlignment="Top" Width="550" Margin="0">
@@ -56,9 +55,8 @@
                             </Separator.RenderTransform>
                         </Separator>
                         <Label Content="Netzwerkadapter" HorizontalAlignment="Left" Margin="320,39,0,0" VerticalAlignment="Top" Width="219" Foreground="#3FFFFFFF" Height="26"/>
-                        <CheckBox x:Name="cb_wndmain_net_iconDisableSpeedLimit" Content="Icons bei jeder Datenaktivität" HorizontalAlignment="Left" Margin="324,93,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="215"/>
-                        <CheckBox x:Name="cb_wndmain_net_textDisableSpeedLimit" Content="Text bei jeder Datenaktivität" HorizontalAlignment="Left" Margin="334,113,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="205"/>
-                        <Button x:Name="btn_overlay_show" Content="Wetter Optionen" Template="{StaticResource custbtn}" HorizontalAlignment="Left" Margin="153,64,0,0" VerticalAlignment="Top" Width="148" Foreground="#7FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25" ToolTip="Öffnet die Unterseite der Wetter-Einstellungen"/>
+                        <CheckBox x:Name="cb_wndmain_net_iconDisableSpeedLimit" Content="Icons bei jeder Datenaktivität" HorizontalAlignment="Left" Margin="324,98,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="215"/>
+                        <CheckBox x:Name="cb_wndmain_net_textDisableSpeedLimit" Content="Text bei jeder Datenaktivität" HorizontalAlignment="Left" Margin="334,118,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="205"/>
                         <Separator HorizontalAlignment="Left" Height="10" Margin="0,76,0,69" VerticalAlignment="Center" Width="35" RenderTransformOrigin="0.5,0.5" Background="#26FFFFFF">
                             <Separator.RenderTransform>
                                 <TransformGroup>
@@ -69,7 +67,7 @@
                                 </TransformGroup>
                             </Separator.RenderTransform>
                         </Separator>
-                        <Separator HorizontalAlignment="Left" Height="10" Margin="319,114,0,31" VerticalAlignment="Center" Width="15" RenderTransformOrigin="0.5,0.5" Background="#26FFFFFF">
+                        <Separator HorizontalAlignment="Left" Height="10" Margin="319,119,0,26" VerticalAlignment="Center" Width="15" RenderTransformOrigin="0.5,0.5" Background="#26FFFFFF">
                             <Separator.RenderTransform>
                                 <TransformGroup>
                                     <ScaleTransform/>
@@ -79,31 +77,20 @@
                                 </TransformGroup>
                             </Separator.RenderTransform>
                         </Separator>
-                        <ComboBox x:Name="ComboBox_net_interface" HorizontalAlignment="Left" VerticalAlignment="Top" Width="215" Margin="324,65,0,0">
-                            <ComboBox.Background>
-                                <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
-                                    <GradientStop Color="Black" Offset="0"/>
-                                    <GradientStop Color="Black" Offset="1"/>
-                                </LinearGradientBrush>
-                            </ComboBox.Background>
-                        </ComboBox>
+                        <ComboBox x:Name="ComboBox_net_interface" HorizontalAlignment="Left" VerticalAlignment="Top" Width="215" Margin="324,65,0,0" Height="25" Foreground="White" Background="#FF424242"/>
                         <CheckBox x:Name="cb_wndmain_spotify_progress" Content="Zeitleiste (Spotify)" HorizontalAlignment="Left" Margin="15,105,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="122"/>
-                        <CheckBox x:Name="cb_other_disableVolumeOSD" Content="Verstecke Lautst. OSD" HorizontalAlignment="Left" Margin="153,96,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="148"/>
-                        <CheckBox x:Name="cb_other_startup_play" Content="Play StartUp Sound" HorizontalAlignment="Left" Margin="153,113,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="148"/>
-                        <CheckBox x:Name="cb_wndmain_blur_enabled" Content="Hintergrund unscharf" HorizontalAlignment="Left" Margin="153,130,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="148"/>
+                        <CheckBox x:Name="cb_other_disableVolumeOSD" Content="Verstecke Lautst. OSD" HorizontalAlignment="Left" Margin="153,65,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="148"/>
+                        <CheckBox x:Name="cb_other_startup_play" Content="Play StartUp Sound" HorizontalAlignment="Left" Margin="153,85,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="148"/>
+                        <CheckBox x:Name="cb_wndmain_blur_enabled" Content="Hintergrund unscharf" HorizontalAlignment="Left" Margin="153,105,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="148"/>
                     </Grid>
-                    <Grid HorizontalAlignment="Left" Height="145" Margin="0,155,0,0" VerticalAlignment="Top" Width="550">
+
+                    <Grid HorizontalAlignment="Left" Height="108" Margin="0,155,0,0" VerticalAlignment="Top" Width="550">
                         <Label Content="Sonstiges" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light" Margin="10,5,0,0"/>
                         <Separator HorizontalAlignment="Left" Height="10" Margin="15,30,0,0" VerticalAlignment="Top" Width="525" Foreground="#FF13EAAC" Background="#3FFFFFFF"/>
-                        <Button x:Name="btn_changelog" Content="Changelog" Template="{StaticResource custbtn}" HorizontalAlignment="Left" Margin="465,45,0,0" VerticalAlignment="Top" Width="75" Foreground="#7FFFFFFF" Background="#33FFFFFF" BorderBrush="#00707070" Height="25"/>
                         <Button x:Name="btn_credits" Content="Credits" HorizontalAlignment="Left" Margin="465,105,0,0" VerticalAlignment="Top" Width="75" Foreground="#3FFFFFFF" Background="#00000000" BorderBrush="#00707070" Height="25" Visibility="Hidden"/>
-                        <Button x:Name="btn_info_3rdpty" Template="{StaticResource custbtn}" Content="Drittanbieter Software" HorizontalAlignment="Left" Margin="405,75,0,0" VerticalAlignment="Top" Width="135" Foreground="#7FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25"/>
-                        <Button x:Name="btn_spotify" Template="{StaticResource custbtn}" Content="Spotify" HorizontalAlignment="Left" Margin="385,45,0,0" VerticalAlignment="Top" Width="75" Foreground="#7FFFFFFF" Background="{x:Null}" BorderBrush="{x:Null}" Height="25" BorderThickness="1" SnapsToDevicePixels="True"/>
-                        <Button x:Name="btn_updates" Template="{StaticResource custbtn}" Content="Updates" HorizontalAlignment="Left" Margin="305,45,0,0" VerticalAlignment="Top" Width="75" Foreground="#7FFFFFFF" Background="{x:Null}" BorderBrush="{x:Null}" Height="25" BorderThickness="1" SnapsToDevicePixels="True"/>
                     </Grid>
                     <Grid x:Name="grd_bottom_strip" Height="28" VerticalAlignment="Bottom" Margin="0">
                         <Button x:Name="btn_settings_save" Content="Speichern" Template="{StaticResource custbtn}" HorizontalAlignment="Right" Margin="0,-6,10,9" VerticalAlignment="Center" Width="85" Foreground="#7FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25"/>
-                        <Label x:Name="lbl_cpr" Content="&lt;cpr&gt;" HorizontalAlignment="Left" Margin="10,-11,0,9" VerticalAlignment="Bottom" Width="445" Foreground="#3FFFFFFF" Height="30" VerticalContentAlignment="Bottom"/>
                     </Grid>
                 </Grid>
             </TabItem>
@@ -229,9 +216,19 @@
                     </Grid>
                 </Grid>
             </TabItem>
+            <TabItem x:Name="matc_about" Header="TabItem" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" Width="54" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF767676">
+                <Grid x:Name="matc_tab_about">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="SmartUI" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Background="{x:Null}" Foreground="White" FontSize="16"/>
+                    <Label Content="v123" HorizontalAlignment="Left" Margin="74,14,0,0" VerticalAlignment="Top" Background="{x:Null}" Foreground="#A5FFFFFF"/>
+                    <Button x:Name="btn_changelog" Content="Changelog" Template="{StaticResource custbtn}" HorizontalAlignment="Left" Margin="465,45,0,0" VerticalAlignment="Top" Width="75" Foreground="#7FFFFFFF" Background="#33FFFFFF" BorderBrush="#00707070" Height="25"/>
+                    <Button x:Name="btn_info_3rdpty" Template="{StaticResource custbtn}" Content="Drittanbieter Software" HorizontalAlignment="Left" Margin="405,75,0,0" VerticalAlignment="Top" Width="135" Foreground="#7FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25"/>
+                    <Label x:Name="lbl_cpr" Content="&lt;cpr&gt;" Margin="10,0,10,10" VerticalAlignment="Bottom" Foreground="#3FFFFFFF" Height="25" VerticalContentAlignment="Bottom"/>
+                </Grid>
+            </TabItem>
         </Custom:MetroAnimatedTabControl>
-
-        <Image x:Name="ico_backToStart" HorizontalAlignment="Left" Height="25" VerticalAlignment="Top" Width="25" Margin="12,10,0,0" Source="Resources/ic_arrow_back_white_24dp.png"/>
 
         <Custom:Flyout x:Name="flyout_message" VerticalAlignment="Bottom" CloseButtonVisibility="Collapsed" Position="Bottom" TitleVisibility="Collapsed" HorizontalAlignment="Center" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="65" Background="#19FFFFFF" AnimateOpacity="True" AnimateOnPositionChange="False" AutoCloseInterval="2500" IsAutoCloseEnabled="True">
             <Grid x:Name="grd_flyout_message" HorizontalAlignment="Center" Height="30" Margin="-27,0,0,0" VerticalAlignment="Center">
@@ -240,7 +237,7 @@
             </Grid>
         </Custom:Flyout>
 
-        <Custom:Flyout x:Name="flyout_cache_reset" Header="" HorizontalAlignment="Left" Height="135" VerticalAlignment="Bottom" Margin="0" AnimateOpacity="True" AutoCloseInterval="0" CloseButtonVisibility="Collapsed" Position="Bottom" Background="#26FFFFFF" IsOpen="True">
+        <Custom:Flyout x:Name="flyout_cache_reset" Header="" HorizontalAlignment="Left" Height="135" VerticalAlignment="Bottom" Margin="0" AnimateOpacity="True" AutoCloseInterval="0" CloseButtonVisibility="Collapsed" Position="Bottom" Background="#26FFFFFF">
             <Grid x:Name="grd_reset_cache_confirmation_Copy" Margin="-35,0,0,0">
                 <Custom:MetroContentControl x:Name="lbl_reset_cache_header" Content="&lt;header&gt;" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top" Foreground="White" FontSize="18.667" FontFamily="Segoe UI Light" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
                 <Button x:Name="btn_flyout_spotify_confirm" Template="{StaticResource custbtn_dark}" Content="Löschen" HorizontalAlignment="Right" Margin="0,0,5,5" VerticalAlignment="Bottom" Width="85" Foreground="White" Background="#66000000" BorderBrush="{x:Null}" Height="26"/>
@@ -248,6 +245,16 @@
                 <Label x:Name="lbl_flyout_spotify_msg" Content="&lt;msg&gt;" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Foreground="White" Background="{x:Null}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
             </Grid>
         </Custom:Flyout>
+
+        <Grid x:Name="grd_navbar" HorizontalAlignment="Center" Height="26" Margin="0,40,0,0" VerticalAlignment="Top">
+            <Button x:Name="btn_page_weather" Content="Wetter" Template="{StaticResource custbtn_transBG}" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Top" Width="70" Foreground="#BFFFFFFF" Background="{x:Null}" BorderBrush="{x:Null}" Height="25"/>
+            <Button x:Name="btn_page_media" Content="Spotify" Template="{StaticResource custbtn_transBG}" HorizontalAlignment="Left" Margin="70,0,0,0" VerticalAlignment="Top" Width="70" Foreground="#BFFFFFFF" Background="{x:Null}" BorderBrush="{x:Null}" Height="25"/>
+            <Button x:Name="btn_page_updates" Content="Updates" Template="{StaticResource custbtn_transBG}" HorizontalAlignment="Left" Margin="140,0,0,0" VerticalAlignment="Top" Width="70" Foreground="#BFFFFFFF" Background="{x:Null}" BorderBrush="{x:Null}" Height="25"/>
+            <Button x:Name="btn_page_about" Content="Info &amp; Support" Template="{StaticResource custbtn_transBG}" HorizontalAlignment="Left" Margin="210,0,0,0" VerticalAlignment="Top" Width="96" Foreground="#BFFFFFFF" Background="{x:Null}" BorderBrush="{x:Null}" Height="25"/>
+         <Separator x:Name="sep_nav_highlight" HorizontalAlignment="Left" Height="1" Margin="0" VerticalAlignment="Bottom" Width="100" Foreground="{x:Null}" Background="#3FFFFFFF"/>
+    
+        </Grid>
+        <Image x:Name="ico_nav_home" HorizontalAlignment="Left" Height="25" VerticalAlignment="Top" Width="25" Margin="92,41,0,0" Source="Resources/ic_arrow_back_white_24dp.png" Visibility="Hidden"/>
     </Grid>
 
 </Window>

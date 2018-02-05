@@ -7,12 +7,13 @@ Public Class wnd_flyout_appmenu
     Dim m_ht As Double = 90
     Dim hda As Boolean = False
 
+    Dim conf As New cls_config
 #Region "WND"
     Private Sub wnd_flyout_appmenu_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
         Me.Top = My.Computer.Screen.WorkingArea.Top
         Me.Left = My.Computer.Screen.WorkingArea.Width - Me.RenderSize.Width
 
-        If IO.File.Exists(".\config\debug") Then
+        If conf.debugging_enabled = True Then
             m_ht = 120
             btn_do_restart.Margin = New Thickness(0, 60, 0, 0)
             btn_do_exit.Margin = New Thickness(0, 90, 0, 0)

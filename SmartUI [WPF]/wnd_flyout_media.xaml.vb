@@ -123,6 +123,7 @@ Public Class wnd_flyout_media
                 hda = False
                 anim_slideout()
                 MainWindow.media_widget_opened = 0
+                MainWindow.wnd_log.AddLine("ERR" & "-MFLYOUT", "update_widget - " & ex.Message)
             End If
 
             media_cache_albumArt()
@@ -165,6 +166,7 @@ Public Class wnd_flyout_media
             img_cover_error.Visibility = Visibility.Visible
             img_cover_error.ToolTip = "Wir hatten bei diesem Titel probleme das Cover abzurufen." & NewLine & "Versuch es später nochmal."
             If IO.File.Exists(cache_path & trk_uri) And err = False Then media_cache_albumArt(True)
+            MainWindow.wnd_log.AddLine("ERR" & "-MFLYOUT", "media_cache_albumArt - " & ex.Message)
         End Try
 
         albumCover_overlay(False, True)        'hide loading ani
