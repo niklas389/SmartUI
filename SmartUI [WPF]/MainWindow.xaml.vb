@@ -5,8 +5,10 @@ Imports System.Net.NetworkInformation
 Imports System.Runtime.InteropServices
 Imports System.Threading
 Imports System.Windows
+Imports System.Windows.Controls
 Imports System.Windows.Input
 Imports System.Windows.Media
+Imports System.Windows.Media.Animation
 Imports CoreAudioApi
 'Imports for SPOTIFY-API .NET
 Imports SpotifyAPI.Local 'Enums
@@ -19,7 +21,7 @@ Class MainWindow
     Public Shared settings_update_needed As Boolean = False
     Public Shared weather_update_needed As Boolean = False
 
-    Public Shared suiversion As String = My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & ".8"
+    Public Shared suiversion As String = My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & ".10"
 
 #Region "Dock"
     Const ABM_NEW As Int32 = 0
@@ -80,7 +82,7 @@ Class MainWindow
 #Region "MyBase & Startup"
     Public Sub New()
         wnd_log.outputBox.AppendText("SmartUI LOG")
-        wnd_log.outputBox.AppendText(NewLine & "Made in 2016/17 by Niklas Wagner in Hannover (DE)")
+        wnd_log.outputBox.AppendText(NewLine & "Made in 2016/18 by Niklas Wagner in Hannover")
         wnd_log.outputBox.AppendText(NewLine & "App startup time: " & DateTime.Now.Day & ". " & CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(DateTime.Now.Month) & " - " & DateTime.Now.ToLongTimeString)
         wnd_log.outputBox.AppendText(NewLine & "APP Version: " & My.Application.Info.Version.ToString & " - " & IO.File.GetLastWriteTime(AppDomain.CurrentDomain.BaseDirectory & "\SmartUI.exe").ToString("yyMMdd"))
         wnd_log.outputBox.AppendText(NewLine & "OS Version: " & Environment.OSVersion.ToString & NewLine)
@@ -170,7 +172,6 @@ Class MainWindow
 
         If sAPI_allowed = True Then
             wpf_helper.helper_grid(grd_spotify, e_playing) 'grid is only visible if Spotify is playing something.
-            wpf_helper.helper_grid(grd_link, Not e_playing)
         End If
 
         tmr_aInit.Stop()
@@ -261,8 +262,13 @@ Class MainWindow
 
             If sAPI_error_count > 4 Then
                 wpf_helper.helper_grid(grd_spotify, False)
-                wpf_helper.helper_grid(grd_link, True)
-                wpf_helper.helper_image(icn_run_spotify, "pack://application:,,,/Resources/ic_error_outline_white_24dp.png")
+
+                'TEST
+                wpf_helper.helper_grid(grd_spotify, True, 25)
+                wpf_helper.helper_image(icn_spotify, "pack://application:,,,/Resources/spotify_notification.png")
+                anim_grd_pos(grd_spotify, 5)
+                anim_grd_pos(grd_weather, 25)
+                'END
             Else
                 flyout_media.Close() 'close media widget
                 media_widget_opened = -1
@@ -465,15 +471,23 @@ Class MainWindow
         Else
             tmr_mediaInfo_delay.Stop()
             wpf_helper.helper_image(icn_spotify, "pack://application:,,,/Resources/spotify_notification.png")
-            wpf_helper.helper_grid(grd_spotify, e.Playing) 'grid is only visible if Spotify is playing something.
-            wpf_helper.helper_grid(grd_link, Not e.Playing)
+            'wpf_helper.helper_grid(grd_spotify, e.Playing) 'grid is only visible if Spotify is playing something.
+            'wpf_helper.helper_grid(grd_link, Not e.Playing)
+            wpf_helper.helper_grid(grd_spotify, True, -5)
+            anim_grd_pos(grd_weather, 1.5)
+            anim_grd_pos(grd_spotify, grd_weather.RenderSize.Width)
         End If
     End Sub
 
     Private WithEvents tmr_mediaInfo_delay As New System.Windows.Threading.DispatcherTimer With {.Interval = New TimeSpan(0, 0, 3), .IsEnabled = False}
     Private Sub tmr_mediaInfo_delay_Tick(ByVal sender As Object, ByVal e As System.EventArgs) Handles tmr_mediaInfo_delay.Tick
-        wpf_helper.helper_grid(grd_spotify, e_playing) 'delayed hiding after playing is paused
-        wpf_helper.helper_grid(grd_link, Not e_playing)
+        'wpf_helper.helper_grid(grd_spotify, e_playing) 'delayed hiding after playing is paused
+        'wpf_helper.helper_grid(grd_link, Not e_playing)
+        wpf_helper.helper_grid(grd_spotify, True, 25)
+        wpf_helper.helper_image(icn_spotify, "pack://application:,,,/Resources/spotify_notification.png")
+        anim_grd_pos(grd_spotify, 5)
+        anim_grd_pos(grd_weather, 25)
+
         tmr_mediaInfo_delay.Stop()
     End Sub
 #End Region
@@ -544,7 +558,7 @@ Class MainWindow
     End Function
 
     Private Sub lbl_spotify_SizeChanged(sender As Object, e As SizeChangedEventArgs) Handles lbl_spotify.SizeChanged, lbl_spotify_remaining.SizeChanged
-        lbl_spotify.Margin = New Thickness(19, -3, 0, 0)
+        'lbl_spotify.Margin = New Thickness(19, -3, 0, 0)
         lbl_spotify_remaining.Margin = New Thickness(icn_spotify.RenderSize.Width + lbl_spotify.RenderSize.Width - 4, -1, 0, 0)
     End Sub
 
@@ -563,13 +577,11 @@ Class MainWindow
         End If
     End Sub
 
-    Private Sub btn_spotify_playpause_Click(sender As Object, e As RoutedEventArgs) Handles icn_spotify.MouseUp, icn_run_spotify.MouseUp
+    Private Sub btn_spotify_playpause_Click(sender As Object, e As RoutedEventArgs) Handles icn_spotify.MouseUp
         If sAPI_error = True Then
             sAPI_error_count = 0
             init_spotifyAPI()
-            wpf_helper.helper_image(icn_run_spotify, "pack://application:,,,/Resources/spotify_notification.png")
             wpf_helper.helper_grid(grd_spotify, e_playing) 'grid is only visible if Spotify is playing something.
-            wpf_helper.helper_grid(grd_link, Not e_playing)
         Else
             ' PlayPause
             If e_playing = False Then spotifyapi.Play() Else spotifyapi.Pause()
@@ -577,7 +589,11 @@ Class MainWindow
     End Sub
 
     Private Sub icn_spotify_MouseEnter(sender As Object, e As Input.MouseEventArgs) Handles icn_spotify.MouseEnter
-        wpf_helper.helper_image(icn_spotify, "pack://application:,,,/Resources/ic_pause_white_24dp.png")
+        If e_playing = True Then
+            wpf_helper.helper_image(icn_spotify, "pack://application:,,,/Resources/ic_pause_white_24dp.png")
+        Else
+            wpf_helper.helper_image(icn_spotify, "pack://application:,,,/Resources/ic_play_arrow_white_24dp.png")
+        End If
     End Sub
 
     Private Sub icn_spotify_MouseLeave(sender As Object, e As Input.MouseEventArgs) Handles icn_spotify.MouseLeave
@@ -775,7 +791,7 @@ Class MainWindow
         End If
 
         net_stat_bSent = net_NIC_statistic.BytesSent
-            net_stat_bReceived = net_NIC_statistic.BytesReceived
+        net_stat_bReceived = net_NIC_statistic.BytesReceived
 
         'visualize sent v2
         If net_stat_bSent_speed > 0 Then
@@ -812,7 +828,7 @@ Class MainWindow
 
     'convert bytes
     Private Function get_formatted_bytes(bytes As Integer) As String
-        If bytes <1024 Then
+        If bytes < 1024 Then
             Return Math.Round(CDbl(bytes), 0) & "B/s"
         ElseIf bytes < 1048576 Then
             Return Math.Round(CDbl(bytes / 1024), 0) & "KB/s"
@@ -837,24 +853,7 @@ Class MainWindow
 
 #End Region
 
-#Region "LINK GRID & FLYOUTS"
-    Private Sub grd_link_IsVisibleChanged(sender As Object, e As DependencyPropertyChangedEventArgs) Handles grd_link.IsVisibleChanged
-        If CBool(e.NewValue) = True Then
-            grd_weather.Margin = New Thickness(25, 0, 0, 0)
-        Else
-            grd_weather.Margin = New Thickness(1.5, 0, 0, 0)
-        End If
-    End Sub
-
-    'Icon : SpotifyLink
-    Private Sub icn_run_spotify_MouseEnter(sender As Object, e As Input.MouseEventArgs) Handles icn_run_spotify.MouseEnter
-        wpf_helper.helper_image(icn_run_spotify, "pack://application:,,,/Resources/ic_play_arrow_white_24dp.png")
-    End Sub
-
-    Private Sub icn_run_spotify_MouseLeave(sender As Object, e As Input.MouseEventArgs) Handles icn_run_spotify.MouseLeave
-        wpf_helper.helper_image(icn_run_spotify, "pack://application:,,,/Resources/spotify_notification.png")
-    End Sub
-
+#Region "FLYOUTS"
     Dim ui_appmenu As New wnd_flyout_appmenu
     Private Sub btn_exit_Click(sender As Object, e As RoutedEventArgs) Handles icn_menu.MouseLeftButtonUp, grd_menu_right.MouseLeftButtonUp
         ui_appmenu.Show()
@@ -878,4 +877,18 @@ Class MainWindow
 
 #End Region
 
+#Region "Animations"
+    Private Sub anim_grd_pos(ByVal e_grid As Grid, ByVal e_pos_left As Double)
+        Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Normal, New ThreadStart(Sub()
+
+
+                                                                                                               Dim ta As ThicknessAnimation = New ThicknessAnimation()
+                                                                                                               ta.From = e_grid.Margin
+                                                                                                               ta.[To] = New Thickness(e_pos_left, 0, 0, 0)
+                                                                                                               ta.Duration = New Duration(TimeSpan.FromSeconds(0.25))
+                                                                                                               e_grid.BeginAnimation(Grid.MarginProperty, ta)
+                                                                                                           End Sub))
+    End Sub
+
+#End Region
 End Class

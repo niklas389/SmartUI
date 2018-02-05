@@ -33,8 +33,6 @@ Public Class wnd_settings
     End Sub
 
     Private Sub wnd_settings_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
-        cls_blur_behind.blur(Me, ui_blur_enabled)
-
         lib_hVOSD.Init() 'bring up lib_HVOSD
         Me.Hide()
 
@@ -135,6 +133,7 @@ Public Class wnd_settings
 
         'Window Blur
         cb_wndmain_blur_enabled.IsChecked = CType(ini.ReadValue("UI", "cb_wndmain_blur_enabled", "False"), Boolean)
+        cls_blur_behind.blur(Me, ui_blur_enabled)
 
         'Spotify
         cb_wndmain_spotify_progress.IsChecked = CType(ini.ReadValue("Spotify", "cb_wndmain_spotify_progress", "False"), Boolean)
@@ -420,13 +419,15 @@ Public Class wnd_settings
     Private Sub flyout_spotify(ctnt As String, ByVal Optional e_csize As String = "")
         Select Case ctnt
             Case "del_cache"
+                lbl_reset_cache_header.Content = "Daten im Cache löschen?"
                 btn_flyout_spotify_confirm.Tag = "del_cache"
-                lbl_flyout_spotify_msg.Content = "Alle Album-Cover werden entfernt, dabei werden " & e_csize & " freigegeben." & NewLine & "Die Cover werden bei bedarf erneut heruntergeladen."
+                lbl_flyout_spotify_msg.Content = "Alle Albumcover werden entfernt, es werden " & e_csize & " Speicherplatz freigegeben." & NewLine & "Die Cover werden bei bedarf erneut heruntergeladen."
                 btn_flyout_spotify_confirm.Content = "Löschen"
 
             Case "force_restart"
+                lbl_reset_cache_header.Content = "Spotify neu-starten?"
                 btn_flyout_spotify_confirm.Tag = "force_restart"
-                lbl_flyout_spotify_msg.Content = "Spotify wird beendet und neu-gestartet"
+                lbl_flyout_spotify_msg.Content = "Der Spotify Client wird beendet und neu-gestartet"
                 btn_flyout_spotify_confirm.Content = "Neu starten"
 
         End Select

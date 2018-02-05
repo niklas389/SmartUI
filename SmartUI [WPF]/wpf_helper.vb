@@ -25,11 +25,17 @@ Public Class wpf_helper
         End If
     End Sub
 
-    Public Shared Sub helper_grid(ByVal ctrl As Grid, ByVal Optional e_visible As Boolean = Nothing)
+    Public Shared Sub helper_grid(ByVal ctrl As Grid, ByVal Optional e_visible As Boolean = Nothing, ByVal Optional e_width As Double = -1)
         If e_visible = True Then
             Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Background, New ThreadStart(Sub() ctrl.Visibility = Visibility.Visible))
         ElseIf e_visible = False Then
             Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Background, New ThreadStart(Sub() ctrl.Visibility = Visibility.Hidden))
+        End If
+
+        If e_width > -1 Then
+            Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Background, New ThreadStart(Sub() ctrl.Width = e_width))
+        ElseIf e_width = -5 Then
+            Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Background, New ThreadStart(Sub() ctrl.Width = Double.NaN))
         End If
     End Sub
 

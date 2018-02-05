@@ -13,10 +13,10 @@ Imports nUpdate.Core
 <Assembly: AssemblyDescription("")>
 <Assembly: AssemblyCompany("")>
 <Assembly: AssemblyProduct("SmartUI")>
-<Assembly: AssemblyCopyright("Copyright © 2016 - 2017 by Niklas Wagner")>
+<Assembly: AssemblyCopyright("Copyright © 2016 - 2018 by Niklas Wagner")>
 <Assembly: AssemblyTrademark("")>
 <Assembly: ComVisible(False)>
-<Assembly: nUpdateVersion("1.3.8")>
+<Assembly: nUpdateVersion("1.3.10")>
 
 'Um mit dem Erstellen lokalisierbarer Anwendungen zu beginnen, legen Sie 
 '<UICulture>ImCodeVerwendeteKultur</UICulture> in der VBPROJ-Datei

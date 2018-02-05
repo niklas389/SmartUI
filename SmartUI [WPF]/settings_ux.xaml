@@ -181,7 +181,7 @@
                                 <Separator HorizontalAlignment="Left" Height="1" Margin="0" VerticalAlignment="Bottom" Width="470" Foreground="#FF13EAAC" Background="#19FFFFFF"/>
                                 <Button x:Name="btn_mahapps_license" Content="Lizenz" Template="{StaticResource custbtn}" HorizontalAlignment="Right" Margin="0,0,3,6" VerticalAlignment="Bottom" Width="75" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#7FFFFFFF"/>
                             </Grid>
-                            
+
                             <Grid x:Name="grd_newtonsoft" HorizontalAlignment="Left" Height="85" VerticalAlignment="Top" Width="470" Margin="0,205,0,0">
                                 <Label x:Name="lbl_newtonsoft_header" Content="Newtonsoft Json" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light"/>
                                 <Label x:Name="lbl_newtonsoft_version" Content="Version: 10.0" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,29,0,0" Width="450" Foreground="White" Background="{x:Null}"/>
@@ -205,7 +205,7 @@
                                 <Button x:Name="btn_hvOSD_license" Content="Lizenz" Template="{StaticResource custbtn}" HorizontalAlignment="Right" Margin="0,0,3,7" VerticalAlignment="Bottom" Width="75" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#7FFFFFFF"/>
                                 <Separator Height="1" Margin="0" VerticalAlignment="Bottom" Foreground="#FF13EAAC" Background="#19FFFFFF"/>
                             </Grid>
-                            
+
                             <Grid x:Name="grd_nUpdate" HorizontalAlignment="Left" Height="111" VerticalAlignment="Top" Width="470" Margin="0,525,0,0">
                                 <Label x:Name="lbl_nUpdate_header" Content="nUpdate" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light"/>
                                 <Label x:Name="lbl_nUpdate_version" Content="Version: 1.2" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,29,0,0" Width="450" Foreground="White" Background="{x:Null}"/>
@@ -215,7 +215,7 @@
                             </Grid>
                         </Grid>
                     </ScrollViewer>
-                    
+
                     <Label x:Name="lbl_test" Content="Dieses Projekt nutzt folgende Software" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light" Margin="10,5,0,0"/>
                     <Separator Height="10" Margin="15,30,15,0" VerticalAlignment="Top" Foreground="#FF13EAAC" Background="#3FFFFFFF"/>
                     <Grid x:Name="grd_3rdpty_shadow" Height="40" Margin="0" VerticalAlignment="Bottom">
@@ -240,13 +240,12 @@
             </Grid>
         </Custom:Flyout>
 
-        <Custom:Flyout x:Name="flyout_cache_reset" Header="" HorizontalAlignment="Left" Height="125" VerticalAlignment="Bottom" Margin="0" AnimateOpacity="True" AutoCloseInterval="0" CloseButtonVisibility="Collapsed" Position="Bottom" Background="#26FFFFFF">
+        <Custom:Flyout x:Name="flyout_cache_reset" Header="" HorizontalAlignment="Left" Height="135" VerticalAlignment="Bottom" Margin="0" AnimateOpacity="True" AutoCloseInterval="0" CloseButtonVisibility="Collapsed" Position="Bottom" Background="#26FFFFFF" IsOpen="True">
             <Grid x:Name="grd_reset_cache_confirmation_Copy" Margin="-35,0,0,0">
-                <Custom:MetroContentControl x:Name="lbl_reset_cache_header" Content="Sind Sie sicher?" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top" Foreground="White" FontSize="18.667" FontFamily="Segoe UI Light" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+                <Custom:MetroContentControl x:Name="lbl_reset_cache_header" Content="&lt;header&gt;" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top" Foreground="White" FontSize="18.667" FontFamily="Segoe UI Light" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
                 <Button x:Name="btn_flyout_spotify_confirm" Template="{StaticResource custbtn_dark}" Content="Löschen" HorizontalAlignment="Right" Margin="0,0,5,5" VerticalAlignment="Bottom" Width="85" Foreground="White" Background="#66000000" BorderBrush="{x:Null}" Height="26"/>
                 <Button x:Name="btn_reset_cache_cancel" Template="{StaticResource custbtn_dark}" Content="Abbrechen" HorizontalAlignment="Right" Margin="0,0,93,5" VerticalAlignment="Bottom" Width="85" Foreground="White" Background="#66000000" BorderBrush="{x:Null}" Height="26"/>
                 <Label x:Name="lbl_flyout_spotify_msg" Content="&lt;msg&gt;" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Foreground="White" Background="{x:Null}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
-                <Image HorizontalAlignment="Left" Height="60" Width="60" Source="Resources/guide_hd_disconnect.png" SnapsToDevicePixels="True" Margin="10,-5,0,0" VerticalAlignment="Center" Opacity="0.5"/>
             </Grid>
         </Custom:Flyout>
     </Grid>
