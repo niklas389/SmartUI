@@ -19,12 +19,33 @@ Public Class wnd_log
 
     Private Sub wnd_log_IsVisibleChanged(sender As Object, e As DependencyPropertyChangedEventArgs) Handles Me.IsVisibleChanged
         If Me.Visibility = Visibility.Hidden Then Exit Sub
-        cls_blur_behind.blur(Me, wnd_settings.ui_blur_enabled)
+        cls_blur_behind.blur(Me, cls_config.ui_blur_enabled)
     End Sub
 #End Region
 
-    Public Sub AddLine(cat As String, msg As String)
-        outputBox.AppendText(NewLine & DateTime.Now.ToLongTimeString & " | " & cat & " > " & msg)
+    Public Sub AddLine(cat As String, msg As String, ByVal Optional color As String = "inf")
+
+        Dim tr As New Documents.TextRange(outputBox.Document.ContentEnd, outputBox.Document.ContentEnd)
+        Dim clr As Media.Brush = Media.Brushes.White
+        tr.Text = NewLine & DateTime.Now.ToLongTimeString & " | " & cat & " > " & msg
+
+        Select Case color
+            Case "inf"
+                clr = Media.Brushes.White
+            Case "err"
+                clr = Media.Brushes.Red
+            Case "att"
+                clr = Media.Brushes.Yellow
+            Case "add"
+                clr = Media.Brushes.Gray
+
+            Case "wea"
+                clr = Media.Brushes.Turquoise
+        End Select
+
+        tr.ApplyPropertyValue(Documents.TextElement.ForegroundProperty, clr)
+
+        'outputBox.AppendText(NewLine & DateTime.Now.ToLongTimeString & " | " & cat & " > " & msg)
         outputBox.ScrollToEnd()
     End Sub
 

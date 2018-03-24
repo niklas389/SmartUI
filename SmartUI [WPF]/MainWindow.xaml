@@ -50,8 +50,8 @@
         </Grid>
 
         <Grid x:Name="grd_menu_right" HorizontalAlignment="Right" Height="25" Margin="0" VerticalAlignment="Top" Width="25">
-            <Image x:Name="icn_menu" HorizontalAlignment="Center" Margin="-1,0,0,0" VerticalAlignment="Center" Source="pack://siteoforigin:,,,/Resources/ic_more_vert_24dp.png" Width="19" Height="19"></Image>
-        </Grid>
+            <Image x:Name="icn_menu" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Source="Resources/ic_more_vert_24dp.png" Width="20" Height="20"/>
+            </Grid>
 
             <Grid x:Name="grd_clock" HorizontalAlignment="Left" Height="25" Margin="450,0,0,0" VerticalAlignment="Top">
                 <Label x:Name="lbl_clock" Content="&lt;clock&gt;" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="White" FontFamily="{DynamicResource MainFont}" FontSize="18.667" Height="36" Margin="47,-3,0,0" Background="{x:Null}"/>

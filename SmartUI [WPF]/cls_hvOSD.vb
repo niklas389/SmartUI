@@ -20,7 +20,7 @@ Namespace HideVolumeOSD
         Private hWndInject As IntPtr = IntPtr.Zero
 
         Private hide_osd_option As Integer = -1
-        Private log_cat As String = "   LIB-HV_OSD"
+        Private log_cat As String = "LIB-HV_OSD"
 
         Public Async Sub Init()
             'MainWindow.wnd_log.AddLine(log_cat, "Init...")
@@ -39,7 +39,7 @@ Namespace HideVolumeOSD
 
             If hWndInject = IntPtr.Zero Then
                 'Program.InitFailed = True
-                MainWindow.wnd_log.AddLine(log_cat, "Init failed (!)")
+                MainWindow.wnd_log.AddLine(log_cat, "Init failed (!)", "err")
                 Return
 
             ElseIf Not hide_osd_option = -1 Then
@@ -63,7 +63,7 @@ Namespace HideVolumeOSD
                 If FindWindowEx(hwndHost, IntPtr.Zero, "DirectUIHWND", "") <> IntPtr.Zero Then
                     ' if this is the only pair we are sure
                     If pairCount = 0 Then
-                        MainWindow.wnd_log.AddLine(log_cat, "Found OSD window with try: " & i_try)
+                        MainWindow.wnd_log.AddLine(log_cat, "Found OSD window with try: " & i_try, "add")
                         hwndRet = hwndHost
                     End If
 
@@ -71,7 +71,7 @@ Namespace HideVolumeOSD
 
                     ' if there are more pairs the criteria has failed...
                     If pairCount > 1 Then
-                        MainWindow.wnd_log.AddLine(log_cat, "error: Multiple pairs found!")
+                        MainWindow.wnd_log.AddLine(log_cat, "error: Multiple pairs found!", "err")
                         Return IntPtr.Zero
                     End If
                 End If
@@ -80,7 +80,7 @@ Namespace HideVolumeOSD
             ' if no window found yet, there is no OSD window at all
 
             If hwndRet = IntPtr.Zero Then
-                MainWindow.wnd_log.AddLine(log_cat, "error: OSD window not found!")
+                MainWindow.wnd_log.AddLine(log_cat, "error: OSD window not found!", "err")
             End If
 
             Return hwndRet
@@ -96,7 +96,7 @@ Namespace HideVolumeOSD
 
             ' SW_MINIMIZE
             ShowWindow(hWndInject, 6)
-            MainWindow.wnd_log.AddLine(log_cat, "Volume OSD hidden")
+            MainWindow.wnd_log.AddLine(log_cat, "Volume OSD hidden", "add")
         End Sub
 
         Public Sub ShowOSD()
@@ -105,7 +105,7 @@ Namespace HideVolumeOSD
 
             ' SW_RESTORE
             ShowWindow(hWndInject, 9)
-            MainWindow.wnd_log.AddLine(log_cat, "Volume OSD visible")
+            MainWindow.wnd_log.AddLine(log_cat, "Volume OSD visible", "add")
         End Sub
 
         Private Shared Function InlineAssignHelper(Of T)(ByRef target As T, value As T) As T

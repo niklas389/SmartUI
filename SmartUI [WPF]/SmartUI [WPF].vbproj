@@ -7,7 +7,7 @@
     <ProjectGuid>{3F12FA04-1F3E-47FE-82CA-0B0F0A8D9C3F}</ProjectGuid>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{F184B08F-C81C-45F6-A57F-5ABD9991F28F}</ProjectTypeGuids>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>SmartUI__WPF_</RootNamespace>
+    <RootNamespace>SmartUI</RootNamespace>
     <AssemblyName>SmartUI</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <MyType>Custom</MyType>
@@ -103,17 +103,11 @@
     <Reference Include="CoreAudioApi">
       <HintPath>..\..\..\Resources\CoreAudioApi.dll</HintPath>
     </Reference>
-    <Reference Include="MahApps.Metro, Version=1.6.0.184, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MahApps.Metro.1.6.0-alpha0184\lib\net45\MahApps.Metro.dll</HintPath>
+    <Reference Include="MahApps.Metro, Version=1.6.1.4, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.1.6.1\lib\net45\MahApps.Metro.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.11.0.1-beta3\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="nUpdate.Internal, Version=3.2.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\nUpdate.ProvideTAP.3.2.1\lib\net40\nUpdate.Internal.dll</HintPath>
-    </Reference>
-    <Reference Include="nUpdate.ProvideTAP, Version=3.2.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\nUpdate.ProvideTAP.3.2.1\lib\net40\nUpdate.ProvideTAP.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.11.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="SpotifyAPI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\SpotifyAPI-NET.2.17.1\lib\SpotifyAPI.dll</HintPath>
@@ -145,7 +139,7 @@
     <Compile Include="cls_blur-behind.vb" />
     <Compile Include="cls_config.vb" />
     <Compile Include="GlobalSuppressions.vb" />
-    <Compile Include="hideVolumeOSD.vb" />
+    <Compile Include="cls_hvOSD.vb" />
     <Compile Include="My Project\Resources.Designer.vb">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -161,9 +155,6 @@
     <Compile Include="wnd_flyout_media.xaml.vb">
       <DependentUpon>wnd_flyout_media.xaml</DependentUpon>
     </Compile>
-    <Compile Include="wnd_flyout_network.xaml.vb">
-      <DependentUpon>wnd_flyout_network.xaml</DependentUpon>
-    </Compile>
     <Compile Include="wnd_flyout_weather.xaml.vb">
       <DependentUpon>wnd_flyout_weather.xaml</DependentUpon>
     </Compile>
@@ -172,6 +163,9 @@
     </Compile>
     <Compile Include="wnd_log.xaml.vb">
       <DependentUpon>wnd_log.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="wnd_settings_new.xaml.vb">
+      <DependentUpon>wnd_settings_new.xaml</DependentUpon>
     </Compile>
     <Compile Include="wpf_helper.vb" />
     <Page Include="MainWindow.xaml">
@@ -198,10 +192,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="wnd_flyout_network.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="wnd_flyout_weather.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -211,6 +201,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="wnd_log.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="wnd_settings_new.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -229,8 +223,9 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <EmbeddedResource Include="My Project\Resources.resx">
-      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <Generator>PublicVbMyResourcesResXFileCodeGenerator</Generator>
       <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.vb</LastGenOutput>
     </EmbeddedResource>
     <None Include="My Project\app.manifest" />

@@ -87,8 +87,11 @@ Public Class wnd_flyout_appmenu
 #End Region
 
     Public Shared ui_settings As New wnd_settings
+    'Public Shared ui_settings_v2 As New wnd_settings_new
+
     Private Sub btn_intern_appsettings_Click(sender As Object, e As RoutedEventArgs) Handles btn_intern_appsettings.Click
         ui_settings.Show()
+        'ui_settings_v2.Show()
         If hda = True Then anim_slideout()
     End Sub
 

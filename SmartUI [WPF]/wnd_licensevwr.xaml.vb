@@ -88,7 +88,7 @@ Public Class wnd_licensevwr
 
     Private Sub wnd_licensevwr_IsVisibleChanged(sender As Object, e As DependencyPropertyChangedEventArgs) Handles Me.IsVisibleChanged
         If Me.Visibility = Visibility.Hidden Then Exit Sub
-        cls_blur_behind.blur(Me, wnd_settings.ui_blur_enabled)
+        cls_blur_behind.blur(Me, cls_config.ui_blur_enabled)
     End Sub
 
     Dim lic_path As String

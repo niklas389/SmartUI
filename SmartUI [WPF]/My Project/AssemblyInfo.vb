@@ -1,7 +1,7 @@
 ﻿Imports System.Reflection
 Imports System.Runtime.InteropServices
 Imports System.Windows
-Imports nUpdate.Core
+'Imports nUpdate.Core
 
 ' Allgemeine Informationen über eine Assembly werden über die folgenden 
 ' Attribute gesteuert. Ändern Sie diese Attributwerte, um die Informationen zu ändern,
@@ -16,7 +16,7 @@ Imports nUpdate.Core
 <Assembly: AssemblyCopyright("Copyright © 2016 - 2018 by Niklas Wagner")>
 <Assembly: AssemblyTrademark("")>
 <Assembly: ComVisible(False)>
-<Assembly: nUpdateVersion("1.3.13")>
+'<Assembly: nUpdateVersion("1.3.15")>
 
 'Um mit dem Erstellen lokalisierbarer Anwendungen zu beginnen, legen Sie 
 '<UICulture>ImCodeVerwendeteKultur</UICulture> in der VBPROJ-Datei

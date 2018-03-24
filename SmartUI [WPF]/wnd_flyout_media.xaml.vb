@@ -32,15 +32,14 @@ Public Class wnd_flyout_media
         anim_slideout()
     End Sub
 
-    Private Sub anim_slidein()        'Timeline.SetDesiredFrameRate(dblanim, 100)
-
-        Dim dblanim As New DoubleAnimation()
-        dblanim.From = -175
-        dblanim.To = 0
-        dblanim.AutoReverse = False
-        dblanim.Duration = TimeSpan.FromSeconds(0.5)
-        'dblanim.By = 0.5
-        dblanim.EasingFunction = New QuarticEase
+    Private Sub anim_slidein()
+        Dim dblanim As New DoubleAnimation With {
+            .From = -175,
+            .To = 0,
+            .AutoReverse = False,
+            .Duration = TimeSpan.FromSeconds(0.5),
+            .EasingFunction = New QuarticEase
+        }
 
         Dim storyboard As New Storyboard()
         Storyboard.SetTarget(dblanim, Me)
@@ -54,16 +53,16 @@ Public Class wnd_flyout_media
         hda = True
     End Sub
 
-    Private Sub anim_slideout()        'Timeline.SetDesiredFrameRate(dblanim, 100)
+    Private Sub anim_slideout()
         hda = False
 
-        Dim dblanim As New DoubleAnimation()
-        dblanim.From = 0
-        dblanim.To = -175
-        dblanim.AutoReverse = False
-        dblanim.Duration = TimeSpan.FromSeconds(0.5)
-        'dblanim.By = 1
-        dblanim.EasingFunction = New QuarticEase
+        Dim dblanim As New DoubleAnimation With {
+            .From = 0,
+            .To = -175,
+            .AutoReverse = False,
+            .Duration = TimeSpan.FromSeconds(0.5),
+            .EasingFunction = New QuarticEase
+        }
 
         Dim storyboard As New Storyboard()
         Storyboard.SetTarget(dblanim, Me)
@@ -139,7 +138,6 @@ Public Class wnd_flyout_media
 
     Private Async Sub media_cache_albumArt(ByVal Optional err As Boolean = False)
         albumCover_overlay(True)        'Show loading ani
-
         Dim trk_uri As String = ""
 
         Try
@@ -148,7 +146,7 @@ Public Class wnd_flyout_media
             If Not IO.Directory.Exists(cache_path) Then IO.Directory.CreateDirectory(cache_path)
 
             'get URI before DL image to avoid mismatching info (eg.: track changes while downloading)
-            If Not IO.File.Exists(cache_path & trk_uri) Then
+            If Not (Await Task.Run(Function() IO.File.Exists(cache_path & trk_uri))) Then '#?
                 'Construct a bitmap
                 Dim img As New Bitmap(Await Task.Run(Function() MainWindow._currentTrack.GetAlbumArtAsync(SpotifyAPI.Local.Enums.AlbumArtSize.Size320))) 'cover DL
                 img.Save(cache_path & trk_uri, Imaging.ImageFormat.Jpeg) 'cache cover as jpeg
@@ -157,15 +155,15 @@ Public Class wnd_flyout_media
 
             img_albumCover.Source = (Await Task.Run(Function() CType(New ImageSourceConverter().ConvertFromString(cache_path & trk_uri), ImageSource)))
             img_bg.Source = img_albumCover.Source
-
             img_cover_error.Visibility = Visibility.Hidden
 
         Catch ex As Exception
             img_albumCover.Source = CType(New ImageSourceConverter().ConvertFromString("pack://application:,,,/Resources/mediaservice_albums.png"), ImageSource)
             img_bg.Source = CType(New ImageSourceConverter().ConvertFromString(AppDomain.CurrentDomain.BaseDirectory & "Resources\no_cover.jpg"), ImageSource)
             img_cover_error.Visibility = Visibility.Visible
-            img_cover_error.ToolTip = "Wir hatten bei diesem Titel probleme das Cover abzurufen." & NewLine & "Versuch es später nochmal."
+            img_cover_error.ToolTip = "Wir hatten bei diesem Titel probleme das Cover abzurufen." & NewLine & "Versuche es später nochmal."
             If IO.File.Exists(cache_path & trk_uri) And err = False Then media_cache_albumArt(True)
+
             MainWindow.wnd_log.AddLine("ERR" & "-MFLYOUT", "media_cache_albumArt - " & ex.Message)
         End Try
 
@@ -195,32 +193,23 @@ Public Class wnd_flyout_media
 #End Region
 
 #Region "Buttons"
-    'Spotify Change Track 
-    <DllImport("user32")>
-    Private Shared Sub keybd_event(bVk As Byte, bScan As Byte, dwFlags As UInteger, dwExtraInfo As Integer)
-    End Sub
-    Private Const KEYEVENTF_EXTENDEDKEY As Integer = &H1
-    Private Const KEYEVENTF_KEYUP As Integer = &H2
-    Private Const VK_MEDIA_NEXT_TRACK As Byte = &HB0
-    Private Const VK_MEDIA_PREV_TRACK As Byte = &HB1
-    Private Const VK_MEDIA_PLAY_PAUSE As Byte = &HB3
-
+    ' PlayPause
     Private Sub btn_media_play_Click(sender As Object, e As RoutedEventArgs) Handles btn_media_play.MouseLeftButtonUp
-        ' PlayPause
-        keybd_event(VK_MEDIA_PLAY_PAUSE, &H45, KEYEVENTF_EXTENDEDKEY, 0)
-        keybd_event(VK_MEDIA_PLAY_PAUSE, &H45, KEYEVENTF_EXTENDEDKEY Or KEYEVENTF_KEYUP, 0)
+        If MainWindow.e_playing = True Then
+            MainWindow.spotifyapi.Pause()
+        Else
+            MainWindow.spotifyapi.Play()
+        End If
     End Sub
 
+    'Next Track / Skip
     Private Sub btn_media_next_MouseLeftButtonUp(sender As Object, e As MouseButtonEventArgs) Handles btn_media_next.MouseLeftButtonUp
-        'Next Track / Skip
-        keybd_event(VK_MEDIA_NEXT_TRACK, &H45, KEYEVENTF_EXTENDEDKEY, 0)
-        keybd_event(VK_MEDIA_NEXT_TRACK, &H45, KEYEVENTF_EXTENDEDKEY Or KEYEVENTF_KEYUP, 0)
+        MainWindow.spotifyapi.Skip()
     End Sub
 
+    'Last Track / Return
     Private Sub btn_media_prev_MouseLeftButtonUp(sender As Object, e As MouseButtonEventArgs) Handles btn_media_prev.MouseLeftButtonUp
-        'Last Track / Return
-        keybd_event(VK_MEDIA_PREV_TRACK, &H45, KEYEVENTF_EXTENDEDKEY, 0)
-        keybd_event(VK_MEDIA_PREV_TRACK, &H45, KEYEVENTF_EXTENDEDKEY Or KEYEVENTF_KEYUP, 0)
+        MainWindow.spotifyapi.Previous()
     End Sub
 #End Region
 

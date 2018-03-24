@@ -49,4 +49,14 @@ Public Class cls_config
     Public Function debugging_enabled() As Boolean
         Return IO.File.Exists(conf_basepath & "debug")
     End Function
+
+    'VAR
+    Public Shared ui_blur_enabled As Boolean
+    Public Shared ui_blur_transparency As Byte = 165
+
+    Public Sub load_variables()
+        ui_blur_enabled = CType(read("UI", "cb_wndmain_blur_enabled", "False"), Boolean)
+        ui_blur_transparency = CType(read("UI", "slider_bg_transp", "165"), Byte)
+
+    End Sub
 End Class

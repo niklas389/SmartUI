@@ -5,7 +5,7 @@ Imports System.Xml
 
 Public Class cls_weather
     Shared conf_ini As New cls_config
-    Shared logcat As String = "   WEATHER"
+    Shared logcat As String = "WEATHER"
     'general config
     Public Shared conf_enabled As Boolean = False
     Public Shared conf_wcom_enabled As Boolean = False
@@ -31,7 +31,7 @@ Public Class cls_weather
 #End Region
 
 #Region "GENERAL"
-    Public Shared Sub init_update(ByVal Optional e_init As Boolean = False, ByVal Optional e_update As Integer = 0)
+    Public Shared Sub init_update(ByVal Optional e_init As Boolean = False)
         If e_init = True Then
             'load settings
             conf_enabled = CBool(conf_ini.read("GEN", "enabled", "False", 1))
@@ -41,31 +41,31 @@ Public Class cls_weather
             'wetter.com file
             conf_wcom_enabled = File.Exists(".\config\wcom_allowed")
 
-            MainWindow.wnd_log.AddLine(logcat & "-INFO", "Init - (Service Enabled: " & conf_enabled.ToString & " / wetter.com allowed: " & conf_wcom_enabled & ")")
+            MainWindow.wnd_log.AddLine(logcat & "-INFO", "Init - (Service Enabled: " & conf_enabled.ToString & " / wetter.com allowed: " & conf_wcom_enabled & ")", "wea")
         End If
 
-        Select Case e_update
-            Case 0
-                MainWindow.wnd_log.AddLine(logcat & "-INFO", "Updating...")
-                oww_update()
-                wcom_update()
+        MainWindow.wnd_log.AddLine(logcat & "-INFO", "Updating...", "wea")
+        If conf_enabled = True Then
+            oww_update()
+            tmr_update_oww.Start() 'enable oww updater /30mins
+        End If
 
-            Case 1
-                'MainWindow.wnd_log.AddLine(logcat & "-INFO", "Updating OpenWeather...")
-                oww_update()
+        If conf_wcom_enabled = True Then
+            wcom_update()
+            tmr_update_wcom.Start() 'enable wcom updater /5mins
+        End If
+    End Sub
+#End Region
 
-            Case 2
-                If conf_wcom_enabled = True Then
-                    'MainWindow.wnd_log.AddLine(logcat & "-INFO", "Updating Wetter.com...")
-                    wcom_update()
-                    'Else
-                    '    MainWindow.wnd_log.AddLine(logcat & "-INFO", "wetter.com disabled (e_update = 2)")
-                End If
+#Region "UPDATE"
+    Public Shared WithEvents tmr_update_oww As New Windows.Threading.DispatcherTimer With {.Interval = New TimeSpan(0, 30, 0), .IsEnabled = False}
+    Public Shared Sub tmr_update_oww_Tick(ByVal sender As Object, ByVal e As EventArgs) Handles tmr_update_oww.Tick
+        oww_update() 'oww_update
+    End Sub
 
-            Case Else
-                MainWindow.wnd_log.AddLine(logcat & "-ERR", "e_update")
-
-        End Select
+    Public Shared WithEvents tmr_update_wcom As New Windows.Threading.DispatcherTimer With {.Interval = New TimeSpan(0, 5, 0), .IsEnabled = False}
+    Public Shared Sub tmr_update_wcom_Tick(ByVal sender As Object, ByVal e As EventArgs) Handles tmr_update_wcom.Tick
+        wcom_update() 'update_wcom
     End Sub
 #End Region
 
@@ -93,14 +93,16 @@ Public Class cls_weather
 
     Public Shared Async Sub oww_update(ByVal Optional e_force_oww As Boolean = False)
         If conf_enabled = False Then
-            MainWindow.wnd_log.AddLine(logcat & "-ATT", "OWW - Not updated, weather disabled!")
+            MainWindow.wnd_log.AddLine(logcat & "-ATT", "OWW - Not updated, weather disabled!", "att")
             Exit Sub
         End If
 
         If My.Computer.Network.IsAvailable = False Then
-            MainWindow.wnd_log.AddLine(logcat & "-ERR", "OWW - Error Network not available")
+            MainWindow.wnd_log.AddLine(logcat & "-ERR", "OWW - Error Network not available", "err")
             Exit Sub
         End If
+
+        MainWindow.wnd_log.AddLine(logcat & "-DBG", DateTime.Now.ToShortTimeString, "wea")
 
         Dim oww_xml As XmlDocument
         Dim oww_API_error As Boolean = False
@@ -118,9 +120,9 @@ Public Class cls_weather
             oww_API_error = True
 
             If ex.Status = WebExceptionStatus.ProtocolError Then
-                MainWindow.wnd_log.AddLine(logcat & "-ERR", "OWW (401 Zugriff verweigert)")
+                MainWindow.wnd_log.AddLine(logcat & "-ERR", "OWW (401 Zugriff verweigert)", "err")
             Else
-                MainWindow.wnd_log.AddLine(logcat & "-ERR", "OWW unknown Error")
+                MainWindow.wnd_log.AddLine(logcat & "-ERR", "OWW unknown Error", "err")
             End If
         End Try
 
@@ -138,7 +140,7 @@ Public Class cls_weather
             conf_ini.write("STAT", "oww", Date.Now.ToShortTimeString, 1)
             'wnd_log.AddLine(log_cat & "-WEATHER", "OWW data updated")
         Else
-            MainWindow.wnd_log.AddLine(logcat & "-ERR", "OWW API-Error")
+            MainWindow.wnd_log.AddLine(logcat & "-ERR", "OWW API-Error", "err")
         End If
         'End API Update
 
@@ -242,10 +244,10 @@ Public Class cls_weather
 
             Case Else
                 oww_data_conditionIMG = icn_basePath & "0.png"
-                MainWindow.wnd_log.AddLine(logcat & "-ATT", "No condition icon (" & oww_data_conditionID & ")")
+                MainWindow.wnd_log.AddLine(logcat & "-ATT", "No condition icon (" & oww_data_conditionID & ")", "att")
         End Select
 
-        MainWindow.weather_update_needed = True
+        MainWindow.weather_need_update = True
     End Sub
 #End Region
 
@@ -259,8 +261,13 @@ Public Class cls_weather
     Shared wcom_pressure As Integer
 
     Public Shared Async Sub wcom_update(ByVal Optional e_station As Integer = 7704, ByVal Optional e_failed As Boolean = False)
+        If conf_wcom_enabled = False Then
+            MainWindow.wnd_log.AddLine(logcat & "-ATT", "WCOM - Not updated, not allowed!", "att")
+            Exit Sub
+        End If
+
         If My.Computer.Network.IsAvailable = False Then
-            MainWindow.wnd_log.AddLine(logcat & "-ERR", "WCOM - Error Network not available")
+            MainWindow.wnd_log.AddLine(logcat & "-ERR", "WCOM - Error Network not available", "err")
             Exit Sub
         End If
 
@@ -339,17 +346,17 @@ Public Class cls_weather
         'last update
         conf_ini.write("STAT", "wcom", DateTime.Now.ToString, 1)
 
-        MainWindow.weather_update_needed = True
+        MainWindow.weather_need_update = True
     End Sub
 
     Private Shared Sub wcom_error(e_station As Integer)
         If e_station = 16549 Then
-            MainWindow.wnd_log.AddLine(logcat & "-ERR", "WCOM - API-Error with Station 16549 - wetter.com disabled")
+            MainWindow.wnd_log.AddLine(logcat & "-ERR", "WCOM - API-Error with Station 16549 - wetter.com disabled", "err")
             conf_wcom_enabled = False
             Exit Sub
         End If
 
-        MainWindow.wnd_log.AddLine(logcat & "-ATT", "WCOM - API-Error with Station 7704, trying 16549")
+        MainWindow.wnd_log.AddLine(logcat & "-ATT", "WCOM - API-Error with Station 7704, trying 16549", "att")
         wcom_update(16549)
     End Sub
 #End Region

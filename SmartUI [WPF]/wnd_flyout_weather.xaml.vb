@@ -23,7 +23,7 @@ Public Class wnd_flyout_weather
 
     Private Sub wwnd_flyout_weather_Loaded(sender As Object, e As DependencyPropertyChangedEventArgs) Handles Me.IsVisibleChanged
         If Me.Visibility = Visibility.Hidden Then Exit Sub
-        cls_blur_behind.blur(Me, wnd_settings.ui_blur_enabled)
+        cls_blur_behind.blur(Me, cls_config.ui_blur_enabled)
 
         Left = My.Computer.Screen.WorkingArea.Left
         Height = 255

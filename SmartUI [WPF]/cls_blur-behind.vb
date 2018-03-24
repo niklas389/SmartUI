@@ -41,11 +41,11 @@ Public Class cls_blur_behind
         Dim accentStructSize = Marshal.SizeOf(accent)
 
         If e_blur_enabled = True Then
-            wnd.Background = New SolidColorBrush(Color.FromArgb(Convert.ToByte(152), Convert.ToByte(0), Convert.ToByte(0), Convert.ToByte(0))) 'BG 60
+            wnd.Background = New SolidColorBrush(Color.FromArgb(Convert.ToByte(cls_config.ui_blur_transparency), Convert.ToByte(0), Convert.ToByte(0), Convert.ToByte(0))) 'BG 60
             accent.AccentState = AccentState.ACCENT_ENABLE_BLURBEHIND
         Else
             accent.AccentState = AccentState.ACCENT_DISABLED
-            wnd.Background = New SolidColorBrush(Color.FromArgb(Convert.ToByte(180), Convert.ToByte(0), Convert.ToByte(0), Convert.ToByte(0))) 'BG 71
+            wnd.Background = New SolidColorBrush(Color.FromArgb(Convert.ToByte(cls_config.ui_blur_transparency), Convert.ToByte(0), Convert.ToByte(0), Convert.ToByte(0))) 'BG 71
         End If
 
         Dim accentPtr = Marshal.AllocHGlobal(accentStructSize)

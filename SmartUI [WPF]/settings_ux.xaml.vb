@@ -1,7 +1,6 @@
 ﻿Imports System
 Imports System.ComponentModel
 Imports System.Diagnostics
-Imports System.Globalization
 Imports System.IO
 Imports System.Net
 Imports System.Threading
@@ -11,11 +10,9 @@ Imports System.Windows.Controls
 Imports System.Windows.Input
 Imports System.Windows.Media
 Imports System.Windows.Media.Animation
-Imports nUpdate.Updating
 
 Public Class wnd_settings
     Dim updater_enabled As Boolean = False
-    Public Shared ui_blur_enabled As Boolean
 
 #Region "Window CMD"
     'Move Window
@@ -65,7 +62,7 @@ Public Class wnd_settings
     Private Sub wnd_settings_IsVisibleChanged(sender As Object, e As DependencyPropertyChangedEventArgs) Handles Me.IsVisibleChanged
         If Me.Visibility = Visibility.Hidden Or lasttab_lic = True Then Exit Sub
 
-        matc_tabctrl.SelectedIndex = 0
+        nav_home()
 
         ComboBox_net_interface.Items.Clear()
         ComboBox_net_interface.Items.Add("Deaktiviert")
@@ -85,8 +82,6 @@ Public Class wnd_settings
 
         flyout_cache_reset.IsOpen = False
         matc_tabctrl.Effect = Nothing
-
-        lbl_header.Content = "EINSTELLUNGEN"
     End Sub
 #End Region
 
@@ -97,11 +92,10 @@ Public Class wnd_settings
         conf.write("UI", "cb_wndmain_clock_enabled", CType(cb_wndmain_clock_enabled.IsChecked, String))
         conf.write("UI", "cb_wndmain_clock_seconds", CType(cb_wndmain_clock_seconds.IsChecked, String))
         conf.write("UI", "cb_wndmain_clock_weekday", CType(cb_wndmain_clock_weekday.IsChecked, String))
+
         'Window Blur
         conf.write("UI", "cb_wndmain_blur_enabled", CType(cb_wndmain_blur_enabled.IsChecked, String))
-
-        'Spotify
-        conf.write("Spotify", "cb_wndmain_spotify_progress", CType(cb_wndmain_spotify_progress.IsChecked, String))
+        conf.write("UI", "slider_bg_transp", CType(slider_bg_transp.Value, String))
 
         'Weather
         cls_weather.enabled(cb_wndmain_weather_enabled.IsChecked.Value)
@@ -116,20 +110,19 @@ Public Class wnd_settings
             conf.write("NET", "ComboBox_net_interface", "null")
         End If
 
-        conf.write("UI", "cb_wndmain_net_iconDisableSpeedLimit", CType(cb_wndmain_net_iconDisableSpeedLimit.IsChecked, String))
+        conf.write("UI", "cb_wndmain_net_textDisableSpeedLimit", CType(cb_wndmain_net_textDisableSpeedLimit.IsChecked, String))
+        conf.write("UI", "slider_netmon_threshold", CType(Math.Round(slider_netmon_threshold.Value, 0), String))
 
         'others
         conf.write("SYS", "cb_other_disableVolumeOSD", CType(cb_other_disableVolumeOSD.IsChecked, String))
         conf.write("SYS", "cb_other_startup_play", CType(cb_other_startup_play.IsChecked, String))
 
-
         'Show flyout after saving settings
         grd_bottom_strip.Visibility = Visibility.Hidden
-
         show_flyout("Änderungen gespeichert!", False)
 
-        MainWindow.settings_update_needed = True
-        cls_blur_behind.blur(Me, ui_blur_enabled)
+        MainWindow.settings_need_update = True
+        cls_blur_behind.blur(Me, cls_config.ui_blur_enabled)
     End Sub
 
     Private Sub load_settings()
@@ -138,11 +131,10 @@ Public Class wnd_settings
         cb_wndmain_clock_weekday.IsChecked = CType(conf.read("UI", "cb_wndmain_clock_weekday", "True"), Boolean)
 
         'Window Blur
-        cb_wndmain_blur_enabled.IsChecked = CType(conf.read("UI", "cb_wndmain_blur_enabled", "False"), Boolean)
-        cls_blur_behind.blur(Me, ui_blur_enabled)
-
-        'Spotify
-        cb_wndmain_spotify_progress.IsChecked = CType(conf.read("Spotify", "cb_wndmain_spotify_progress", "False"), Boolean)
+        cb_wndmain_blur_enabled.IsChecked = cls_config.ui_blur_enabled
+        cls_blur_behind.blur(Me, cls_config.ui_blur_enabled)
+        slider_bg_transp.Value = CType(conf.read("UI", "slider_bg_transp", "165"), Double)
+        MainWindow.settings_need_update = True
 
         'Weather
         cb_wndmain_weather_enabled.IsChecked = cls_weather.conf_enabled
@@ -157,8 +149,8 @@ Public Class wnd_settings
             ComboBox_net_interface.SelectedItem = conf.read("NET", "ComboBox_net_interface", "")
         End If
 
-        cb_wndmain_net_iconDisableSpeedLimit.IsChecked = CType(conf.read("UI", "cb_wndmain_net_iconDisableSpeedLimit", "False"), Boolean)
         cb_wndmain_net_textDisableSpeedLimit.IsChecked = CType(conf.read("UI", "cb_wndmain_net_textDisableSpeedLimit", "False"), Boolean)
+        slider_netmon_threshold.Value = CType(conf.read("UI", "slider_netmon_threshold", "10"), Double)
 
         'Others
         cb_other_disableVolumeOSD.IsChecked = CType(conf.read("SYS", "cb_other_disableVolumeOSD", "False"), Boolean)
@@ -166,27 +158,17 @@ Public Class wnd_settings
         'Others End
     End Sub
 
-    Private Sub cb_wndmain_net_iconDisableSpeedLimit_Unchecked(sender As Object, e As RoutedEventArgs) Handles cb_wndmain_net_iconDisableSpeedLimit.Unchecked
-        cb_wndmain_net_textDisableSpeedLimit.IsChecked = False
-        cb_wndmain_net_textDisableSpeedLimit.IsEnabled = False
-    End Sub
-
-    Private Sub cb_wndmain_net_iconDisableSpeedLimit_checked(sender As Object, e As RoutedEventArgs) Handles cb_wndmain_net_iconDisableSpeedLimit.Checked
-        cb_wndmain_net_textDisableSpeedLimit.IsEnabled = True
-    End Sub
-
     Private Sub wnd_settings_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
         conf.write("app", "firstrun", CType(My.Application.Info.Version.ToString, String))
     End Sub
 
     Dim lib_hVOSD As New HideVolumeOSD.HideVolumeOSDLib
-
     Private Sub cb_other_disableVolumeOSD_checked(sender As Object, e As RoutedEventArgs) Handles cb_other_disableVolumeOSD.Checked, cb_other_disableVolumeOSD.Unchecked
         If cb_other_disableVolumeOSD.IsChecked = True Then lib_hVOSD.HideOSD() Else lib_hVOSD.ShowOSD()
     End Sub
 
     Private Sub cb_wndmain_blur_enabled_Checked(sender As Object, e As RoutedEventArgs) Handles cb_wndmain_blur_enabled.Checked, cb_wndmain_blur_enabled.Unchecked
-        ui_blur_enabled = cb_wndmain_blur_enabled.IsChecked.Value
+        cls_config.ui_blur_enabled = cb_wndmain_blur_enabled.IsChecked.Value
     End Sub
 
 #End Region
@@ -199,6 +181,10 @@ Public Class wnd_settings
             Exit Sub
         End If
 
+        nav_home()
+    End Sub
+
+    Private Sub nav_home()
         matc_tabctrl.SelectedIndex = 0
         lbl_header.Content = "EINSTELLUNGEN"
         lasttab_lic = False
@@ -237,19 +223,17 @@ Public Class wnd_settings
         anim_sep_pos(sep_nav_highlight, btn_page_weather.Margin.Left)
     End Sub
 
-    Private Sub btn_page_media_Click(sender As Object, e As RoutedEventArgs) Handles btn_page_media.Click
+    Private Async Sub btn_page_media_Click(sender As Object, e As RoutedEventArgs) Handles btn_page_media.Click
         matc_tabctrl.SelectedIndex = 3
         lbl_header.Content = "SPOTIFY"
 
-        lbl_cacheSize.Content = get_cache_size()
+        lbl_cacheSize.Content = Await Task.Run(Function() get_cache_size())
 
         'Spotify Check
-        If IO.File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Spotify\Spotify.exe") Then
+        If media_spotify_installed Then
             lbl_spotifyCheck.Content = "Spotify installiert (v" & MainWindow._sAPI_ClientVersion & ") und " & If(Process.GetProcessesByName("Spotify").Length > 1, "gestartet", "nicht gestartet (!)")
-            bol_spotify_installed = True
         Else
             lbl_spotifyCheck.Content = "Spotify ist nicht Installiert."
-            bol_spotify_installed = False
         End If
 
         anim_width(sep_nav_highlight, btn_page_media.Width)
@@ -465,15 +449,16 @@ Public Class wnd_settings
         lbl_mahapps_version.Content = "Version: " & FileVersionInfo.GetVersionInfo(".\MahApps.Metro.dll").FileVersion
         lbl_newtonsoft_version.Content = "Version: " & FileVersionInfo.GetVersionInfo(".\Newtonsoft.Json.dll").FileVersion
         lbl_sAPI_version.Content = "Version: 2.17.0"
-        lbl_nUpdate_version.Content = "Version: " & FileVersionInfo.GetVersionInfo(".\nUpdate.Internal.dll").FileVersion
+        'lbl_nUpdate_version.Content = "Version: " & FileVersionInfo.GetVersionInfo(".\nUpdate.Internal.dll").FileVersion
     End Sub
 #End Region
 
 #Region "Spotify"
-    Dim bol_spotify_installed As Boolean
+    Dim media_spotify_installed As Boolean = IO.File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Spotify\Spotify.exe")
+
 
     Private Sub btn_restart_spotify_Click(sender As Object, e As RoutedEventArgs) Handles btn_restart_spotify.Click
-        If bol_spotify_installed = True Then flyout_spotify("force_restart") Else show_flyout("Spotify nicht installiert!", False)
+        If media_spotify_installed = True Then flyout_spotify("force_restart") Else show_flyout("Spotify nicht installiert!", False)
     End Sub
 
     Private Sub flyout_spotify(ctnt As String, ByVal Optional e_csize As String = "")
@@ -522,6 +507,7 @@ Public Class wnd_settings
 
         ElseIf btn_flyout_spotify_confirm.Tag Is "force_restart" Then
             show_flyout("Spotify wird neu-gestartet...", True)
+            Topmost = True
 
             For Each prog As Process In Process.GetProcesses
                 If prog.ProcessName = "Spotify" Or prog.ProcessName = "SpotifyWebHelper" Then
@@ -534,6 +520,7 @@ Public Class wnd_settings
 
         flyout_cache_reset.IsOpen = False
         matc_tabctrl.Effect = Nothing
+        Topmost = False
     End Sub
 
     Private Sub btn_reset_cache_cancel_Click(sender As Object, e As RoutedEventArgs) Handles btn_reset_cache_cancel.Click
@@ -566,9 +553,9 @@ Public Class wnd_settings
             If cache_size = 0 Then
                 Return "Keine Album-Cover zwischengespeichert"
             ElseIf cache_size < 1048576 Then
-                Return "Album-Cover zwischengespeichert: " & files_count & " (" & (cache_size / 1024).ToString("0") & "KB)"
+                Return "Album-Cover zwischengespeichert: " & files_count & " (" & (cache_size / 1024).ToString("0") & "KB)" & " (" & ((cache_size / files_count) / 1024).ToString("0.0") & "KB/Cover)"
             Else
-                Return "Album-Cover zwischengespeichert: " & files_count & " (" & (cache_size / 1048576).ToString("0.0") & "MB)"
+                Return "Album-Cover zwischengespeichert: " & files_count & " (" & (cache_size / 1048576).ToString("0.0") & "MB)" & " (" & ((cache_size / files_count) / 1024).ToString("0.0") & "KB/Cover)"
             End If
         Else
             Return (cache_size / 1048576).ToString("0.0") & "MB"
@@ -612,8 +599,8 @@ Public Class wnd_settings
 #End Region
 
 #Region "Updates"
-    Dim manager As New UpdateManager(New Uri("https://niklas389.lima-city.de/SmartUI/updates.json"), "<RSAKeyValue><Modulus>1l9BYgpTEN2ID5l489eiFDhCUdHPGvJ21PJ2m1FdVlAzKl7zalkjvzYd8th7KOFaepYMWXryAIJ+v+FimyQ/H6/EcZH26sr+0mqo44UuBkiEvNFprwplmzt++TnuKIY6+exc0+S3NyuB9cxf4z9vKZGWwWrV/n+CXEU3GDAsWsRoAobU5/P2o56GlCfqO+ybyr5yO11O5eLoAYcMNjyY16VHa4aJvx9iPtRI0aM7T6BVuYuR1NTZjkdnQIdAJAY0T/zO47Fb2M34Oo7uDyRxZ4CDTpNya6ejR35PwIkTWfqRXjj6IJsF8rrjB/Xj/MCgLLXjbfy8F4pSmfmyJ56mUzNlA6rSmymvjg0hzSNwQqNKJEeK4W8WDd9Y5w/Lz9KMeNYz8Wy/oUHvJgx5DK2PmIAUuYhLTGO6wqG/IDt0xy5PyLa0NocbMcXneRPqXx7b3rT7uxvruuIyTMHovIln3F+3b7WYrsS52V8wWoOCDFElX+Y7L8gK1kQ4pXJvqFUqWYNGYG1yBorJ+eWc0E1PQ7Gv+ZL8CBigN4idfhRg87O87psXekK4RE76Pfx7RliTUH1P9LfwRrUQjamt60ZFGrmSKgqxMBGvWuYDFGEtai2EouqBsnVkyzfWPPqG4z++XvPsm0ah1+xJOCyRoa7NHkeGA/PZEVGHYmi9+GbqaV0hfmNx89I1EGn7cXC4Y67AnxvMy7N0jxrn3iQG3tI8AsX1ZZeUqYWwXpc8e1/cpXQ1POKu+gVj/sviyilZP4lFkGwR3ZIz2FZPLd547P2raz6xF1zgo722KZJCH2wU9uBDWiCwawv6N8cNHEuD+1b26ouot0O0Dg/9IA7ic3uWUA2o2zs5UxEoNQSc8z6HR+WeJmW5tjnr8ZZoFZECl8cnJmCTBfkwYbtv1xTf+VhxUa4aROMxbBaxTEMpbYVFZ7WYhJ4ncmh2JjNGYmKNphNUxrTcL6mzx8Mc9bdmr+sxymdKHnybjT39oGI7bkh8jeQj/qDMcIARu3nI0ORibThwYffiWXWKPE2o3yE3a/+RUqpEleK1+orzfO5cANZpTcTJ6ouSkNTnlQoNOsXHRhnC5wL2jeKjfUqEdtLHxMWhnhNnzWrWMnlgdfsjyUsUTOx0nWVPFSOACB943QmYxt1a+tNfkJZCkrIQtLlMqFYyUOEcSsDyaKft9FYE+ABKWKwRvO0X8hujTm2XWoNjyox7gCXCzD0DlawsegUgmT62gKxhhkOwbGyBbrGnZutcYJPL4KX5dxC6k25IGVSRsymzXqhvhu3f93Vn+/ynoZctjnYEw9SlRSqzIYR8xi1WdpKkLfe89EHD20wEf3xKL6cIhsd4npV/at6n6HOsxrQnjQ==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>", New CultureInfo("en"))
-    Dim updaterUI As New UpdaterUI(manager, SynchronizationContext.Current)
+    'Dim manager As New UpdateManager(New Uri("https://niklas389.lima-city.de/SmartUI/updates.json"), "<RSAKeyValue><Modulus>1l9BYgpTEN2ID5l489eiFDhCUdHPGvJ21PJ2m1FdVlAzKl7zalkjvzYd8th7KOFaepYMWXryAIJ+v+FimyQ/H6/EcZH26sr+0mqo44UuBkiEvNFprwplmzt++TnuKIY6+exc0+S3NyuB9cxf4z9vKZGWwWrV/n+CXEU3GDAsWsRoAobU5/P2o56GlCfqO+ybyr5yO11O5eLoAYcMNjyY16VHa4aJvx9iPtRI0aM7T6BVuYuR1NTZjkdnQIdAJAY0T/zO47Fb2M34Oo7uDyRxZ4CDTpNya6ejR35PwIkTWfqRXjj6IJsF8rrjB/Xj/MCgLLXjbfy8F4pSmfmyJ56mUzNlA6rSmymvjg0hzSNwQqNKJEeK4W8WDd9Y5w/Lz9KMeNYz8Wy/oUHvJgx5DK2PmIAUuYhLTGO6wqG/IDt0xy5PyLa0NocbMcXneRPqXx7b3rT7uxvruuIyTMHovIln3F+3b7WYrsS52V8wWoOCDFElX+Y7L8gK1kQ4pXJvqFUqWYNGYG1yBorJ+eWc0E1PQ7Gv+ZL8CBigN4idfhRg87O87psXekK4RE76Pfx7RliTUH1P9LfwRrUQjamt60ZFGrmSKgqxMBGvWuYDFGEtai2EouqBsnVkyzfWPPqG4z++XvPsm0ah1+xJOCyRoa7NHkeGA/PZEVGHYmi9+GbqaV0hfmNx89I1EGn7cXC4Y67AnxvMy7N0jxrn3iQG3tI8AsX1ZZeUqYWwXpc8e1/cpXQ1POKu+gVj/sviyilZP4lFkGwR3ZIz2FZPLd547P2raz6xF1zgo722KZJCH2wU9uBDWiCwawv6N8cNHEuD+1b26ouot0O0Dg/9IA7ic3uWUA2o2zs5UxEoNQSc8z6HR+WeJmW5tjnr8ZZoFZECl8cnJmCTBfkwYbtv1xTf+VhxUa4aROMxbBaxTEMpbYVFZ7WYhJ4ncmh2JjNGYmKNphNUxrTcL6mzx8Mc9bdmr+sxymdKHnybjT39oGI7bkh8jeQj/qDMcIARu3nI0ORibThwYffiWXWKPE2o3yE3a/+RUqpEleK1+orzfO5cANZpTcTJ6ouSkNTnlQoNOsXHRhnC5wL2jeKjfUqEdtLHxMWhnhNnzWrWMnlgdfsjyUsUTOx0nWVPFSOACB943QmYxt1a+tNfkJZCkrIQtLlMqFYyUOEcSsDyaKft9FYE+ABKWKwRvO0X8hujTm2XWoNjyox7gCXCzD0DlawsegUgmT62gKxhhkOwbGyBbrGnZutcYJPL4KX5dxC6k25IGVSRsymzXqhvhu3f93Vn+/ynoZctjnYEw9SlRSqzIYR8xi1WdpKkLfe89EHD20wEf3xKL6cIhsd4npV/at6n6HOsxrQnjQ==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>", New CultureInfo("en"))
+    'Dim updaterUI As New UpdaterUI(manager, SynchronizationContext.Current)
 
     'Private Sub btn_updates_Click(sender As Object, e As RoutedEventArgs) Handles btn_updates.Click
     '    If updater_enabled = False Then
@@ -626,54 +613,57 @@ Public Class wnd_settings
     'End Sub
 
     Private Sub updater_hiddensearch()
-        manager.IncludeBeta = True
-        manager.CloseHostApplication = True
-        manager.SearchForUpdatesAsync()
+        'manager.IncludeBeta = True
+        'manager.CloseHostApplication = True
+        'manager.SearchForUpdatesAsync()
     End Sub
 
     Private Sub btn_updates_search_Click(sender As Object, e As RoutedEventArgs) Handles btn_updates_search.Click
-        updaterUI.ShowUserInterface()
+        'updaterUI.ShowUserInterface()
     End Sub
 #End Region
 
 #Region "Animations"
     Private Sub anim_grd_pos(ByVal e_ctrl As Grid, ByVal e_pos_left As Double)
-        Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Normal, New ThreadStart(Sub()
+        Application.Current.Dispatcher.Invoke(Threading.DispatcherPriority.Normal, New ThreadStart(Sub()
 
 
-                                                                                                               Dim ta As ThicknessAnimation = New ThicknessAnimation()
-                                                                                                               ta.From = e_ctrl.Margin
-                                                                                                               ta.[To] = New Thickness(e_pos_left, e_ctrl.Margin.Top, e_ctrl.Margin.Right, e_ctrl.Margin.Bottom)
-                                                                                                               ta.Duration = New Duration(TimeSpan.FromSeconds(0.5))
-                                                                                                               ta.EasingFunction = New QuarticEase
-                                                                                                               e_ctrl.BeginAnimation(Grid.MarginProperty, ta)
-                                                                                                           End Sub))
+                                                                                                       Dim ta As ThicknessAnimation = New ThicknessAnimation With {
+                                                                                                                   .From = e_ctrl.Margin,
+                                                                                                                   .[To] = New Thickness(e_pos_left, e_ctrl.Margin.Top, e_ctrl.Margin.Right, e_ctrl.Margin.Bottom),
+                                                                                                                   .Duration = New Duration(TimeSpan.FromSeconds(0.5)),
+                                                                                                                   .EasingFunction = New QuarticEase
+                                                                                                               }
+                                                                                                       e_ctrl.BeginAnimation(Grid.MarginProperty, ta)
+                                                                                                   End Sub))
     End Sub
 
     Private Sub anim_sep_pos(ByVal e_ctrl As Separator, ByVal e_pos_left As Double)
-        Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Normal, New ThreadStart(Sub()
+        Application.Current.Dispatcher.Invoke(Threading.DispatcherPriority.Normal, New ThreadStart(Sub()
 
 
-                                                                                                               Dim ta As ThicknessAnimation = New ThicknessAnimation()
-                                                                                                               ta.From = e_ctrl.Margin
-                                                                                                               ta.[To] = New Thickness(e_pos_left, e_ctrl.Margin.Top, e_ctrl.Margin.Right, e_ctrl.Margin.Bottom)
-                                                                                                               ta.Duration = New Duration(TimeSpan.FromSeconds(0.5))
-                                                                                                               ta.EasingFunction = New QuarticEase
-                                                                                                               e_ctrl.BeginAnimation(Separator.MarginProperty, ta)
-                                                                                                           End Sub))
+                                                                                                       Dim ta As ThicknessAnimation = New ThicknessAnimation With {
+                                                                                                           .From = e_ctrl.Margin,
+                                                                                                           .[To] = New Thickness(e_pos_left, e_ctrl.Margin.Top, e_ctrl.Margin.Right, e_ctrl.Margin.Bottom),
+                                                                                                           .Duration = New Duration(TimeSpan.FromSeconds(0.5)),
+                                                                                                           .EasingFunction = New QuarticEase
+                                                                                                       }
+                                                                                                       e_ctrl.BeginAnimation(Separator.MarginProperty, ta)
+                                                                                                   End Sub))
     End Sub
 
     Private Sub anim_img_pos(ByVal e_ctrl As Image, ByVal e_pos_left As Double)
-        Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Normal, New ThreadStart(Sub()
+        Application.Current.Dispatcher.Invoke(Threading.DispatcherPriority.Normal, New ThreadStart(Sub()
 
 
-                                                                                                               Dim ta As ThicknessAnimation = New ThicknessAnimation()
-                                                                                                               ta.From = e_ctrl.Margin
-                                                                                                               ta.[To] = New Thickness(e_pos_left, e_ctrl.Margin.Top, e_ctrl.Margin.Right, e_ctrl.Margin.Bottom)
-                                                                                                               ta.Duration = New Duration(TimeSpan.FromSeconds(0.5))
-                                                                                                               ta.EasingFunction = New QuarticEase
-                                                                                                               e_ctrl.BeginAnimation(Grid.MarginProperty, ta)
-                                                                                                           End Sub))
+                                                                                                       Dim ta As ThicknessAnimation = New ThicknessAnimation With {
+                                                                                                                   .From = e_ctrl.Margin,
+                                                                                                                   .[To] = New Thickness(e_pos_left, e_ctrl.Margin.Top, e_ctrl.Margin.Right, e_ctrl.Margin.Bottom),
+                                                                                                                   .Duration = New Duration(TimeSpan.FromSeconds(0.5)),
+                                                                                                                   .EasingFunction = New QuarticEase
+                                                                                                               }
+                                                                                                       e_ctrl.BeginAnimation(Grid.MarginProperty, ta)
+                                                                                                   End Sub))
     End Sub
 
     Private Sub anim_width(ByVal e_ctrl As Separator, ByVal e_width As Double)
@@ -690,6 +680,16 @@ Public Class wnd_settings
                                                                                                            End Sub))
     End Sub
 
+
+
 #End Region
 
+    Private Sub slider_bg_transp_ValueChanged(sender As Object, e As RoutedPropertyChangedEventArgs(Of Double)) Handles slider_bg_transp.ValueChanged
+        cls_config.ui_blur_transparency = CByte(slider_bg_transp.Value)
+        cls_blur_behind.blur(Me, cls_config.ui_blur_enabled)
+    End Sub
+
+    Private Sub slider_netmon_threshold_ValueChanged(sender As Object, e As RoutedPropertyChangedEventArgs(Of Double)) Handles slider_netmon_threshold.ValueChanged
+        lbl_netmon_threshold.Content = Math.Round(slider_netmon_threshold.Value, 0) & " KB/s"
+    End Sub
 End Class
