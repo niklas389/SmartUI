@@ -21,7 +21,7 @@ Class MainWindow
     Public Shared settings_need_update As Boolean = False
     Public Shared weather_need_update As Boolean = False
 
-    Public Shared suiversion As String = My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & ".23"
+    Public Shared suiversion As String = My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & ".24"
 
 #Region "Dock"
     Const ABM_NEW As Int32 = 0
@@ -180,6 +180,7 @@ Class MainWindow
 
         tmr_clock.Start()
         tmr_netmon_v2.Start()
+        AddHandler NetworkChange.NetworkAvailabilityChanged, AddressOf AvailabilityChanged
 
         mpb_indicateLoading.Visibility = Visibility.Hidden
         'mpb_indicateLoading.Margin = New Thickness(0, -5, 0, 0)
@@ -350,7 +351,6 @@ Class MainWindow
             wpf_helper.helper_image(icn_volume, "pack://application:,,,/Resources/snd_off.png")
             wpf_helper.helper_label(lbl_volume, Nothing, Visibility.Hidden)
             wpf_helper.helper_label(lbl_volume_unit, "Mute")
-
         Else
             wpf_helper.helper_label(lbl_volume_unit, "%")
             wpf_helper.helper_label(lbl_volume, e_volume.ToString, Visibility.Visible)
@@ -358,9 +358,9 @@ Class MainWindow
             Select Case e_volume
                 Case < 5
                     wpf_helper.helper_image(icn_volume, "pack://application:,,,/Resources/snd_vLow.png")
-                Case < 30
+                Case < 33
                     wpf_helper.helper_image(icn_volume, "pack://application:,,,/Resources/snd_low.png")
-                Case < 60
+                Case < 66
                     wpf_helper.helper_image(icn_volume, "pack://application:,,,/Resources/snd_mid.png")
                 Case Else
                     wpf_helper.helper_image(icn_volume, "pack://application:,,,/Resources/snd_high.png")
@@ -369,33 +369,30 @@ Class MainWindow
     End Sub
 
     Dim ca_skip_volChange As Boolean
-    Private Sub icn_volume_MouseWheel(sender As Object, e As MouseWheelEventArgs) Handles icn_volume.MouseWheel, lbl_volume.MouseWheel, grd_volume.MouseWheel
+    Private Sub icn_volume_MouseWheel(sender As Object, e As MouseWheelEventArgs) Handles icn_volume.MouseWheel, lbl_volume.MouseWheel, lbl_volume_unit.MouseWheel, grd_volume.MouseWheel
         ca_skip_volChange = Not ca_skip_volChange
+        If ca_skip_volChange = True Then Exit Sub
 
-        If ca_skip_volChange = True Then
-            If e.Delta > 0 Then
-                audio_device.AudioEndpointVolume.VolumeStepUp()
-            Else
-                audio_device.AudioEndpointVolume.VolumeStepDown()
-            End If
+        If e.Delta > 0 Then
+            audio_device.AudioEndpointVolume.VolumeStepUp()
+        Else
+            audio_device.AudioEndpointVolume.VolumeStepDown()
         End If
     End Sub
 
-    '---- RWork
     Private Sub grd_volume_SizeChanged(sender As Object, e As SizeChangedEventArgs) Handles grd_volume.SizeChanged, lbl_volume.SizeChanged
-        If lbl_volume.Visibility = Visibility.Visible Then
+        grd_network.Margin = New Thickness(0, 0, grd_volume.RenderSize.Width + grd_volume.Margin.Right + 6, 0)
+
+        If audio_device.AudioEndpointVolume.Mute = False Then
             lbl_volume_unit.Margin = New Thickness(17 + Math.Round(lbl_volume.RenderSize.Width, 0), -1, 0, 0)
         Else
             lbl_volume_unit.Margin = New Thickness(19, -1, 0, 0)
         End If
-
-        grd_network.Margin = New Thickness(0, 0, grd_volume.RenderSize.Width + grd_volume.Margin.Right + 6, 0)
     End Sub
-    '-----
+
     Private Sub grd_volume_MouseUp(sender As Object, e As MouseButtonEventArgs) Handles grd_volume.MouseUp
         audio_device.AudioEndpointVolume.Mute = Not audio_device.AudioEndpointVolume.Mute
     End Sub
-
 #End Region
 
 #Region "SpotifyAPI-NET"
@@ -632,12 +629,12 @@ Class MainWindow
 
 #Region "NOTIFICATION"
     Private Sub helper_notification(e_msg As String, Optional e_icn As String = Nothing)
-        Dim c_blur As New Effects.BlurEffect With {.Radius = 10}
-        grd_controls.Effect = c_blur
-        grd_controls.Opacity = 0.65
-
         Application.Current.Dispatcher.Invoke(Threading.DispatcherPriority.Normal,
                                               New ThreadStart(Sub()
+                                                                  Dim c_blur As New Effects.BlurEffect With {.Radius = 10}
+                                                                  grd_controls.Effect = c_blur
+                                                                  grd_controls.Opacity = 0.65
+
                                                                   fout_notification.IsOpen = True
                                                                   fout_notification.IsAutoCloseEnabled = False
                                                                   fout_notification.IsAutoCloseEnabled = True
@@ -699,11 +696,49 @@ Class MainWindow
             wpf_helper.helper_grid(grd_network, True)
             netmon_enabled = 1
 
+            If My.Computer.Network.IsAvailable Then
+                netmon_connection_icon(1) 'Network
+                If netmon_checkInternetConnection() Then netmon_connection_icon(2) 'Inet
+            Else
+                netmon_connection_icon(0) 'Not connected
+            End If
         Catch
             wnd_log.AddLine("ERR" & "-NET", "Error in 'net_get_interfaces'", "err")
             netmon_enabled = -1
             wpf_helper.helper_grid(grd_network, False)
         End Try
+    End Sub
+
+    Private Sub AvailabilityChanged(ByVal sender As Object, ByVal e As NetworkAvailabilityEventArgs)
+        If e.IsAvailable Then
+            netmon_connection_icon(1) 'Network
+            If netmon_checkInternetConnection() Then netmon_connection_icon(2) 'Inet
+        Else
+            netmon_connection_icon(0) 'Not connected
+        End If
+    End Sub
+
+    Private Function netmon_checkInternetConnection() As Boolean
+        Try
+            Using client = New Net.WebClient()
+                Using stream = client.OpenRead("http://www.google.com")
+                    Return True
+                End Using
+            End Using
+        Catch
+            Return False
+        End Try
+    End Function
+
+    Private Sub netmon_connection_icon(ByVal e_conn As Integer)
+        Select Case e_conn
+            Case 0
+                wpf_helper.helper_image(icn_network_state, "pack://application:,,,/Resources/ic_ethernet_cable_off_white_21px.png")
+            Case 1
+                wpf_helper.helper_image(icn_network_state, "pack://application:,,,/Resources/ic_lan_nointernet.png")
+            Case 2
+                wpf_helper.helper_image(icn_network_state, "pack://application:,,,/Resources/ic_lan_connected.png")
+        End Select
     End Sub
 
     Dim netmon_bytesTx_total As Int64

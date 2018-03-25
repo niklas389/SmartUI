@@ -6,7 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:Name="wnd_main" x:Class="MainWindow"
         mc:Ignorable="d"
-        Title="Main Overlay" Height="25" Width="1000" AllowsTransparency="True" WindowStyle="None" Background="#7F000000" ShowInTaskbar="False" ShowActivated="False" ResizeMode="NoResize" Foreground="White" Left="0" Top="0" Topmost="True">
+        Title="Main Overlay" Height="25" Width="1000" AllowsTransparency="True" WindowStyle="None" ShowInTaskbar="False" ShowActivated="False" ResizeMode="NoResize" Foreground="White" Left="0" Top="0" Topmost="True" Background="Black">
     <Window.Resources>
         <FontFamily x:Key="MainFont">Segoe UI Light</FontFamily>
     </Window.Resources>
@@ -23,34 +23,34 @@
         <!--Controls below here-->
         <Grid x:Name="grd_controls" Margin="0">
             <Custom:MetroProgressBar x:Name="mpb_indicateLoading" Margin="0" VerticalAlignment="Top" Background="Transparent" EllipseDiameter="4" EllipseOffset="10" Foreground="#FF00F19F" IsIndeterminate="True"/>
-        
-        <Grid x:Name="grd_volume" HorizontalAlignment="Right" Height="25" VerticalAlignment="Top" Margin="0,0,20,0">
-            <Label x:Name="lbl_volume" Content="&lt;volume&gt;" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="White" FontFamily="{DynamicResource MainFont}" FontSize="18.667" Height="35" Margin="23,-3,0,0" RenderTransformOrigin="12,0" Background="{x:Null}"/>
-            <Image x:Name="icn_volume" HorizontalAlignment="Left" Margin="3,3,0,0" VerticalAlignment="Top" Width="19" Source="pack://application:,,,/Resources/snd_high.png" Stretch="Fill" Height="19"/>
-            <Label x:Name="lbl_volume_unit" Content="%" VerticalAlignment="Top" Foreground="White" FontFamily="{DynamicResource MainFont}" FontSize="14" Height="35" Margin="115,-1,0,0" RenderTransformOrigin="0,0" Opacity="0.6" Background="{x:Null}" HorizontalAlignment="Left"/>
-        </Grid>
 
-        <Grid x:Name="grd_network" Margin="0,0,157,0" Height="25" VerticalAlignment="Top" HorizontalAlignment="Right">
-            <Image x:Name="icn_network_send" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Center" Source="Resources/ic_net_send_24dp.png" Width="19" Height="19"/>
-            <Label x:Name="lbl_network_traffic_send" Content="&lt;net send&gt;" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="White" FontFamily="{DynamicResource MainFont}" FontSize="14" Height="35" Margin="19,-1,0,0" RenderTransformOrigin="0,0" Opacity="0.6" Background="{x:Null}"/>
-            <Image x:Name="icn_network_receive" HorizontalAlignment="Left" Margin="103,3,0,3" VerticalAlignment="Center" Source="Resources/ic_net_receive_24dp.png" Width="19" Height="19"/>
-            <Label x:Name="lbl_network_traffic_receive" Content="&lt;net receive&gt;" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="White" FontFamily="{DynamicResource MainFont}" FontSize="14" Height="35" Margin="122,-1,0,0" RenderTransformOrigin="0,0" Opacity="0.6" Background="{x:Null}"/>
-            <Image x:Name="icn_network_state" HorizontalAlignment="Left" Margin="214,3,0,0" VerticalAlignment="Top" Source="Resources/ic_ethernet_cable_off_white_21px.png" Width="19" Height="19" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
-        </Grid>
+            <Grid x:Name="grd_volume" HorizontalAlignment="Right" Height="25" VerticalAlignment="Top" Margin="0,0,20,0">
+                <Image x:Name="icn_volume" HorizontalAlignment="Left" Margin="3,3,0,0" VerticalAlignment="Top" Width="19" Source="pack://application:,,,/Resources/snd_high.png" Stretch="Fill" Height="19"/>
+                <Label x:Name="lbl_volume" Content="&lt;volume&gt;" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="White" FontFamily="{DynamicResource MainFont}" FontSize="18.667" Height="35" Margin="23,-3,0,0" RenderTransformOrigin="12,0" Background="{x:Null}"/>
+                <Label x:Name="lbl_volume_unit" Content="%" VerticalAlignment="Top" Foreground="White" FontFamily="{DynamicResource MainFont}" FontSize="14" Height="35" Margin="115,-1,0,0" RenderTransformOrigin="0,0" Opacity="0.6" Background="{x:Null}" HorizontalAlignment="Left"/>
+            </Grid>
 
-        <Grid x:Name="grd_weather" HorizontalAlignment="Left" Height="25" VerticalAlignment="Top" Margin="0">
-            <Label x:Name="lbl_weather" Content="&lt;weather&gt;" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="White" FontFamily="{DynamicResource MainFont}" FontSize="18.667" Height="35" Margin="24,-3,0,0" RenderTransformOrigin="12,0" Background="{x:Null}"/>
-            <Image x:Name="icn_weather" HorizontalAlignment="Left" Margin="5,3,0,0" VerticalAlignment="Top" Width="19" Height="19" Source="Resources/img_weather_init.png" Stretch="UniformToFill"/>
-        </Grid>
+            <Grid x:Name="grd_network" Margin="0,0,157,0" Height="25" VerticalAlignment="Top" HorizontalAlignment="Right">
+                <Image x:Name="icn_network_send" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Center" Source="Resources/ic_net_send_24dp.png" Width="19" Height="19"/>
+                <Label x:Name="lbl_network_traffic_send" Content="&lt;net send&gt;" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="White" FontFamily="{DynamicResource MainFont}" FontSize="14" Height="35" Margin="19,-1,0,0" RenderTransformOrigin="0,0" Opacity="0.6" Background="{x:Null}"/>
+                <Image x:Name="icn_network_receive" HorizontalAlignment="Left" Margin="103,3,0,3" VerticalAlignment="Center" Source="Resources/ic_net_receive_24dp.png" Width="19" Height="19"/>
+                <Label x:Name="lbl_network_traffic_receive" Content="&lt;net receive&gt;" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="White" FontFamily="{DynamicResource MainFont}" FontSize="14" Height="35" Margin="122,-1,0,0" RenderTransformOrigin="0,0" Opacity="0.6" Background="{x:Null}"/>
+                <Image x:Name="icn_network_state" HorizontalAlignment="Left" Margin="214,3,0,0" VerticalAlignment="Top" Source="Resources/ic_ethernet_cable_off_white_21px.png" Width="19" Height="19" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+            </Grid>
 
-        <Grid x:Name="grd_spotify" HorizontalAlignment="Left" Height="25" VerticalAlignment="Top" Margin="121,0,0,0">
-            <Image x:Name="icn_spotify" HorizontalAlignment="Left" Margin="0,3,0,0" VerticalAlignment="Top" Width="19" Source="Resources/spotify_notification.png" Height="19"/>
-            <Label x:Name="lbl_spotify" Content="&lt;title&gt;" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="White" FontFamily="{DynamicResource MainFont}" FontSize="18.667" Height="35" Margin="19,-3,0,0" RenderTransformOrigin="12,0" Background="{x:Null}"/>
-            <Label x:Name="lbl_spotify_remaining" Content="&lt;add_info&gt;" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="White" FontFamily="{DynamicResource MainFont}" FontSize="14" Margin="81,-1,0,0" RenderTransformOrigin="0,0" Height="30" Opacity="0.6" Background="{x:Null}"/>
-        </Grid>
+            <Grid x:Name="grd_weather" HorizontalAlignment="Left" Height="25" VerticalAlignment="Top" Margin="0">
+                <Label x:Name="lbl_weather" Content="&lt;weather&gt;" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="White" FontFamily="{DynamicResource MainFont}" FontSize="18.667" Height="35" Margin="24,-3,0,0" RenderTransformOrigin="12,0" Background="{x:Null}"/>
+                <Image x:Name="icn_weather" HorizontalAlignment="Left" Margin="5,3,0,0" VerticalAlignment="Top" Width="19" Height="19" Source="Resources/img_weather_init.png" Stretch="UniformToFill"/>
+            </Grid>
 
-        <Grid x:Name="grd_menu_right" HorizontalAlignment="Right" Height="25" Margin="0" VerticalAlignment="Top" Width="25">
-            <Image x:Name="icn_menu" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Source="Resources/ic_more_vert_24dp.png" Width="20" Height="20"/>
+            <Grid x:Name="grd_spotify" HorizontalAlignment="Left" Height="25" VerticalAlignment="Top" Margin="121,0,0,0">
+                <Image x:Name="icn_spotify" HorizontalAlignment="Left" Margin="0,3,0,0" VerticalAlignment="Top" Width="19" Source="Resources/spotify_notification.png" Height="19"/>
+                <Label x:Name="lbl_spotify" Content="&lt;title&gt;" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="White" FontFamily="{DynamicResource MainFont}" FontSize="18.667" Height="35" Margin="19,-3,0,0" RenderTransformOrigin="12,0" Background="{x:Null}"/>
+                <Label x:Name="lbl_spotify_remaining" Content="&lt;add_info&gt;" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="White" FontFamily="{DynamicResource MainFont}" FontSize="14" Margin="81,-1,0,0" RenderTransformOrigin="0,0" Height="30" Opacity="0.6" Background="{x:Null}"/>
+            </Grid>
+
+            <Grid x:Name="grd_menu_right" HorizontalAlignment="Right" Height="25" Margin="0" VerticalAlignment="Top" Width="25">
+                <Image x:Name="icn_menu" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Source="Resources/ic_more_vert_24dp.png" Width="20" Height="20"/>
             </Grid>
 
             <Grid x:Name="grd_clock" HorizontalAlignment="Left" Height="25" Margin="450,0,0,0" VerticalAlignment="Top">
@@ -59,8 +59,8 @@
             </Grid>
         </Grid>
     </Grid>
-    
-    
+
+
 </Window>
 
     
