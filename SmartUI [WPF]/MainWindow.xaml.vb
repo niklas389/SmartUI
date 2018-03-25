@@ -21,7 +21,7 @@ Class MainWindow
     Public Shared settings_need_update As Boolean = False
     Public Shared weather_need_update As Boolean = False
 
-    Public Shared suiversion As String = My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & ".22"
+    Public Shared suiversion As String = My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & ".23"
 
 #Region "Dock"
     Const ABM_NEW As Int32 = 0

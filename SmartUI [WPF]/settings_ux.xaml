@@ -127,7 +127,7 @@
                     <Button x:Name="btn_cache_refresh" Content="Aktualisieren" Template="{StaticResource custbtn}" HorizontalAlignment="Left" Margin="450,80,0,0" VerticalAlignment="Top" Width="85" Foreground="#7FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25"/>
                     <Label Content="Spotify Integration" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light" Margin="10,5,0,0"/>
                     <Separator Height="10" Margin="15,30,15,0" VerticalAlignment="Top" Foreground="#FF13EAAC" Background="#3FFFFFFF"/>
-                    <Button x:Name="btn_restart_spotify" Content="Spotify Neu starten" Template="{StaticResource custbtn}" Margin="15,288,415,0" VerticalAlignment="Top" Foreground="#7FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25" HorizontalAlignment="Center" Width="120"/>
+                    <Button x:Name="btn_restart_spotify" Content="Spotify Neu starten" Template="{StaticResource custbtn}" Margin="15,115,415,0" VerticalAlignment="Top" Foreground="#7FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25" HorizontalAlignment="Center" Width="120"/>
                 </Grid>
             </TabItem>
             <TabItem x:Name="matc_updates" Header="Updates" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" Width="54" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF767676">

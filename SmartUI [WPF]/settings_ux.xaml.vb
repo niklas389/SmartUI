@@ -50,6 +50,7 @@ Public Class wnd_settings
 
         lbl_cpr.Content = "Version: " & MainWindow.suiversion & " - " & IO.File.GetLastWriteTime(AppDomain.CurrentDomain.BaseDirectory & "\SmartUI.exe").ToString("yyMMdd")
 
+        check_spotify_installation()
         load_settings()
         get_3rdptysw_versions()
 
@@ -231,7 +232,11 @@ Public Class wnd_settings
 
         'Spotify Check
         If media_spotify_installed Then
-            lbl_spotifyCheck.Content = "Spotify installiert (v" & MainWindow._sAPI_ClientVersion & ") und " & If(Process.GetProcessesByName("Spotify").Length > 1, "gestartet", "nicht gestartet (!)")
+            If media_spotify_type = "UWP" Then
+                lbl_spotifyCheck.Content = "Spotify (UWP) installiert (v" & MainWindow._sAPI_ClientVersion & ") und " & If(Process.GetProcessesByName("Spotify").Length > 1, "gestartet", "nicht gestartet (!)")
+            Else
+                lbl_spotifyCheck.Content = "Spotify installiert (v" & MainWindow._sAPI_ClientVersion & ") und " & If(Process.GetProcessesByName("Spotify").Length > 1, "gestartet", "nicht gestartet (!)")
+            End If
         Else
             lbl_spotifyCheck.Content = "Spotify ist nicht Installiert."
         End If
@@ -454,8 +459,20 @@ Public Class wnd_settings
 #End Region
 
 #Region "Spotify"
-    Dim media_spotify_installed As Boolean = IO.File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Spotify\Spotify.exe")
+    Dim media_spotify_installed As Boolean
+    Dim media_spotify_type As String
 
+    Private Sub check_spotify_installation()
+        If IO.Directory.Exists(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) & "\Packages\SpotifyAB.SpotifyMusic_zpdnekdrzrea0") Then
+            media_spotify_installed = True
+            media_spotify_type = "UWP"
+        ElseIf IO.File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Spotify\Spotify.exe") Then
+            media_spotify_installed = True
+            media_spotify_type = "normal"
+        Else
+            media_spotify_installed = False
+        End If
+    End Sub
 
     Private Sub btn_restart_spotify_Click(sender As Object, e As RoutedEventArgs) Handles btn_restart_spotify.Click
         If media_spotify_installed = True Then flyout_spotify("force_restart") Else show_flyout("Spotify nicht installiert!", False)
@@ -470,10 +487,15 @@ Public Class wnd_settings
                 btn_flyout_spotify_confirm.Content = "Löschen"
 
             Case "force_restart"
-                lbl_reset_cache_header.Content = "Spotify neu-starten?"
-                btn_flyout_spotify_confirm.Tag = "force_restart"
-                lbl_flyout_spotify_msg.Content = "Der Spotify Client wird beendet und neu-gestartet"
-                btn_flyout_spotify_confirm.Content = "Neu starten"
+                If media_spotify_type <> "UWP" Then
+                    lbl_reset_cache_header.Content = "Spotify neu-starten?"
+                    btn_flyout_spotify_confirm.Tag = "force_restart"
+                    lbl_flyout_spotify_msg.Content = "Der Spotify Client wird beendet und neu-gestartet"
+                    btn_flyout_spotify_confirm.Content = "Neu starten"
+                Else
+                    show_flyout("Spotify UWP kann nicht neu gestartet werden", False)
+                    Exit Sub
+                End If
 
         End Select
 
@@ -612,15 +634,15 @@ Public Class wnd_settings
     '    lbl_header.Content = "UPDATES"
     'End Sub
 
-    Private Sub updater_hiddensearch()
-        'manager.IncludeBeta = True
-        'manager.CloseHostApplication = True
-        'manager.SearchForUpdatesAsync()
-    End Sub
+    'Private Sub updater_hiddensearch()
+    '    manager.IncludeBeta = True
+    '    manager.CloseHostApplication = True
+    '    manager.SearchForUpdatesAsync()
+    'End Sub
 
-    Private Sub btn_updates_search_Click(sender As Object, e As RoutedEventArgs) Handles btn_updates_search.Click
-        'updaterUI.ShowUserInterface()
-    End Sub
+    'Private Sub btn_updates_search_Click(sender As Object, e As RoutedEventArgs) Handles btn_updates_search.Click
+    '    updaterUI.ShowUserInterface()
+    'End Sub
 #End Region
 
 #Region "Animations"
