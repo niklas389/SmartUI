@@ -21,7 +21,7 @@ Class MainWindow
     Public Shared settings_need_update As Boolean = False
     Public Shared weather_need_update As Boolean = False
 
-    Public Shared suiversion As String = My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & ".21"
+    Public Shared suiversion As String = My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & ".22"
 
 #Region "Dock"
     Const ABM_NEW As Int32 = 0
@@ -70,25 +70,18 @@ Class MainWindow
         abd.rc.rBottom = 25
         apiSHAppBarMessage(ABM_NEW, abd)
         apiSHAppBarMessage(ABM_SETPOS, abd)
-
         Topmost = True
-        anim_slidein()
+
+        anim_fadein()
     End Sub
 
-    Private Sub anim_slidein()
-        Top = -25
-        Left = 0
-        Me.Width = SystemParameters.PrimaryScreenWidth
-
-        Dim dblanim As New DoubleAnimation()
-        dblanim.From = -25
-        dblanim.To = 0
-        dblanim.AutoReverse = False
-        dblanim.Duration = TimeSpan.FromSeconds(0.6)
+    Private Sub anim_fadein()
+        Dim dblanim As New DoubleAnimation(0, 1, TimeSpan.FromSeconds(1))
+        dblanim.Duration = TimeSpan.FromSeconds(1)
 
         Dim storyboard As New Storyboard()
         Storyboard.SetTarget(dblanim, Me)
-        Storyboard.SetTargetProperty(dblanim, New PropertyPath(Window.TopProperty))
+        Storyboard.SetTargetProperty(dblanim, New PropertyPath(Window.OpacityProperty))
 
         storyboard.Children.Add(dblanim)
         storyboard.Begin(Me)
@@ -134,13 +127,13 @@ Class MainWindow
 
         ui_clock_weekday = CultureInfo.CurrentCulture.DateTimeFormat.GetShortestDayName(DateTime.Now.DayOfWeek)
 
-        'log if this is this versions first run
-        If Not My.Application.Info.Version.ToString = _conf.read("app", "firstrun", "") Then wnd_log.AddLine("INFO", "First start after updating the app" & Environment.NewLine)
+        If Not My.Application.Info.Version.ToString = _conf.read("app", "firstrun", "") Then wnd_log.AddLine("INFO", "First start after updating the app" & Environment.NewLine) 'log first run after update
 
-        lbl_weather.Content = "--°" 'Change text to this to avoid that user see's labels standard text
+        lbl_weather.Content = "--°" 'Change text to avoid that user see's labels standard text
         settings_load()
 
-        AddHandler Microsoft.Win32.SystemEvents.PowerModeChanged, AddressOf SystemEvents_PowerModeChanged
+        tmr_aInit.Start()
+        AddHandler Microsoft.Win32.SystemEvents.PowerModeChanged, AddressOf SystemEvents_PowerModeChanged 'EVP for Standby/Hibernation events
     End Sub
 
     Public Sub settings_load()
@@ -172,7 +165,7 @@ Class MainWindow
         End If
     End Sub
 
-    Private WithEvents tmr_aInit As New Threading.DispatcherTimer With {.Interval = New TimeSpan(0, 0, 4), .IsEnabled = True}
+    Private WithEvents tmr_aInit As New Threading.DispatcherTimer With {.Interval = New TimeSpan(0, 0, 3), .IsEnabled = False}
     Private Sub tmr_aInit_Tick(ByVal sender As Object, ByVal e As EventArgs) Handles tmr_aInit.Tick
         cls_weather.init_update(True) 'Init Weather
         wnd_flyout_appmenu.ui_settings.Show() 'Init settings window #!
