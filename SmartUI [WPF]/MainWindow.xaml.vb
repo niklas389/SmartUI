@@ -21,7 +21,7 @@ Class MainWindow
     Public Shared settings_need_update As Boolean = False
     Public Shared weather_need_update As Boolean = False
 
-    Public Shared suiversion As String = My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & ".24"
+    Public Shared suiversion As String = My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & ".25"
 
 #Region "Dock"
     Const ABM_NEW As Int32 = 0
@@ -49,7 +49,6 @@ Class MainWindow
 
     Private Sub MainWindow_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
         If abd.rc.rBottom = 25 Then apiSHAppBarMessage(ABM_REMOVE, abd)
-        'RemoveHandler NetworkChange.NetworkAddressChanged, AddressOf AddressChangedCallback
     End Sub
 
     Private Sub MainWindow_LocationChanged(sender As Object, e As EventArgs) Handles Me.LocationChanged, Me.SizeChanged
@@ -72,7 +71,21 @@ Class MainWindow
         apiSHAppBarMessage(ABM_SETPOS, abd)
         Topmost = True
 
+        sui_hidefromalttab()
         anim_fadein()
+    End Sub
+
+    Public Sub sui_hidefromalttab()
+        Dim w As Window = New Window()
+        w.WindowStyle = WindowStyle.ToolWindow
+        w.ShowInTaskbar = False
+        w.Top = -100
+        w.Left = -100
+        w.Width = 1
+        w.Height = 1
+        w.Show()
+        Me.Owner = w
+        w.Hide()
     End Sub
 
     Private Sub anim_fadein()

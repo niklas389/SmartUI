@@ -56,7 +56,7 @@
                             </Separator.RenderTransform>
                         </Separator>
                         <Label Content="Netzwerkadapter" HorizontalAlignment="Left" Margin="320,39,0,0" VerticalAlignment="Top" Width="219" Foreground="#3FFFFFFF" Height="26"/>
-                        <CheckBox x:Name="cb_wndmain_net_textDisableSpeedLimit" Content="Text bei jeder Datenaktivität" HorizontalAlignment="Left" Margin="324,130,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="216"/>
+                        <CheckBox x:Name="cb_wndmain_net_textDisableSpeedLimit" Content="Text auch unter 50 KB/s anzeigen" HorizontalAlignment="Left" Margin="324,95,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="215"/>
                         <Separator HorizontalAlignment="Left" Height="10" Margin="0,76,0,69" VerticalAlignment="Center" Width="35" RenderTransformOrigin="0.5,0.5" Background="#26FFFFFF">
                             <Separator.RenderTransform>
                                 <TransformGroup>
@@ -68,19 +68,19 @@
                             </Separator.RenderTransform>
                         </Separator>
                         <ComboBox x:Name="ComboBox_net_interface" HorizontalAlignment="Left" VerticalAlignment="Top" Width="215" Margin="324,65,0,0" Height="25" Foreground="Black" Background="#FF424242" BorderBrush="#FF424242"/>
-                        <Slider x:Name="slider_bg_transp" HorizontalAlignment="Left" Margin="153,89,0,0" VerticalAlignment="Top" Width="145" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFBDBDBD" Maximum="255" SmallChange="1" Minimum="50"/>
-                        <Label Content="Transparenz" HorizontalAlignment="Left" Margin="148,65,0,0" VerticalAlignment="Top" Width="145" Foreground="#3FFFFFFF" Height="26"/>
-                        <Slider x:Name="slider_netmon_threshold" HorizontalAlignment="Left" Margin="324,97,0,0" VerticalAlignment="Top" Width="157" Maximum="100" SmallChange="1" LargeChange="5"/>
-                        <Label x:Name="lbl_netmon_threshold" Content="XXX KB/s" HorizontalAlignment="Right" Margin="0,93,11,0" VerticalAlignment="Top" Background="{x:Null}" Foreground="White"/>
+                        <Slider x:Name="slider_netmon_threshold" HorizontalAlignment="Left" Margin="324,119,0,0" VerticalAlignment="Top" Width="158" Maximum="100" SmallChange="1" LargeChange="5"/>
+                        <Label x:Name="lbl_netmon_threshold" Content="XXX KB/s" HorizontalAlignment="Right" Margin="0,115,10,0" VerticalAlignment="Top" Background="{x:Null}" Foreground="White"/>
                     </Grid>
 
                     <Grid HorizontalAlignment="Left" Height="130" Margin="0,155,0,0" VerticalAlignment="Top" Width="550">
                         <Label Content="Sonstiges" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#FF00F19F" FontSize="14.5" FontFamily="Segoe UI Light" Margin="10,5,0,0"/>
                         <Separator HorizontalAlignment="Left" Height="10" Margin="15,30,0,0" VerticalAlignment="Top" Width="525" Foreground="#FF13EAAC" Background="#3FFFFFFF"/>
                         <Button x:Name="btn_credits" Content="Credits" HorizontalAlignment="Left" Margin="465,105,0,0" VerticalAlignment="Top" Width="75" Foreground="#3FFFFFFF" Background="#00000000" BorderBrush="#00707070" Height="25" Visibility="Hidden"/>
-                        <CheckBox x:Name="cb_other_disableVolumeOSD" Content="Verstecke Lautst. OSD" HorizontalAlignment="Left" Margin="15,45,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="148"/>
-                        <CheckBox x:Name="cb_other_startup_play" Content="Play StartUp Sound" HorizontalAlignment="Left" Margin="15,65,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="148"/>
-                        <CheckBox x:Name="cb_wndmain_blur_enabled" Content="Hintergrund unscharf" HorizontalAlignment="Left" Margin="15,85,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="148"/>
+                        <CheckBox x:Name="cb_other_disableVolumeOSD" Content="Verstecke Lautst. OSD" HorizontalAlignment="Left" Margin="15,45,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="167"/>
+                        <CheckBox x:Name="cb_other_startup_play" Content="Start-sound wiedergeben" HorizontalAlignment="Left" Margin="15,65,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="167"/>
+                        <CheckBox x:Name="cb_wndmain_blur_enabled" Content="Hintergrund weichzeichnen" HorizontalAlignment="Left" Margin="15,85,0,0" VerticalAlignment="Top" Foreground="White" Background="#33FFFFFF" BorderBrush="#33FFFFFF" Width="167"/>
+                        <Slider x:Name="slider_bg_transp" HorizontalAlignment="Left" Margin="244,65,0,0" VerticalAlignment="Top" Width="158" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFBDBDBD" Maximum="255" SmallChange="1" Minimum="50"/>
+                        <Label Content="Transparenz der Fenster" HorizontalAlignment="Left" Margin="244,41,0,0" VerticalAlignment="Top" Width="158" Foreground="#3FFFFFFF" Height="26"/>
                     </Grid>
                     <Grid x:Name="grd_bottom_strip" Height="28" VerticalAlignment="Bottom" Margin="0">
                         <Button x:Name="btn_settings_save" Content="Speichern" Template="{StaticResource custbtn}" HorizontalAlignment="Right" Margin="0,-6,10,9" VerticalAlignment="Center" Width="85" Foreground="#7FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25"/>
@@ -215,10 +215,9 @@
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <Label Content="SmartUI" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Background="{x:Null}" Foreground="White" FontSize="16"/>
-                    <Label Content="v123" HorizontalAlignment="Left" Margin="74,14,0,0" VerticalAlignment="Top" Background="{x:Null}" Foreground="#A5FFFFFF"/>
                     <Button x:Name="btn_changelog" Content="Changelog" Template="{StaticResource custbtn}" HorizontalAlignment="Left" Margin="465,45,0,0" VerticalAlignment="Top" Width="75" Foreground="#7FFFFFFF" Background="#33FFFFFF" BorderBrush="#00707070" Height="25"/>
                     <Button x:Name="btn_info_3rdpty" Template="{StaticResource custbtn}" Content="Drittanbieter Software" HorizontalAlignment="Left" Margin="405,75,0,0" VerticalAlignment="Top" Width="135" Foreground="#7FFFFFFF" Background="{DynamicResource MainColorBtn}" BorderBrush="#00707070" Height="25"/>
-                    <Label x:Name="lbl_cpr" Content="&lt;cpr&gt;" Margin="10,0,10,10" VerticalAlignment="Bottom" Foreground="#3FFFFFFF" Height="25" VerticalContentAlignment="Bottom"/>
+                    <Label x:Name="lbl_cpr" Content="&lt;cpr&gt;" Margin="75,0,10,284" VerticalAlignment="Bottom" Foreground="#3FFFFFFF" Height="25" VerticalContentAlignment="Bottom"/>
                 </Grid>
             </TabItem>
         </Custom:MetroAnimatedTabControl>

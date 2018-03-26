@@ -48,7 +48,7 @@ Public Class wnd_settings
         flyout_message.IsOpen = False
         pring_flyout_message.Visibility = Visibility.Hidden
 
-        lbl_cpr.Content = "Version: " & MainWindow.suiversion & " - " & IO.File.GetLastWriteTime(AppDomain.CurrentDomain.BaseDirectory & "\SmartUI.exe").ToString("yyMMdd")
+        lbl_cpr.Content = "v" & MainWindow.suiversion & " - " & IO.File.GetLastWriteTime(AppDomain.CurrentDomain.BaseDirectory & "\SmartUI.exe").ToString("yyMMdd")
 
         check_spotify_installation()
         load_settings()
