@@ -48,9 +48,6 @@ Public Class wnd_settings
         flyout_message.IsOpen = False
         pring_flyout_message.Visibility = Visibility.Hidden
 
-        lbl_cpr.Content = "v" & MainWindow.suiversion & " - " & IO.File.GetLastWriteTime(AppDomain.CurrentDomain.BaseDirectory & "\SmartUI.exe").ToString("yyMMdd")
-
-        check_spotify_installation()
         load_settings()
         get_3rdptysw_versions()
 
@@ -199,14 +196,14 @@ Public Class wnd_settings
             sep_nav_highlight.Background = New SolidColorBrush(Color.FromArgb(255, 0, 241, 159))
             ico_nav_home.Visibility = Visibility.Visible
 
-            anim_img_pos(ico_nav_home, 104.5)
+            anim_img_pos(ico_nav_home, 120)
             anim_grd_pos(grd_navbar, 25)
         Else
+            anim_img_pos(ico_nav_home, 100)
+            anim_grd_pos(grd_navbar, 0)
+
             sep_nav_highlight.Background = New SolidColorBrush(Color.FromArgb(80, 255, 255, 255))
             ico_nav_home.Visibility = Visibility.Hidden
-
-            anim_img_pos(ico_nav_home, 92)
-            anim_grd_pos(grd_navbar, 0)
         End If
     End Sub
 
@@ -228,18 +225,8 @@ Public Class wnd_settings
         matc_tabctrl.SelectedIndex = 3
         lbl_header.Content = "SPOTIFY"
 
+        check_spotify_installation()
         lbl_cacheSize.Content = Await Task.Run(Function() get_cache_size())
-
-        'Spotify Check
-        If media_spotify_installed Then
-            If media_spotify_type = "UWP" Then
-                lbl_spotifyCheck.Content = "Spotify (UWP) installiert (v" & MainWindow._sAPI_ClientVersion & ") und " & If(Process.GetProcessesByName("Spotify").Length > 1, "gestartet", "nicht gestartet (!)")
-            Else
-                lbl_spotifyCheck.Content = "Spotify installiert (v" & MainWindow._sAPI_ClientVersion & ") und " & If(Process.GetProcessesByName("Spotify").Length > 1, "gestartet", "nicht gestartet (!)")
-            End If
-        Else
-            lbl_spotifyCheck.Content = "Spotify ist nicht Installiert."
-        End If
 
         anim_width(sep_nav_highlight, btn_page_media.Width)
         anim_sep_pos(sep_nav_highlight, btn_page_media.Margin.Left)
@@ -263,17 +250,18 @@ Public Class wnd_settings
         lbl_header.Content = "INFO & SUPPORT"
         anim_width(sep_nav_highlight, btn_page_about.Width)
         anim_sep_pos(sep_nav_highlight, btn_page_about.Margin.Left)
+        lbl_cpr.Content = "v" & MainWindow.suiversion & " - " & cls_config.build_version
     End Sub
+
+
 #End Region
 
 #Region "Weather & API-Key Overlay"
     Private Sub cb_wndmain_weather_enabled_Checked(sender As Object, e As RoutedEventArgs) Handles cb_wndmain_weather_enabled.Click
-        If txtBx_weather_cid.Text = "<City ID>" Or txtBx_weather_APIkey.Text = "<API Key>" Then
+        If txtBx_weather_APIkey.Text = "0" Or txtBx_weather_cid.Text = "0" Then
             cb_wndmain_weather_enabled.IsChecked = False
-            MessageBox.Show("Bitte geben sie die ID ihres Ortes und ihren OpenWeather API-Key ein, damit wir die Wetterdaten abrufen können." & NewLine &
-                            "Falls sie keinen API-Key haben, können sie diesen KOSTENLOS bei OpenWeather erhalten, klicken sie dafür auf 'Einrichten > API-Key erhalten'", "OpenWeather | Einrichten", MessageBoxButton.OK, MessageBoxImage.Asterisk)
+            show_flyout("API-Key oder City-ID ungültig!", False)
         End If
-
     End Sub
 
     Private Async Sub weather_api_test()
@@ -450,32 +438,41 @@ Public Class wnd_settings
 #End Region
 
     Private Sub get_3rdptysw_versions()
-        lbl_coreaudio_version.Content = "Version: " & FileVersionInfo.GetVersionInfo(".\CoreAudioApi.dll").FileVersion
-        lbl_mahapps_version.Content = "Version: " & FileVersionInfo.GetVersionInfo(".\MahApps.Metro.dll").FileVersion
-        lbl_newtonsoft_version.Content = "Version: " & FileVersionInfo.GetVersionInfo(".\Newtonsoft.Json.dll").FileVersion
+        If IO.File.Exists(".\CoreAudioApi.dll") Then lbl_coreaudio_version.Content = "Version: " & FileVersionInfo.GetVersionInfo(".\CoreAudioApi.dll").FileVersion
+        If IO.File.Exists(".\MahApps.Metro.dll") Then lbl_mahapps_version.Content = "Version: " & FileVersionInfo.GetVersionInfo(".\MahApps.Metro.dll").FileVersion
+        If IO.File.Exists(".\Newtonsoft.Json.dll") Then lbl_newtonsoft_version.Content = "Version: " & FileVersionInfo.GetVersionInfo(".\Newtonsoft.Json.dll").FileVersion
         lbl_sAPI_version.Content = "Version: 2.17.0"
         'lbl_nUpdate_version.Content = "Version: " & FileVersionInfo.GetVersionInfo(".\nUpdate.Internal.dll").FileVersion
     End Sub
 #End Region
 
 #Region "Spotify"
-    Dim media_spotify_installed As Boolean
     Dim media_spotify_type As String
 
     Private Sub check_spotify_installation()
+        Dim spotify_cnt As Integer
+        Dim spotify_str As String
+        For Each prog As Process In Process.GetProcesses
+            If prog.ProcessName = "Spotify" Then
+                spotify_cnt += 1
+            End If
+        Next
+        If spotify_cnt > 1 Then spotify_str = " - läuft" Else spotify_str = " - läuft nicht"
+
         If IO.Directory.Exists(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) & "\Packages\SpotifyAB.SpotifyMusic_zpdnekdrzrea0") Then
-            media_spotify_installed = True
             media_spotify_type = "UWP"
+            lbl_spotifyCheck.Content = "Spotify (UWP / MS Store Version) installiert" & spotify_str
         ElseIf IO.File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Spotify\Spotify.exe") Then
-            media_spotify_installed = True
             media_spotify_type = "normal"
+            lbl_spotifyCheck.Content = "Spotify (Desktop) installiert" & spotify_str
         Else
-            media_spotify_installed = False
+            media_spotify_type = "N/A"
+            lbl_spotifyCheck.Content = "Spotify ist nicht installiert"
         End If
     End Sub
 
     Private Sub btn_restart_spotify_Click(sender As Object, e As RoutedEventArgs) Handles btn_restart_spotify.Click
-        If media_spotify_installed = True Then flyout_spotify("force_restart") Else show_flyout("Spotify nicht installiert!", False)
+        If media_spotify_type <> "N/A" Then flyout_spotify("force_restart") Else show_flyout("Spotify nicht installiert!", False)
     End Sub
 
     Private Sub flyout_spotify(ctnt As String, ByVal Optional e_csize As String = "")
@@ -506,6 +503,7 @@ Public Class wnd_settings
 
 #Region "AlbumArt Cache"
     Private Sub btn_cache_refresh_Click(sender As Object, e As RoutedEventArgs) Handles btn_cache_refresh.Click
+        check_spotify_installation()
         lbl_cacheSize.Content = get_cache_size()
     End Sub
 
@@ -537,21 +535,16 @@ Public Class wnd_settings
                 End If
             Next
 
-            Process.Start(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Spotify\Spotify.exe")
+            Process.Start(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) & "\Spotify\SpotifyLauncher.exe")
         End If
 
         flyout_cache_reset.IsOpen = False
         matc_tabctrl.Effect = Nothing
-        Topmost = False
     End Sub
 
     Private Sub btn_reset_cache_cancel_Click(sender As Object, e As RoutedEventArgs) Handles btn_reset_cache_cancel.Click
         flyout_cache_reset.IsOpen = False
         matc_tabctrl.Effect = Nothing
-    End Sub
-
-    Private Sub cb_other_startup_play_Checked(sender As Object, e As RoutedEventArgs) Handles cb_other_startup_play.Checked
-        My.Computer.Audio.Play(AppDomain.CurrentDomain.BaseDirectory & "\Resources\win_vis_beta_startup.wav")
     End Sub
 
     Private Function get_cache_size(ByVal Optional e_notext As Boolean = False) As String
@@ -616,33 +609,8 @@ Public Class wnd_settings
         grd_bottom_strip.Visibility = Visibility.Visible
         grd_bottom_strip_weather.Visibility = Visibility.Visible
         If matc_tabctrl.SelectedIndex = 1 Then matc_tabctrl.SelectedIndex = 0
+        Topmost = False
     End Sub
-
-#End Region
-
-#Region "Updates"
-    'Dim manager As New UpdateManager(New Uri("https://niklas389.lima-city.de/SmartUI/updates.json"), "<RSAKeyValue><Modulus>1l9BYgpTEN2ID5l489eiFDhCUdHPGvJ21PJ2m1FdVlAzKl7zalkjvzYd8th7KOFaepYMWXryAIJ+v+FimyQ/H6/EcZH26sr+0mqo44UuBkiEvNFprwplmzt++TnuKIY6+exc0+S3NyuB9cxf4z9vKZGWwWrV/n+CXEU3GDAsWsRoAobU5/P2o56GlCfqO+ybyr5yO11O5eLoAYcMNjyY16VHa4aJvx9iPtRI0aM7T6BVuYuR1NTZjkdnQIdAJAY0T/zO47Fb2M34Oo7uDyRxZ4CDTpNya6ejR35PwIkTWfqRXjj6IJsF8rrjB/Xj/MCgLLXjbfy8F4pSmfmyJ56mUzNlA6rSmymvjg0hzSNwQqNKJEeK4W8WDd9Y5w/Lz9KMeNYz8Wy/oUHvJgx5DK2PmIAUuYhLTGO6wqG/IDt0xy5PyLa0NocbMcXneRPqXx7b3rT7uxvruuIyTMHovIln3F+3b7WYrsS52V8wWoOCDFElX+Y7L8gK1kQ4pXJvqFUqWYNGYG1yBorJ+eWc0E1PQ7Gv+ZL8CBigN4idfhRg87O87psXekK4RE76Pfx7RliTUH1P9LfwRrUQjamt60ZFGrmSKgqxMBGvWuYDFGEtai2EouqBsnVkyzfWPPqG4z++XvPsm0ah1+xJOCyRoa7NHkeGA/PZEVGHYmi9+GbqaV0hfmNx89I1EGn7cXC4Y67AnxvMy7N0jxrn3iQG3tI8AsX1ZZeUqYWwXpc8e1/cpXQ1POKu+gVj/sviyilZP4lFkGwR3ZIz2FZPLd547P2raz6xF1zgo722KZJCH2wU9uBDWiCwawv6N8cNHEuD+1b26ouot0O0Dg/9IA7ic3uWUA2o2zs5UxEoNQSc8z6HR+WeJmW5tjnr8ZZoFZECl8cnJmCTBfkwYbtv1xTf+VhxUa4aROMxbBaxTEMpbYVFZ7WYhJ4ncmh2JjNGYmKNphNUxrTcL6mzx8Mc9bdmr+sxymdKHnybjT39oGI7bkh8jeQj/qDMcIARu3nI0ORibThwYffiWXWKPE2o3yE3a/+RUqpEleK1+orzfO5cANZpTcTJ6ouSkNTnlQoNOsXHRhnC5wL2jeKjfUqEdtLHxMWhnhNnzWrWMnlgdfsjyUsUTOx0nWVPFSOACB943QmYxt1a+tNfkJZCkrIQtLlMqFYyUOEcSsDyaKft9FYE+ABKWKwRvO0X8hujTm2XWoNjyox7gCXCzD0DlawsegUgmT62gKxhhkOwbGyBbrGnZutcYJPL4KX5dxC6k25IGVSRsymzXqhvhu3f93Vn+/ynoZctjnYEw9SlRSqzIYR8xi1WdpKkLfe89EHD20wEf3xKL6cIhsd4npV/at6n6HOsxrQnjQ==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>", New CultureInfo("en"))
-    'Dim updaterUI As New UpdaterUI(manager, SynchronizationContext.Current)
-
-    'Private Sub btn_updates_Click(sender As Object, e As RoutedEventArgs) Handles btn_updates.Click
-    '    If updater_enabled = False Then
-    '        show_flyout("Die suche nach Updates ist in diesem Build deaktiviert", False)
-    '        Exit Sub
-    '    End If
-
-    '    matc_tabctrl.SelectedIndex = 4
-    '    lbl_header.Content = "UPDATES"
-    'End Sub
-
-    'Private Sub updater_hiddensearch()
-    '    manager.IncludeBeta = True
-    '    manager.CloseHostApplication = True
-    '    manager.SearchForUpdatesAsync()
-    'End Sub
-
-    'Private Sub btn_updates_search_Click(sender As Object, e As RoutedEventArgs) Handles btn_updates_search.Click
-    '    updaterUI.ShowUserInterface()
-    'End Sub
 #End Region
 
 #Region "Animations"
@@ -706,6 +674,10 @@ Public Class wnd_settings
 
 #End Region
 
+    Private Sub cb_other_startup_play_Checked(sender As Object, e As RoutedEventArgs) Handles cb_other_startup_play.Checked
+        My.Computer.Audio.Play(AppDomain.CurrentDomain.BaseDirectory & "\Resources\win_vis_beta_startup.wav")
+    End Sub
+
     Private Sub slider_bg_transp_ValueChanged(sender As Object, e As RoutedPropertyChangedEventArgs(Of Double)) Handles slider_bg_transp.ValueChanged
         cls_config.ui_blur_transparency = CByte(slider_bg_transp.Value)
         cls_blur_behind.blur(Me, cls_config.ui_blur_enabled)
@@ -714,4 +686,5 @@ Public Class wnd_settings
     Private Sub slider_netmon_threshold_ValueChanged(sender As Object, e As RoutedPropertyChangedEventArgs(Of Double)) Handles slider_netmon_threshold.ValueChanged
         lbl_netmon_threshold.Content = Math.Round(slider_netmon_threshold.Value, 0) & " KB/s"
     End Sub
+
 End Class

@@ -1,6 +1,5 @@
 ﻿Imports System
 Imports System.Drawing
-Imports System.Runtime.InteropServices
 Imports System.Threading.Tasks
 Imports System.Windows
 Imports System.Windows.Input
@@ -8,7 +7,6 @@ Imports System.Windows.Media
 Imports System.Windows.Media.Animation
 
 Public Class wnd_flyout_media
-    Dim hda As Boolean = False
 
 #Region "Window"
     Private Sub wnd_flyout_media_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
@@ -21,22 +19,23 @@ Public Class wnd_flyout_media
         If Me.Visibility = Visibility.Visible Then
             update_widget()
             tmr_update_trackdata.Start()
-            anim_slidein()
+            If animation_block = False Then animate_wnd(Me.Height * -1, 0)
+        Else
+            tmr_update_trackdata.Stop()
         End If
     End Sub
 
     Private Sub wnd_flyout_volume_LostFocus(sender As Object, e As RoutedEventArgs) Handles Me.MouseLeave, Me.LostFocus
-        If hda = False Then Exit Sub
         MainWindow.media_widget_opened = 0
-        MainWindow.media_newtrack = True
-        anim_slideout()
+        MainWindow.media_update_title = True
+        If animation_block = False Then animate_wnd(0, Me.Height * -1)
     End Sub
 
-    Private Sub anim_slidein()
+    Dim animation_block As Boolean = False
+    Private Sub animate_wnd(ByVal e_from As Double, ByVal e_to As Double)
         Dim dblanim As New DoubleAnimation With {
-            .From = -175,
-            .To = 0,
-            .AutoReverse = False,
+            .From = e_from,
+            .To = e_to,
             .Duration = TimeSpan.FromSeconds(0.5),
             .EasingFunction = New QuarticEase
         }
@@ -45,30 +44,10 @@ Public Class wnd_flyout_media
         Storyboard.SetTarget(dblanim, Me)
         Storyboard.SetTargetProperty(dblanim, New PropertyPath(Window.TopProperty))
 
-        'AddHandler dblanim.Completed, AddressOf dblanim_Completed
-
-        storyboard.Children.Add(dblanim)
-        storyboard.Begin(Me)
-
-        hda = True
-    End Sub
-
-    Private Sub anim_slideout()
-        hda = False
-
-        Dim dblanim As New DoubleAnimation With {
-            .From = 0,
-            .To = -175,
-            .AutoReverse = False,
-            .Duration = TimeSpan.FromSeconds(0.5),
-            .EasingFunction = New QuarticEase
-        }
-
-        Dim storyboard As New Storyboard()
-        Storyboard.SetTarget(dblanim, Me)
-        Storyboard.SetTargetProperty(dblanim, New PropertyPath(Window.TopProperty))
-
-        AddHandler dblanim.Completed, AddressOf dblanim_Completed
+        If e_from = 0 Then
+            AddHandler dblanim.Completed, AddressOf dblanim_Completed
+            animation_block = True
+        End If
 
         storyboard.Children.Add(dblanim)
         storyboard.Begin(Me)
@@ -76,14 +55,11 @@ Public Class wnd_flyout_media
 
     Private Sub dblanim_Completed(sender As Object, e As EventArgs)
         Me.Hide()
-        tmr_update_trackdata.Stop()
+        animation_block = False
     End Sub
-
 #End Region
 
 #Region "MEDIA"
-    Public Shared str_media_time As String = ""
-
     'Update timer
     Private WithEvents tmr_update_trackdata As New Threading.DispatcherTimer With {.Interval = New TimeSpan(0, 0, 0, 0, 250), .IsEnabled = False}
     Private Sub tmr_update_trackdata_Tick(ByVal sender As Object, ByVal e As System.EventArgs) Handles tmr_update_trackdata.Tick
@@ -104,13 +80,13 @@ Public Class wnd_flyout_media
                 media_cache_albumArt()
             End If
 
-            lbl_trk_time_elapsed.Content = DateTime.MinValue.AddSeconds(CDbl(str_media_time.Substring(0, str_media_time.IndexOf("%")))).ToString("m:ss")
-            lbl_trk_time_remaining.Content = str_media_time.Substring(str_media_time.IndexOf("#") + 1, (str_media_time.Length - str_media_time.IndexOf("#") - 1))
+            lbl_trk_time_elapsed.Content = Date.MinValue.AddSeconds(wpf_helper.media_track_elapsed).ToString("m:ss")
+            lbl_trk_time_remaining.Content = Date.MinValue.AddSeconds(wpf_helper.media_track_length - wpf_helper.media_track_elapsed).ToString("m:ss")
 
-            pb_trk_progress.Value = CDbl(str_media_time.Substring(0, str_media_time.IndexOf("%")))
-            pb_trk_progress.Maximum = CDbl(str_media_time.Substring(str_media_time.IndexOf("%") + 1, (str_media_time.IndexOf("#") - str_media_time.IndexOf("%") - 1)))
+            pb_trk_progress.Value = wpf_helper.media_track_elapsed
+            pb_trk_progress.Maximum = wpf_helper.media_track_length
 
-            If MainWindow.e_playing = True Then
+            If MainWindow.media_playing = True Then
                 btn_media_play.Source = CType(New ImageSourceConverter().ConvertFromString("pack://application:,,,/Resources/ic_pause_white_24dp.png"), ImageSource)
             Else
                 btn_media_play.Source = CType(New ImageSourceConverter().ConvertFromString("pack://application:,,,/Resources/ic_play_arrow_white_24dp.png"), ImageSource)
@@ -119,8 +95,7 @@ Public Class wnd_flyout_media
             uw_err = False
         Catch ex As Exception
             If uw_err = True Then
-                hda = False
-                anim_slideout()
+                animate_wnd(0, Me.Height * -1)
                 MainWindow.media_widget_opened = 0
                 MainWindow.wnd_log.AddLine("ERR" & "-MFLYOUT", "update_widget - " & ex.Message)
             End If
@@ -133,27 +108,27 @@ Public Class wnd_flyout_media
 
 #End Region
 
-#Region "Cover & String Shortener"
+#Region "Cover & Text Shortener"
     Dim cache_path As String = AppDomain.CurrentDomain.BaseDirectory & "cache\media\"
 
     Private Async Sub media_cache_albumArt(ByVal Optional err As Boolean = False)
         albumCover_overlay(True)        'Show loading ani
-        Dim trk_uri As String = ""
 
         Try
-            trk_uri = MainWindow._currentTrack.TrackResource.ParseUri.ToString.Remove(0, 14)
+            Dim trk_uri As String = wpf_helper.media_track_uri.ToString.Remove(0, 14)
 
             If Not IO.Directory.Exists(cache_path) Then IO.Directory.CreateDirectory(cache_path)
 
-            'get URI before DL image to avoid mismatching info (eg.: track changes while downloading)
+            'get URI before image DL to avoid mismatching info (eg.: track changes while downloading)
             If Not (Await Task.Run(Function() IO.File.Exists(cache_path & trk_uri))) Then '#?
                 'Construct a bitmap
                 Dim img As New Bitmap(Await Task.Run(Function() MainWindow._currentTrack.GetAlbumArtAsync(SpotifyAPI.Local.Enums.AlbumArtSize.Size320))) 'cover DL
-                img.Save(cache_path & trk_uri, Imaging.ImageFormat.Jpeg) 'cache cover as jpeg
+                Await Task.Run(Sub() img.Save(cache_path & trk_uri, Imaging.ImageFormat.Jpeg)) 'cache cover as jpeg
                 img.Dispose()
             End If
 
-            img_albumCover.Source = (Await Task.Run(Function() CType(New ImageSourceConverter().ConvertFromString(cache_path & trk_uri), ImageSource)))
+            img_albumCover.Source = CType(New ImageSourceConverter().ConvertFromString(cache_path & trk_uri), ImageSource)
+
             img_bg.Source = img_albumCover.Source
             img_cover_error.Visibility = Visibility.Hidden
 
@@ -162,12 +137,12 @@ Public Class wnd_flyout_media
             img_bg.Source = CType(New ImageSourceConverter().ConvertFromString(AppDomain.CurrentDomain.BaseDirectory & "Resources\no_cover.jpg"), ImageSource)
             img_cover_error.Visibility = Visibility.Visible
             img_cover_error.ToolTip = "Wir hatten bei diesem Titel probleme das Cover abzurufen." & NewLine & "Versuche es später nochmal."
-            If IO.File.Exists(cache_path & trk_uri) And err = False Then media_cache_albumArt(True)
-
             MainWindow.wnd_log.AddLine("ERR" & "-MFLYOUT", "media_cache_albumArt - " & ex.Message)
+
+            If err = False Then media_cache_albumArt(True) 'retry
         End Try
 
-        albumCover_overlay(False, True)        'hide loading ani
+        albumCover_overlay(True, True) 'hide loading ani
     End Sub
 
     'String shortener
@@ -192,10 +167,10 @@ Public Class wnd_flyout_media
     End Function
 #End Region
 
-#Region "Buttons"
+#Region "Media CTRL-Buttons"
     ' PlayPause
     Private Sub btn_media_play_Click(sender As Object, e As RoutedEventArgs) Handles btn_media_play.MouseLeftButtonUp
-        If MainWindow.e_playing = True Then
+        If MainWindow.media_playing = True Then
             MainWindow.spotifyapi.Pause()
         Else
             MainWindow.spotifyapi.Play()
@@ -211,6 +186,13 @@ Public Class wnd_flyout_media
     Private Sub btn_media_prev_MouseLeftButtonUp(sender As Object, e As MouseButtonEventArgs) Handles btn_media_prev.MouseLeftButtonUp
         MainWindow.spotifyapi.Previous()
     End Sub
+
+    Private Sub img_albumCover_MouseUp(sender As Object, e As MouseButtonEventArgs) Handles grd_loading.MouseUp
+        Diagnostics.Process.Start(MainWindow._currentTrack.TrackResource.ParseUri.ToString)
+        MainWindow.media_widget_opened = 0
+        MainWindow.media_update_title = True
+        animate_wnd(0, Me.Height * -1)
+    End Sub
 #End Region
 
     Private Sub img_albumCover_MouseEnter(sender As Object, e As MouseEventArgs) Handles img_albumCover.MouseEnter, img_cover_error.MouseEnter
@@ -221,29 +203,48 @@ Public Class wnd_flyout_media
         albumCover_overlay(False, True)
     End Sub
 
-    Private Sub img_albumCover_MouseUp(sender As Object, e As MouseButtonEventArgs) Handles grd_loading.MouseUp
-        Diagnostics.Process.Start(MainWindow._currentTrack.TrackResource.ParseUri.ToString)
-    End Sub
-
     Private Sub albumCover_overlay(e_loading As Boolean, Optional hidden As Boolean = False)
+        If e_loading = True Then
+            grd_overlay_openExt.Visibility = Visibility.Hidden
+            pr_loading.Visibility = Visibility.Visible
+        Else
+            pr_loading.Visibility = Visibility.Hidden
+            grd_overlay_openExt.Visibility = Visibility.Visible
+        End If
+
         If hidden = True Then
-            grd_loading.Visibility = Visibility.Hidden
-            pr_loading.IsActive = False
+            animate_opacity(1, 0, grd_loading, OpacityProperty)
             Exit Sub
         Else
             grd_loading.Visibility = Visibility.Visible
+            animate_opacity(0, 1, grd_loading, OpacityProperty)
         End If
+    End Sub
 
-        If e_loading = True Then
-            pr_loading.IsActive = True
-            pr_loading.Visibility = Visibility.Visible
-            ic_overlay_openExt.Visibility = Visibility.Hidden
-            lbl_overlay_openExt.Visibility = Visibility.Hidden
-        Else
-            pr_loading.IsActive = False
-            pr_loading.Visibility = Visibility.Hidden
-            ic_overlay_openExt.Visibility = Visibility.Visible
-            lbl_overlay_openExt.Visibility = Visibility.Visible
-        End If
+    Private Sub pr_loading_IsVisibleChanged(sender As Object, e As DependencyPropertyChangedEventArgs) Handles pr_loading.IsVisibleChanged
+        If pr_loading.Visibility = Visibility.Visible Then pr_loading.IsActive = True Else pr_loading.IsActive = False
+    End Sub
+
+    Private Sub animate_opacity(ByVal e_from As Double, ByVal e_to As Double, ByVal e_target As DependencyObject, ByVal e_prop As DependencyProperty)
+        Dim dblanim As New DoubleAnimation With {
+            .From = e_from,
+            .To = e_to,
+            .Duration = TimeSpan.FromSeconds(0.5),
+            .EasingFunction = New QuarticEase
+        }
+
+        Dim storyboard As New Storyboard()
+        Storyboard.SetTarget(dblanim, e_target)
+        Storyboard.SetTargetProperty(dblanim, New PropertyPath(e_prop))
+
+        If e_from = 1 Then AddHandler dblanim.Completed, AddressOf dblanim_Completed_opacity
+
+        storyboard.Children.Add(dblanim)
+        storyboard.Begin(Me)
+    End Sub
+
+    Private Sub dblanim_Completed_opacity(sender As Object, e As EventArgs)
+        grd_loading.Visibility = Visibility.Hidden
+        pr_loading.Visibility = Visibility.Hidden
     End Sub
 End Class

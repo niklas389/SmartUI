@@ -7,17 +7,16 @@ Public Class wnd_flyout_appmenu
     Dim m_ht As Double = 90
     Dim hda As Boolean = False
 
-    Dim conf As New cls_config
 #Region "WND"
     Private Sub wnd_flyout_appmenu_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
         Me.Top = My.Computer.Screen.WorkingArea.Top
         Me.Left = My.Computer.Screen.WorkingArea.Width - Me.RenderSize.Width
 
-        If conf.debugging_enabled = True Then
+        If cls_config.debugging_enabled Then
             m_ht = 120
             btn_do_restart.Margin = New Thickness(0, 60, 0, 0)
             btn_do_exit.Margin = New Thickness(0, 90, 0, 0)
-            MainWindow.wnd_log.AddLine("INFO" & "-DEBUG", "debug file exists, LOG button visible")
+            MainWindow.wnd_log.AddLine("MENU" & "-DEBUG", "debugging enabled, LOG-Button visible")
         Else
             m_ht = 90
             btn_do_restart.Margin = New Thickness(0, 30, 0, 0)
@@ -40,19 +39,17 @@ Public Class wnd_flyout_appmenu
     End Sub
 
     Private Sub anim_slidein()
-
-        Dim dblanim As New DoubleAnimation()
-        dblanim.From = (m_ht * -1)
-        dblanim.To = 25
-        dblanim.AutoReverse = False
-        dblanim.Duration = TimeSpan.FromSeconds(0.5)
-        dblanim.EasingFunction = New QuarticEase
+        Dim dblanim As New DoubleAnimation With {
+            .From = (m_ht * -1),
+            .To = 25,
+            .AutoReverse = False,
+            .Duration = TimeSpan.FromSeconds(0.5),
+            .EasingFunction = New QuarticEase
+        }
 
         Dim storyboard As New Storyboard()
         Storyboard.SetTarget(dblanim, Me)
         Storyboard.SetTargetProperty(dblanim, New PropertyPath(Window.TopProperty))
-
-        'AddHandler dblanim.Completed, AddressOf dblanim_Completed
 
         storyboard.Children.Add(dblanim)
         storyboard.Begin(Me)
@@ -63,12 +60,13 @@ Public Class wnd_flyout_appmenu
     Private Sub anim_slideout()
         hda = False
 
-        Dim dblanim As New DoubleAnimation()
-        dblanim.From = 25
-        dblanim.To = (m_ht * -1)
-        dblanim.AutoReverse = False
-        dblanim.Duration = TimeSpan.FromSeconds(0.5)
-        dblanim.EasingFunction = New QuarticEase
+        Dim dblanim As New DoubleAnimation With {
+            .From = 25,
+            .To = (m_ht * -1),
+            .AutoReverse = False,
+            .Duration = TimeSpan.FromSeconds(0.5),
+            .EasingFunction = New QuarticEase
+        }
 
         Dim storyboard As New Storyboard()
         Storyboard.SetTarget(dblanim, Me)
@@ -119,7 +117,6 @@ Public Class wnd_flyout_appmenu
         btn_do_exit.Content = "Beenden"
         tmr_reset.Stop()
     End Sub
-
 
     Private Sub btn_intern_log_Click(sender As Object, e As RoutedEventArgs) Handles btn_intern_log.Click
         MainWindow.wnd_log.Show()

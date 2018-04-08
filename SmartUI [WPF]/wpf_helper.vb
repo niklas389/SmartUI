@@ -5,39 +5,36 @@ Imports System.Windows.Controls
 Imports System.Windows.Media
 
 Public Class wpf_helper
+    'Variables needed for MEDIA_FLYOUT
+    Public Shared media_track_elapsed As Double
+    Public Shared media_track_length As Double
+    Public Shared media_track_uri As String
+
     'helper: IMAGE
     Public Shared Sub helper_image(ByVal ctrl As Controls.Image, ByVal Optional e_content As String = "<nothing>", ByVal Optional e_visible As Boolean = Nothing)
-        If Not e_content = "<nothing>" Then
-            Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Background,
+        Try
+            If Not e_content = "<nothing>" Then
+                Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Background,
                                                   New ThreadStart(Sub() ctrl.Source = CType(New ImageSourceConverter().ConvertFromString(e_content), ImageSource)))
-        End If
+            End If
 
-        If Not e_visible = Nothing Then
-            Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Background,
-                                                  New ThreadStart(Sub()
+            If Not e_visible = Nothing Then
+                Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Background,
+                                                      New ThreadStart(Sub()
 
-                                                                      If e_visible = True Then
-                                                                          ctrl.Visibility = Visibility.Visible
-                                                                      ElseIf e_visible = False Then
-                                                                          ctrl.Visibility = Visibility.Hidden
-                                                                      End If
-                                                                  End Sub))
-        End If
+                                                                          If e_visible = True Then
+                                                                              ctrl.Visibility = Visibility.Visible
+                                                                          ElseIf e_visible = False Then
+                                                                              ctrl.Visibility = Visibility.Hidden
+                                                                          End If
+                                                                      End Sub))
+            End If
+        Catch ex As Exception
+            MainWindow.wnd_log.AddLine("cls:wpf_helper/image", ex.Message, "err")
+        End Try
     End Sub
 
     Public Shared Sub helper_grid(ByVal ctrl As Grid, ByVal Optional e_visible As Boolean = Nothing, ByVal Optional e_width As Double = -1, ByVal Optional e_left As Double = -1)
-        'If e_visible = True Then
-        '    Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Background, New ThreadStart(Sub() ctrl.Visibility = Visibility.Visible))
-        'ElseIf e_visible = False Then
-        '    Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Background, New ThreadStart(Sub() ctrl.Visibility = Visibility.Hidden))
-        'End If
-
-        'If e_width > -1 Then
-        '    Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Background, New ThreadStart(Sub() ctrl.Width = e_width))
-        'ElseIf e_width = -5 Then
-        '    Application.Current.Dispatcher.Invoke(Windows.Threading.DispatcherPriority.Background, New ThreadStart(Sub() ctrl.Width = Double.NaN))
-        'End If
-
         Application.Current.Dispatcher.Invoke _
             (Windows.Threading.DispatcherPriority.Background,
                New ThreadStart(Sub()

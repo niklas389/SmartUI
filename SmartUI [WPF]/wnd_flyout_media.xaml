@@ -7,7 +7,7 @@
     x:Class="wnd_flyout_media"
         mc:Ignorable="d"
         Title="Media-Flyout" Height="175" Width="500" Background="Black" Foreground="White" AllowsTransparency="True" WindowStyle="None" ShowInTaskbar="False" ResizeMode="NoResize" Topmost="True">
-   
+
     <Grid>
         <Image x:Name="img_bg" Margin="0,-175,0,0" Stretch="UniformToFill" Height="350" Width="500" OpacityMask="#7F000000" HorizontalAlignment="Left" VerticalAlignment="Top">
             <Image.Effect>
@@ -32,11 +32,13 @@
             </Grid>
         </Grid>
         <Grid x:Name="grd_loading" HorizontalAlignment="Right" Height="130" VerticalAlignment="Top" Width="130" Margin="0,35,10,0" Background="#99000000">
-            <Custom:ProgressRing x:Name="pr_loading" HorizontalAlignment="Center" VerticalAlignment="Center" Width="35" Height="35" Foreground="#D8FFFFFF" Margin="0" Visibility="Hidden"/>
-            <Image x:Name="ic_overlay_openExt" HorizontalAlignment="Center" Height="30" VerticalAlignment="Center" Width="30" Source="pack://siteoforigin:,,,/Resources/ic_exit_to_app_white_24dp.png" Margin="0,-30,0,0"/>
-            <Label x:Name="lbl_overlay_openExt" Content="Zum Album" HorizontalAlignment="Center" VerticalAlignment="Center" Background="{x:Null}" Foreground="White" Margin="0,30,0,0"/>
+            <Custom:ProgressRing x:Name="pr_loading" HorizontalAlignment="Center" VerticalAlignment="Center" Width="35" Height="35" Foreground="#D8FFFFFF" Margin="0" Visibility="Hidden" IsActive="False"/>
+            <Grid x:Name="grd_overlay_openExt" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center">
+                <Image HorizontalAlignment="Center" Height="30" VerticalAlignment="Top" Width="30" Source="pack://siteoforigin:,,,/Resources/ic_exit_to_app_white_24dp.png"/>
+                <Label Content="Zum Album" HorizontalAlignment="Center" VerticalAlignment="Top" Background="{x:Null}" Foreground="White" Margin="0,35,0,0"/>
+            </Grid>
         </Grid>
-        <Image x:Name="img_cover_error" HorizontalAlignment="Left" Height="20" Margin="470,145,0,0" VerticalAlignment="Top" Width="20" Source="Resources/ic_warning_white_18dp.png" Opacity="0.75" ToolTip="Für diesen Titel haben wir kein Cover gefunden"/>
+        <Image x:Name="img_cover_error" HorizontalAlignment="Right" Height="20" Margin="0,0,15,15" VerticalAlignment="Bottom" Width="20" Source="Resources/ic_warning_white_18dp.png" Opacity="0.75" ToolTip="Für diesen Titel haben wir kein Cover gefunden"/>
 
     </Grid>
 </Window>

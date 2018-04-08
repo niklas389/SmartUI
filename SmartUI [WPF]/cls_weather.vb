@@ -9,6 +9,7 @@ Public Class cls_weather
     'general config
     Public Shared conf_enabled As Boolean = False
     Public Shared conf_wcom_enabled As Boolean = False
+    Public Shared conf_bzm_enabled As Boolean = False
     'OPENWEATHER config
     Public Shared oww_API_cityID As Integer
     Public Shared oww_API_key As String
@@ -39,12 +40,12 @@ Public Class cls_weather
             oww_API_key = conf_ini.read("OWW", "key", "0", 1)
 
             'wetter.com file
-            conf_wcom_enabled = File.Exists(".\config\wcom_allowed")
+            conf_wcom_enabled = File.Exists(AppDomain.CurrentDomain.BaseDirectory & "\config\wcom_allowed")
 
-            MainWindow.wnd_log.AddLine(logcat & "-INFO", "Init - (Service Enabled: " & conf_enabled.ToString & " / wetter.com allowed: " & conf_wcom_enabled & ")", "wea")
+            MainWindow.wnd_log.AddLine(logcat & "-INFO", "Init - (Service Enabled: " & conf_enabled.ToString & " / wetter.com allowed: " & conf_wcom_enabled & ")")
         End If
 
-        MainWindow.wnd_log.AddLine(logcat & "-INFO", "Updating...", "wea")
+        MainWindow.wnd_log.AddLine(logcat & "-INFO", "Updating...")
         If conf_enabled = True Then
             oww_update()
             tmr_update_oww.Start() 'enable oww updater /30mins
@@ -54,6 +55,10 @@ Public Class cls_weather
             wcom_update()
             tmr_update_wcom.Start() 'enable wcom updater /5mins
         End If
+
+        'If conf_bzm_enabled = True Then
+        'get_bzm_baqi()
+        'End If
     End Sub
 #End Region
 
@@ -92,17 +97,11 @@ Public Class cls_weather
 
 
     Public Shared Async Sub oww_update(ByVal Optional e_force_oww As Boolean = False)
-        If conf_enabled = False Then
-            MainWindow.wnd_log.AddLine(logcat & "-ATT", "OWW - Not updated, weather disabled!", "att")
+        If conf_enabled = False Or My.Computer.Network.IsAvailable = False Then
+            MainWindow.wnd_log.AddLine(logcat & "-ATT", "OWW - Weather service disabled or Network not available!", "att")
             Exit Sub
         End If
 
-        If My.Computer.Network.IsAvailable = False Then
-            MainWindow.wnd_log.AddLine(logcat & "-ERR", "OWW - Error Network not available", "err")
-            Exit Sub
-        End If
-
-        MainWindow.wnd_log.AddLine(logcat & "-DBG", DateTime.Now.ToShortTimeString, "wea")
 
         Dim oww_xml As XmlDocument
         Dim oww_API_error As Boolean = False
@@ -114,6 +113,7 @@ Public Class cls_weather
 
         Try
             oww_api_respone = Await oww_api_request.GetResponseAsync() 'server response
+            MainWindow.wnd_log.AddLine(logcat & "-DEBUG", "OWW data updated successfully")
 
         Catch ex As WebException
             oww_api_respone = Nothing
@@ -138,7 +138,7 @@ Public Class cls_weather
             oww_xml.Save(path_cache_weather & "oww_data.xml")
 
             conf_ini.write("STAT", "oww", Date.Now.ToShortTimeString, 1)
-            'wnd_log.AddLine(log_cat & "-WEATHER", "OWW data updated")
+
         Else
             MainWindow.wnd_log.AddLine(logcat & "-ERR", "OWW API-Error", "err")
         End If
@@ -148,12 +148,10 @@ Public Class cls_weather
         If File.Exists(path_cache_weather & "oww_data.xml") Then
             Dim XMLReader As Xml.XmlReader = New Xml.XmlTextReader(path_cache_weather & "oww_data.xml")
 
-            ' Es folgt das Auslesen der XML-Datei 
             Dim xmlid As String = ""
-            With XMLReader
-                Do While .Read ' Es sind noch Daten vorhanden 
-                    ' Welche Art von Daten liegt an? 
-                    If .NodeType = Xml.XmlNodeType.Element Then
+            With XMLReader 'read XML
+                Do While .Read
+                    If .NodeType = Xml.XmlNodeType.Element Then ' Welche Art von Daten liegt an? 
 
                         xmlid = .Name
                         'If xmlid = "country" Then oww_data_country = .ReadElementContentAsString
@@ -186,12 +184,6 @@ Public Class cls_weather
         Else
 
         End If
-
-        'DEBUG:  Show Wdata after Update
-        'MessageBox.Show("City: " & oww_data_location & " // Country: " & oww_data_country & vbCrLf & "Temp: " & oww_data_temp & "// Tmin: " &
-        'oww_data_Tmin & " // Tmax: " & oww_data_Tmax & vbCrLf & "Humidity: " & oww_data_humidity & vbCrLf & "Pressure: " & oww_data_pressure &
-        '                        "Wind Speed: " & oww_data_windspeed & " // Wind Condition: " & oww_data_windcondition & " // Winddirection: " & oww_data_winddirection & vbCrLf &
-        '"Weather txt: " & oww_data_condition & " // Weather Code: " & oww_data_conditionID)
 
         Dim icn_basePath As String = System.AppDomain.CurrentDomain.BaseDirectory & "Resources\wIcons\"
         Select Case oww_data_conditionID
@@ -244,7 +236,7 @@ Public Class cls_weather
 
             Case Else
                 oww_data_conditionIMG = icn_basePath & "0.png"
-                MainWindow.wnd_log.AddLine(logcat & "-ATT", "No condition icon (" & oww_data_conditionID & ")", "att")
+                MainWindow.wnd_log.AddLine(logcat & "-ATT", "No icon available for this condition (" & oww_data_conditionID & ")", "att")
         End Select
 
         MainWindow.weather_need_update = True
@@ -260,14 +252,9 @@ Public Class cls_weather
     Public Shared wcom_rain As String
     Shared wcom_pressure As Integer
 
-    Public Shared Async Sub wcom_update(ByVal Optional e_station As Integer = 7704, ByVal Optional e_failed As Boolean = False)
-        If conf_wcom_enabled = False Then
-            MainWindow.wnd_log.AddLine(logcat & "-ATT", "WCOM - Not updated, not allowed!", "att")
-            Exit Sub
-        End If
-
-        If My.Computer.Network.IsAvailable = False Then
-            MainWindow.wnd_log.AddLine(logcat & "-ERR", "WCOM - Error Network not available", "err")
+    Public Shared Async Sub wcom_update(ByVal Optional e_station As Integer = 16549, ByVal Optional e_failed As Boolean = False)
+        If conf_wcom_enabled = False Or My.Computer.Network.IsAvailable = False Then
+            MainWindow.wnd_log.AddLine(logcat & "-ATT", "WCOM - wetter.com not allowed or Network not available!", "att")
             Exit Sub
         End If
 
@@ -277,8 +264,10 @@ Public Class cls_weather
 
         Try
             wStationData_respone = Await wStationData_request.GetResponseAsync()
+            MainWindow.wnd_log.AddLine(logcat & "-DEBUG", "WCOM data updated successfully")
         Catch ex As Exception
             wcom_error(e_station)
+            MainWindow.wnd_log.AddLine(logcat & "-DEBUG", "WCOM update failed: " & ex.Message)
             Exit Sub
         End Try
 
@@ -350,14 +339,40 @@ Public Class cls_weather
     End Sub
 
     Private Shared Sub wcom_error(e_station As Integer)
-        If e_station = 16549 Then
-            MainWindow.wnd_log.AddLine(logcat & "-ERR", "WCOM - API-Error with Station 16549 - wetter.com disabled", "err")
+        If e_station = 7704 Then
+            MainWindow.wnd_log.AddLine(logcat & "-ERR", "WCOM - API-Error with backup-station - wetter.com disabled", "err")
             conf_wcom_enabled = False
             Exit Sub
         End If
 
-        MainWindow.wnd_log.AddLine(logcat & "-ATT", "WCOM - API-Error with Station 7704, trying 16549", "att")
-        wcom_update(16549)
+        MainWindow.wnd_log.AddLine(logcat & "-ATT", "WCOM - API-Error with Station 16549, trying 7704", "att")
+        wcom_update(7704)
+    End Sub
+#End Region
+
+#Region "Breezometer API"
+    Public Shared bzm_location_long As Double
+    Public Shared bzm_location_lat As Double
+    Public Shared bzm_location_key As String
+
+    Public Shared bzm_data As String
+
+    Public Shared Async Sub get_bzm_baqi()
+        If conf_bzm_enabled = False Or My.Computer.Network.IsAvailable = False Then
+            MainWindow.wnd_log.AddLine(logcat & "-ATT", "BZM - Weather service disabled or Network not available!", "att")
+            Exit Sub
+        End If
+
+        Dim bzm_api_request As WebRequest = WebRequest.Create("https://api.breezometer.com/baqi/?" & "lat=" & bzm_location_lat & "&lon=" & bzm_location_lat & "&key=" & bzm_location_key)
+        Dim bzm_api_respone As WebResponse
+        Dim bzm_data_json As Newtonsoft.Json.JsonTextReader
+
+        Try
+            bzm_api_respone = Await bzm_api_request.GetResponseAsync() 'server response
+        Catch ex As WebException
+
+        End Try
+
     End Sub
 #End Region
 
@@ -378,7 +393,8 @@ Public Class cls_weather
     End Function
 
     Public Shared Function get_wind_dir() As Double
-        If conf_wcom_enabled = True Then Return wcom_wind_direction Else Return oww_winddir_deg
+        'If conf_wcom_enabled = True Then Return wcom_wind_direction Else Return oww_winddir_deg
+        Return oww_winddir_deg
     End Function
 
     Public Shared Function get_pressure() As Integer
@@ -392,4 +408,8 @@ Public Class cls_weather
             Return oww_data_conditionIMG.Replace("wIcons", "wImg").Replace(".png", ".jpg")
         End If
     End Function
+
+    'Public Shared Function get_bzm() As Integer
+    '    Return oww_pressure
+    'End Function
 End Class

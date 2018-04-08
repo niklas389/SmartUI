@@ -7,3 +7,4 @@
 Imports System
 
 <Assembly: Diagnostics.CodeAnalysis.SuppressMessage("Stil", "IDE1006:Benennungsstile")>
+<Assembly: Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Scope:="member", Target:="SmartUI.cls_blur_behind.#SetWindowCompositionAttribute(System.IntPtr,SmartUI.cls_blur_behind+WindowCompositionAttributeData&)")>

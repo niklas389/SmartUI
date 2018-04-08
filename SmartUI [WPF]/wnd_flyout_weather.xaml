@@ -18,7 +18,7 @@
         </Image>
 
         <Grid x:Name="grd_weather_v2" VerticalAlignment="Top">
-            <Grid x:Name="grd_v2_location" Height="35" Margin="0" VerticalAlignment="Top">
+            <Grid x:Name="grd_v2_location" Height="35" Margin="0" VerticalAlignment="Top" Opacity="0.75">
                 <Grid HorizontalAlignment="Center" Margin="0" Height="25" VerticalAlignment="Center">
                     <Image HorizontalAlignment="Left" Height="18" Margin="3.5,0,0,0" VerticalAlignment="Center" Width="18" Source="Resources/ic_room_white_18dp.png"/>
                     <Label x:Name="lbl_location" Content="&lt;location&gt;" Margin="20,0,0,0" Cursor="" Foreground="White" Background="{x:Null}"/>
@@ -72,7 +72,7 @@
                     <Label x:Name="lbl_now_rain" Content="x" HorizontalAlignment="Center" Margin="0,15,0,0" VerticalAlignment="Top" Foreground="White" Background="{x:Null}" FontFamily="Segoe UI Light" FontSize="30"/>
                     <Label Content="l/m²" HorizontalAlignment="Center" Margin="2,52,3,0" Background="{x:Null}" Foreground="#7FFFFFFF" RenderTransformOrigin="0.5,0.5"/>
                 </Grid>
-                <Separator HorizontalAlignment="Left" Height="26" Margin="54,1,0,0" VerticalAlignment="Top" Width="286" Background="#7FFFFFFF" Foreground="{x:Null}"/>
+                <Separator Height="26" Margin="54,1,15,0" VerticalAlignment="Top" Background="#7FFFFFFF" Foreground="{x:Null}"/>
                 <Label Content="Jetzt" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" Foreground="White" Background="{x:Null}"/>
             </Grid>
         </Grid>

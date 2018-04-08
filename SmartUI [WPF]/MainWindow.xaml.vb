@@ -10,9 +10,8 @@ Imports System.Windows.Input
 Imports System.Windows.Media
 Imports System.Windows.Media.Animation
 Imports CoreAudioApi
-'Imports for SPOTIFY-API .NET
 Imports SpotifyAPI.Local 'Enums
-Imports SpotifyAPI.Local.Models 'Models for the JSON-responses
+Imports SpotifyAPI.Local.Models 'Models for JSON-responses
 
 Class MainWindow
     ReadOnly _conf As New cls_config
@@ -21,7 +20,7 @@ Class MainWindow
     Public Shared settings_need_update As Boolean = False
     Public Shared weather_need_update As Boolean = False
 
-    Public Shared suiversion As String = My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & ".25"
+    Public Shared ReadOnly suiversion As String = My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & ".54"
 
 #Region "Dock"
     Const ABM_NEW As Int32 = 0
@@ -76,21 +75,21 @@ Class MainWindow
     End Sub
 
     Public Sub sui_hidefromalttab()
-        Dim w As Window = New Window()
-        w.WindowStyle = WindowStyle.ToolWindow
-        w.ShowInTaskbar = False
-        w.Top = -100
-        w.Left = -100
-        w.Width = 1
-        w.Height = 1
+        Dim w As Window = New Window With {
+            .WindowStyle = WindowStyle.ToolWindow,
+            .ShowInTaskbar = False,
+            .Top = -100,
+            .Left = -100,
+            .Width = 1,
+            .Height = 1
+        }
         w.Show()
         Me.Owner = w
         w.Hide()
     End Sub
 
     Private Sub anim_fadein()
-        Dim dblanim As New DoubleAnimation(0, 1, TimeSpan.FromSeconds(1))
-        dblanim.Duration = TimeSpan.FromSeconds(1)
+        Dim dblanim As New DoubleAnimation(0, 1, TimeSpan.FromSeconds(0.75)) With {.Duration = TimeSpan.FromSeconds(1)}
 
         Dim storyboard As New Storyboard()
         Storyboard.SetTarget(dblanim, Me)
@@ -103,16 +102,6 @@ Class MainWindow
 
 #Region "MyBase & Startup"
     Public Sub New()
-        wnd_log.outputBox.AppendText("SmartUI LOG")
-        wnd_log.outputBox.AppendText(NewLine & "Made in 2016/18 by Niklas Wagner in Hannover")
-        wnd_log.outputBox.AppendText(NewLine & "APP start time: " & DateTime.Now.Day & ". " & CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(DateTime.Now.Month) & " - " & DateTime.Now.ToLongTimeString)
-        wnd_log.outputBox.AppendText(NewLine & "APP Version: " & suiversion & " (" & My.Application.Info.Version.ToString & " - " & IO.File.GetLastWriteTime(AppDomain.CurrentDomain.BaseDirectory & "\SmartUI.exe").ToString("yyMMdd") & ")")
-        wnd_log.outputBox.AppendText(NewLine & "OS Version: " & Environment.OSVersion.ToString & NewLine)
-
-        ' Dieser Aufruf ist für den Designer erforderlich.
-        InitializeComponent()
-        ' Fügen Sie Initialisierungen nach dem InitializeComponent()-Aufruf hinzu.
-
         'SmartUI multi instance check
         Dim int_sui_pcount As Integer = 0
         For Each prog As Diagnostics.Process In System.Diagnostics.Process.GetProcesses
@@ -126,6 +115,16 @@ Class MainWindow
             _conf.load_variables()
             sui_dock()
         End If
+
+        wnd_log.outputBox.AppendText("SmartUI LOG")
+        wnd_log.outputBox.AppendText(NewLine & "Made in 2016/18 by Niklas Wagner in Hannover")
+        wnd_log.outputBox.AppendText(NewLine & "APP start time: " & DateTime.Now.Day & ". " & CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(DateTime.Now.Month) & " - " & DateTime.Now.ToLongTimeString)
+        wnd_log.outputBox.AppendText(NewLine & "APP Version: " & suiversion & " (" & cls_config.build_version & " - " & cls_config.build_date & ")")
+        wnd_log.outputBox.AppendText(NewLine & "OS Version: " & Environment.OSVersion.ToString & NewLine)
+
+        ' Dieser Aufruf ist für den Designer erforderlich.
+        InitializeComponent()
+        ' Fügen Sie Initialisierungen nach dem InitializeComponent()-Aufruf hinzu.
     End Sub
 
     Private Sub MainWindow_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
@@ -152,9 +151,9 @@ Class MainWindow
     Public Sub settings_load()
         'LOG
         If settings_need_update Then
-            wnd_log.AddLine("INFO" & "-SETTINGS", "Loading updated settings")
+            wnd_log.AddLine("INFO" & "-MAINWND", "Loading updated settings")
         Else
-            wnd_log.AddLine("INFO" & "-SETTINGS", "Loading settings")
+            wnd_log.AddLine("INFO" & "-MAINWND", "Loading settings")
         End If
 
         'Seconds
@@ -166,7 +165,7 @@ Class MainWindow
         End If
 
         'window blur
-        cls_blur_behind.blur(Me, CType(_conf.read("UI", "cb_wndmain_blur_enabled", "False"), Boolean))
+        cls_blur_behind.blur(Me, cls_config.ui_blur_enabled)
 
         'Network
         netmon_config_thresh_text = CType(_conf.read("UI", "cb_wndmain_net_textDisableSpeedLimit", "False"), Boolean)
@@ -196,22 +195,6 @@ Class MainWindow
         AddHandler NetworkChange.NetworkAvailabilityChanged, AddressOf AvailabilityChanged
 
         mpb_indicateLoading.Visibility = Visibility.Hidden
-        'mpb_indicateLoading.Margin = New Thickness(0, -5, 0, 0)
-        'mpb_indicateLoading.IsIndeterminate = False
-        'mpb_indicateLoading.Foreground = Brushes.White
-        'mpb_indicateLoading.Opacity = 0.5
-
-        If sAPI_allowed = True Then
-            If e_playing = True Then
-                wpf_helper.helper_grid(grd_spotify, True, -5, -25)
-                anim_grd_pos(grd_spotify, weather_width)
-                anim_grd_pos(grd_weather, 1.5)
-            Else
-                wpf_helper.helper_grid(grd_spotify, True, 25, -25)
-                anim_grd_pos(grd_spotify, 5)
-                anim_grd_pos(grd_weather, 23.5)
-            End If
-        End If
 
         tmr_aInit.Stop()
     End Sub
@@ -219,11 +202,7 @@ Class MainWindow
 
 #Region "SYS_EVENTS"
     Private Sub SystemEvents_PowerModeChanged(ByVal sender As Object, ByVal e As Microsoft.Win32.PowerModeChangedEventArgs) 'Update weather on os resume
-        'Select Case e.Mode
-        '    Case Microsoft.Win32.PowerModes.Resume
-        '    Case Microsoft.Win32.PowerModes.StatusChange
-        '    Case Microsoft.Win32.PowerModes.Suspend
-        'End Select
+        'e.Mode = Microsoft.Win32.PowerModes.Resume | = Microsoft.Win32.PowerModes.StatusChange | = Microsoft.Win32.PowerModes.Suspend
 
         If e.Mode = Microsoft.Win32.PowerModes.Resume Then
             wnd_log.AddLine("SYSEVENT", "OS resumed from Standby/Hibernation", "att")
@@ -239,15 +218,14 @@ Class MainWindow
             tmr_waitfornetwork.Stop()
         End If
     End Sub
-
 #End Region
 
 #Region "Clock"
-    Private WithEvents tmr_clock As New Threading.DispatcherTimer With {.Interval = New TimeSpan(0, 0, 1), .IsEnabled = False}
     Private ui_clock_weekday As String = "Mo"
     Private ui_clock_style As Integer = -1
     Dim clock_date As Boolean = False
 
+    Private WithEvents tmr_clock As New Threading.DispatcherTimer With {.Interval = New TimeSpan(0, 0, 1), .IsEnabled = False}
     Private Sub tmr_clock_Tick(ByVal sender As Object, ByVal e As EventArgs) Handles tmr_clock.Tick
         If DateTime.Now.Minute = 0 Then ui_clock_weekday = CultureInfo.CurrentCulture.DateTimeFormat.GetShortestDayName(DateTime.Now.DayOfWeek)
 
@@ -281,34 +259,6 @@ Class MainWindow
             weather_need_update = False
         End If
 
-        'WA Spotify v2 (Aggressive) | Restart sotify evp in case of error
-        If e_playing = True And dbg_sptfy = dbg_sptfy_2 Then
-            sAPI_error_count += 1
-
-            If sAPI_error_count > 4 Then
-                wpf_helper.helper_grid(grd_spotify, False)
-
-                'TEST
-                wpf_helper.helper_grid(grd_spotify, True, 25)
-                wpf_helper.helper_image(icn_spotify, "pack://application:,,,/Resources/spotify_notification.png")
-                anim_grd_pos(grd_spotify, 5)
-                anim_grd_pos(grd_weather, 25)
-                'END
-            Else
-                flyout_media.Close() 'close media widget
-                media_widget_opened = -1
-
-                sAPI_error = True
-                sAPI_error_count = 0
-                init_spotifyAPI()
-            End If
-        Else
-            sAPI_error = False
-            sAPI_error_count = 0
-        End If
-
-        dbg_sptfy = dbg_sptfy_2
-
         If settings_need_update = True Then
             settings_load()
             settings_need_update = False
@@ -339,7 +289,6 @@ Class MainWindow
     Private Sub grd_clock_SizeChanged(sender As Object, e As SizeChangedEventArgs) Handles grd_clock.SizeChanged
         anim_grd_pos(grd_clock, (ActualWidth - grd_clock.ActualWidth) / 2)
     End Sub
-
 #End Region
 
 #Region "CoreAudio"
@@ -347,7 +296,7 @@ Class MainWindow
     ReadOnly audio_device As MMDevice = _device_enum.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eMultimedia)
 
     Private Sub init_coreaudio()
-        wnd_log.AddLine("INFO" & "-CORE AUDIO", "Initializing...")
+        wnd_log.AddLine("INFO" & "-CORE AUDIO", "Init...")
 
         wpf_helper.helper_grid(grd_volume, True)
 
@@ -411,91 +360,130 @@ Class MainWindow
 #Region "SpotifyAPI-NET"
     Dim sAPI_allowed As Boolean = False
     Dim sAPI_error As Boolean = False
-    Dim sAPI_error_count As Integer = 0
-    'needed for recovery (...)
-    Dim dbg_sptfy As String = ""
-    Dim dbg_sptfy_2 As String = ""
 
     Public Shared spotifyapi As SpotifyLocalAPI
     Public Shared _currentTrack As Track
-    Public Shared _sAPI_ClientVersion As String
 
     Sub init_spotifyAPI() 'Init and connect Spotify-API
         If sAPI_error = False Then wnd_log.AddLine("INFO" & "-MEDIA", "Init Spotify-API .NET...") Else wnd_log.AddLine("ATT" & "-MEDIA", "(!) Restarting Spotify-API .NET...", "att")
-        spotifyapi = New SpotifyLocalAPI
 
-        'Check if Spotify (and WebHelper) are running
+        spotifyapi = New SpotifyLocalAPI(250)
+
+        'Check if Spotify and WebHelper are running
         If Not SpotifyLocalAPI.IsSpotifyRunning() Then wnd_log.AddLine("INFO" & "-MEDIA", "Spotify isn't running!")
         If Not SpotifyLocalAPI.IsSpotifyWebHelperRunning() Then wnd_log.AddLine("INFO" & "-MEDIA", "SpotifyWebHelper isn't running!")
 
         Try
             sAPI_allowed = spotifyapi.Connect
+            wnd_log.AddLine("INFO" & "-MEDIA", "Connected to Spotify Client (Version: " & spotifyapi.GetStatus.ClientVersion.ToString & ")")
+            sAPI_error = False
+        Catch ex As Exception
+            wnd_log.AddLine("ERR" & "-MEDIA", ex.Message, "err")
+            sAPI_error = True
+        End Try
 
-            If sAPI_allowed = True Then
-                wnd_log.AddLine("INFO" & "-MEDIA", "Connected to Spotify Client (Version: " & spotifyapi.GetStatus.ClientVersion.ToString & ")")
-                sAPI_UpdateInfos()
+        If sAPI_allowed = True And sAPI_error = False Then
+            spotifyapi.ListenForEvents = True
 
-                spotifyapi.ListenForEvents = True
-                sAPI_error = False
+            If spotifyapi.GetStatus.Track IsNot Nothing Then 'Update track infos
+                _currentTrack = spotifyapi.GetStatus.Track
+                media_playing = spotifyapi.GetStatus.Playing
+                sui_media_update(_currentTrack.TrackResource.Name, _currentTrack.ArtistResource.Name)
+                wpf_helper.media_track_uri = _currentTrack.TrackResource.Uri
 
-                AddHandler spotifyapi.OnPlayStateChange, AddressOf spotifyapi_OnPlayStateChange
-                AddHandler spotifyapi.OnTrackChange, AddressOf spotifyapi_OnTrackChange
-                AddHandler spotifyapi.OnTrackTimeChange, AddressOf spotifyapi_OnTrackTimeChange
-            Else
-                wnd_log.AddLine("INFO" & "-MEDIA", "Couldn't connect - API disabled until next app start!")
-                sAPI_error = True
+                If media_playing = True Then
+                    tmr_spotify_watchdog.Start()
+                    wpf_helper.helper_grid(grd_spotify, True, -5, -25)
+                    anim_grd_pos(grd_spotify, weather_width)
+                    anim_grd_pos(grd_weather, 1.5)
+                Else
+                    tmr_spotify_watchdog.Stop()
+                    wpf_helper.helper_grid(grd_spotify, True, 25, -25)
+                    anim_grd_pos(grd_spotify, 5)
+                    anim_grd_pos(grd_weather, 23.5)
+                End If
             End If
 
-        Catch ex As Exception
-            wnd_log.AddLine("ERR" & "-MEDIA", "Well, here's something really fucked up...", "err")
-            'MessageBox.Show(ex.Message, "Spotify .NET API", MessageBoxButton.OK, MessageBoxImage.Error)
-        End Try
-    End Sub
-
-    Public Sub sAPI_UpdateInfos()
-        _sAPI_ClientVersion = spotifyapi.GetStatus.ClientVersion.ToString
-
-        If spotifyapi.GetStatus.Track IsNot Nothing Then        'Update track infos
-            _currentTrack = spotifyapi.GetStatus.Track
-            e_playing = spotifyapi.GetStatus.Playing
+            AddHandler spotifyapi.OnPlayStateChange, AddressOf spotifyapi_OnPlayStateChange
+            AddHandler spotifyapi.OnTrackChange, AddressOf spotifyapi_OnTrackChange
+            AddHandler spotifyapi.OnTrackTimeChange, AddressOf spotifyapi_OnTrackTimeChange
+        Else
+            wnd_log.AddLine("INFO" & "-MEDIA", "Couldn't connect to Client")
+            sAPI_error = True
         End If
     End Sub
 
-    Dim lasttrack As Track
-    Private Sub spotifyapi_OnTrackTimeChange(sender As Object, e As TrackTimeChangeEventArgs)
-        dbg_sptfy = (_currentTrack.TrackResource.Uri & e.TrackTime & _currentTrack.Length & e_playing)
+    'SPOTIFY WATCHDOG
+    Dim dbg_sptfy As String
+    Private WithEvents tmr_spotify_watchdog As New Threading.DispatcherTimer With {.Interval = New TimeSpan(0, 0, 5), .IsEnabled = False}
+    Private Sub tmr_spotify_watchdog_Tick(ByVal sender As Object, ByVal e As EventArgs) Handles tmr_spotify_watchdog.Tick
+        If media_playing = False Then
+            tmr_spotify_watchdog.Stop()
+            Exit Sub
+        End If
 
-        If Not lasttrack Is _currentTrack Or media_newtrack = True Then
-            media_newtrack = True
-            lasttrack = _currentTrack
-            sui_media_update(_currentTrack.TrackResource.Name, _currentTrack.ArtistResource.Name, Date.MinValue.AddSeconds(_currentTrack.Length - CInt(e.TrackTime)).ToString("m:ss"), e.TrackTime, _currentTrack.Length)
-        Else
-            sui_media_update(Nothing, Nothing, Date.MinValue.AddSeconds(_currentTrack.Length - CInt(e.TrackTime)).ToString("m:ss"), e.TrackTime, _currentTrack.Length)
+        If media_track_remaining = dbg_sptfy Then 'Restart spotify evp if track info didn't change for 5sec
+            wnd_log.AddLine("INFO" & "-MEDIA", "Watchdog is restarting the Spotify EVP...")
+            media_playing = False 'set to not playing to prevent multiple restarts
+
+            wpf_helper.helper_grid(grd_spotify, True, 25)
+            wpf_helper.helper_image(icn_spotify, "pack://application:,,,/Resources/spotify_notification.png")
+            anim_grd_pos(grd_spotify, 5)
+            anim_grd_pos(grd_weather, 25)
+
+            If media_widget_opened = 1 Then
+                flyout_media.Hide() '-------------- changed
+                media_widget_opened = -1
+            End If
+
+            sAPI_error = True
+            init_spotifyAPI()
+        End If
+
+        dbg_sptfy = media_track_remaining
+    End Sub
+
+    Dim media_last_time As String
+    Dim media_track_remaining As String
+    Private Sub spotifyapi_OnTrackTimeChange(sender As Object, e As TrackTimeChangeEventArgs)
+        media_track_remaining = Date.MinValue.AddSeconds(_currentTrack.Length - CInt(e.TrackTime)).ToString("m:ss")
+
+        If media_widget_opened = 1 Then
+            wpf_helper.media_track_elapsed = e.TrackTime
+            wpf_helper.media_track_length = _currentTrack.Length
+
+        ElseIf media_last_time <> media_track_remaining Then
+            wpf_helper.helper_label(lbl_spotify_remaining, media_artist & " ٠ " & media_track_remaining)
+            media_last_time = media_track_remaining
+            If media_update_title = True Then sui_media_update(_currentTrack.TrackResource.Name, _currentTrack.ArtistResource.Name)
         End If
     End Sub
 
     Private Sub spotifyapi_OnTrackChange(sender As Object, e As TrackChangeEventArgs)
         _currentTrack = e.NewTrack
+        sui_media_update(_currentTrack.TrackResource.Name, _currentTrack.ArtistResource.Name)
+        wpf_helper.media_track_uri = _currentTrack.TrackResource.Uri
     End Sub
 
-    Public Shared e_playing As Boolean
+    Public Shared media_playing As Boolean
     Private Sub spotifyapi_OnPlayStateChange(sender As Object, e As PlayStateEventArgs)
-        e_playing = e.Playing
+        media_playing = e.Playing
 
         If e.Playing = False Then
             tmr_mediaInfo_delay.Start()
+            tmr_spotify_watchdog.Start() 'Start watchdog timer
             wpf_helper.helper_image(icn_spotify, "pack://application:,,,/Resources/ic_pause_white_24dp.png")
         Else
             tmr_mediaInfo_delay.Stop()
+            tmr_spotify_watchdog.Stop() 'Stop watchdog timer
             wpf_helper.helper_image(icn_spotify, "pack://application:,,,/Resources/spotify_notification.png")
             wpf_helper.helper_grid(grd_spotify, True, -5)
             anim_grd_pos(grd_weather, 1.5)
             anim_grd_pos(grd_spotify, weather_width)
-
         End If
     End Sub
 
-    Private WithEvents tmr_mediaInfo_delay As New Threading.DispatcherTimer With {.Interval = New TimeSpan(0, 0, 0, 1), .IsEnabled = False}
+    Private WithEvents tmr_mediaInfo_delay As New Threading.DispatcherTimer With {.Interval = New TimeSpan(0, 0, 0, 0, 500), .IsEnabled = False}
     Private Sub tmr_mediaInfo_delay_Tick(ByVal sender As Object, ByVal e As EventArgs) Handles tmr_mediaInfo_delay.Tick
         wpf_helper.helper_grid(grd_spotify, True, 25)
         wpf_helper.helper_image(icn_spotify, "pack://application:,,,/Resources/spotify_notification.png")
@@ -504,54 +492,40 @@ Class MainWindow
 
         tmr_mediaInfo_delay.Stop()
     End Sub
-#End Region
 
 #Region "MIP (Media Info Processing)"
-    Public Shared media_newtrack As Boolean
-    Dim media_last_time As String
+    Public Shared media_update_title As Boolean = False
     Dim media_artist As String
 
-    Private Sub sui_media_update(ByVal e_title As String, ByVal e_artist As String, ByVal e_Tremaining As String, ByVal e_pb_val As Double, ByVal e_pb_max As Double)
-        'Title ------------------ don't update label if title didn't change
+    Private Sub sui_media_update(ByVal e_title As String, ByVal e_artist As String)
+        If media_widget_opened = 1 Then Exit Sub
+        Dim media_additional_text As String
+        media_update_title = False
 
-        If e_title <> Nothing And media_widget_opened <> 1 Then
-            Dim media_additional_text As String
+        Select Case True
+            Case e_title.Contains("(") And Not e_title.StartsWith("(")
+                wpf_helper.helper_label(lbl_spotify, e_title.Substring(0, (e_title.IndexOf("(") - 1))) 'main title
+                media_additional_text = media_trk_adinfo(e_title.Substring(e_title.IndexOf("("), e_title.Length - e_title.IndexOf("("))) & " ٠ " 'check & add_info in SubLabel
 
-            Select Case True
-                Case e_title.Contains("(") And Not e_title.StartsWith("(")
-                    wpf_helper.helper_label(lbl_spotify, e_title.Substring(0, (e_title.IndexOf("(") - 1))) 'main title
-                    media_additional_text = media_trk_adinfo(e_title.Substring(e_title.IndexOf("("), e_title.Length - e_title.IndexOf("("))) & " ٠ " 'check & add_info in SubLabel
+            Case e_title.Contains("- ")
+                wpf_helper.helper_label(lbl_spotify, e_title.Substring(0, (e_title.IndexOf("-") - 1))) 'main title
+                media_additional_text = media_trk_adinfo(e_title.Substring(e_title.IndexOf("-"), e_title.Length - e_title.IndexOf("-"))) & " ٠ "  'check & add_info in SubLabel
 
-                Case e_title.Contains("- ")
-                    wpf_helper.helper_label(lbl_spotify, e_title.Substring(0, (e_title.IndexOf("-") - 1))) 'main title
-                    media_additional_text = media_trk_adinfo(e_title.Substring(e_title.IndexOf("-"), e_title.Length - e_title.IndexOf("-"))) & " ٠ "  'check & add_info in SubLabel
+            Case Else
+                media_additional_text = Nothing
 
-                Case Else
-                    media_additional_text = ""
+                If e_title.Length > 41 Then
+                    wpf_helper.helper_label(lbl_spotify, e_title.Remove(40, e_title.Length - 40) & "...")
+                Else
+                    wpf_helper.helper_label(lbl_spotify, e_title)
+                End If
+        End Select 'wpf_helper.helper_label(lbl_spotify_remaining, media_artist & " ٠ -:--")
 
-                    If e_title.Length > 41 Then
-                        wpf_helper.helper_label(lbl_spotify, e_title.Remove(40, e_title.Length - 40) & "...")
-                    Else
-                        wpf_helper.helper_label(lbl_spotify, e_title)
-                    End If
-            End Select
-
-            media_artist = media_additional_text & e_artist
-            media_newtrack = False
-        End If
-
-        If Not media_last_time = e_Tremaining And media_widget_opened <> 1 Then
-            wpf_helper.helper_label(lbl_spotify_remaining, media_artist & " ٠ " & e_Tremaining)
-            media_last_time = e_Tremaining
-        End If
-
-        If media_widget_opened = 1 Then wnd_flyout_media.str_media_time = e_pb_val & "%" & e_pb_max & "#" & e_Tremaining
+        media_artist = media_additional_text & e_artist
     End Sub
 
-    'MEDIA GRID UPDATE PART ---------------------------
-    Private Function media_trk_adinfo(e As String) As String
+    Private Function media_trk_adinfo(e As String) As String 'function for trimming the extra info in the title
         Dim e_fs As String = e
-
         'remove "(" at start and ")" end
         If e.StartsWith("(") And e.EndsWith(")") Then e_fs = e.Substring(1, e.Length - 2)
         'remove "-" at beginning
@@ -564,38 +538,33 @@ Class MainWindow
         End If
     End Function
 
-    Private Sub lbl_spotify_SizeChanged(sender As Object, e As SizeChangedEventArgs) Handles lbl_spotify.SizeChanged, lbl_spotify_remaining.SizeChanged
+    Private Sub lbl_spotify_SizeChanged(sender As Object, e As SizeChangedEventArgs) Handles lbl_spotify.SizeChanged ', lbl_spotify_remaining.SizeChanged
         lbl_spotify_remaining.Margin = New Thickness(icn_spotify.RenderSize.Width + lbl_spotify.RenderSize.Width - 4, -1, 0, 0)
     End Sub
 
-    'SPOTIFY TRACK CHANGE
+#Region "CTRL'S"
+    'SPOTIFY TRACK CHANGE -- Scroll up > Next Track / Skip | Scroll down > Last Track / Return
     Dim spotify_skip_trackChange As Boolean = False
-
-    'Change track with scrolling up/down
     Private Sub lbl_spotify_MouseWheel(sender As Object, e As MouseWheelEventArgs) Handles grd_spotify.MouseWheel
         If spotify_skip_trackChange = True Then
             spotify_skip_trackChange = False
         Else
-            'Scroll up > Next Track / Skip | Scroll down > Last Track / Return
             If e.Delta > 0 Then spotifyapi.Skip() Else spotifyapi.Previous()
-
             spotify_skip_trackChange = True
         End If
     End Sub
 
     Private Sub btn_spotify_playpause_Click(sender As Object, e As RoutedEventArgs) Handles icn_spotify.MouseUp
         If sAPI_error = True Then
-            sAPI_error_count = 0
             init_spotifyAPI()
-            wpf_helper.helper_grid(grd_spotify, e_playing) 'grid is only visible if Spotify is playing something.
+            wpf_helper.helper_grid(grd_spotify, media_playing) 'grid is only visible if Spotify is playing something.
         Else
-            ' PlayPause
-            If e_playing = False Then spotifyapi.Play() Else spotifyapi.Pause()
+            If media_playing = False Then spotifyapi.Play() Else spotifyapi.Pause() 'PlayPause
         End If
     End Sub
 
     Private Sub icn_spotify_MouseEnter(sender As Object, e As MouseEventArgs) Handles icn_spotify.MouseEnter
-        If e_playing = True Then
+        If media_playing = True Then
             wpf_helper.helper_image(icn_spotify, "pack://application:,,,/Resources/ic_pause_white_24dp.png")
         Else
             wpf_helper.helper_image(icn_spotify, "pack://application:,,,/Resources/ic_play_arrow_white_24dp.png")
@@ -605,44 +574,15 @@ Class MainWindow
     Private Sub icn_spotify_MouseLeave(sender As Object, e As MouseEventArgs) Handles icn_spotify.MouseLeave
         wpf_helper.helper_image(icn_spotify, "pack://application:,,,/Resources/spotify_notification.png")
     End Sub
+#End Region
 
-    'positioning labels - left
-    Dim weather_width As Double = 0
-    Private Sub lbl_weather_SizeChanged(sender As Object, e As SizeChangedEventArgs) Handles grd_weather.SizeChanged ', grd_spotify.SizeChanged
-        If grd_weather.Visibility = Visibility.Visible Then
-            weather_width = grd_weather.ActualWidth
+#End Region
 
-            If e_playing = True Then
-                anim_grd_pos(grd_spotify, weather_width)
-                anim_grd_pos(grd_weather, 1.5)
-            Else
-
-            End If
-        Else
-            'grd_spotify.Margin = New Thickness(3, 0, 0, 0)
-            weather_width = 5
-            anim_grd_pos(grd_spotify, weather_width)
-        End If
-    End Sub
-
-    Private Sub grd_weather_IsVisibleChanged(sender As Object, e As DependencyPropertyChangedEventArgs) Handles grd_weather.IsVisibleChanged
-        If grd_weather.Visibility = Visibility.Visible Then
-            weather_width = grd_weather.ActualWidth
-            If e_playing = True Then
-                anim_grd_pos(grd_spotify, weather_width)
-                anim_grd_pos(grd_weather, 1.5)
-            End If
-        Else
-            'grd_spotify.Margin = New Thickness(3, 0, 0, 0)
-            weather_width = 5
-            anim_grd_pos(grd_spotify, weather_width)
-        End If
-    End Sub
 #End Region
 
 #Region "NOTIFICATION"
     Private Sub helper_notification(e_msg As String, Optional e_icn As String = Nothing)
-        Application.Current.Dispatcher.Invoke(Threading.DispatcherPriority.Normal,
+        Windows.Application.Current.Dispatcher.Invoke(Threading.DispatcherPriority.Normal,
                                               New ThreadStart(Sub()
                                                                   Dim c_blur As New Effects.BlurEffect With {.Radius = 10}
                                                                   grd_controls.Effect = c_blur
@@ -669,10 +609,10 @@ Class MainWindow
     End Sub
 #End Region
 
-#Region "NetMonitor v2"
+#Region "NetMonitor"
     Dim netmon_enabled As Integer = 0 '0 = disabled / 1 = enabled / -1 = error
     Dim netmon_NIC As NetworkInterface
-    Dim netmon_config_thresh_text As Boolean = False    'Settings
+    Dim netmon_config_thresh_text As Boolean = False
     Dim netmon_config_threshold As Integer = 10
 
     Private WithEvents tmr_netmon_v2 As New Threading.DispatcherTimer With {.Interval = New TimeSpan(0, 0, 0, 0, 500), .IsEnabled = False}
@@ -680,9 +620,9 @@ Class MainWindow
         If netmon_enabled = -1 Then
             wnd_log.AddLine("INFO" & "-NET", "Network monitoring state: " & netmon_enabled.ToString)
             tmr_netmon_v2.Stop()
+        Else
+            net_monitoring()
         End If
-
-        net_monitoring()
     End Sub
 
     Private Sub netmon_set_nic()
@@ -734,7 +674,7 @@ Class MainWindow
     Private Function netmon_checkInternetConnection() As Boolean
         Try
             Using client = New Net.WebClient()
-                Using stream = client.OpenRead("http://www.google.com")
+                Using stream = client.OpenRead("https://1.1.1.1")
                     Return True
                 End Using
             End Using
@@ -801,7 +741,7 @@ Class MainWindow
         netmon_bytesTx_total = net_NIC_statistic.BytesSent
         netmon_bytesRx_total = net_NIC_statistic.BytesReceived
 
-        'sent v2
+        'tx v2
         If netmon_speed_Tx > netmon_config_threshold Then
             icn_network_send.Visibility = Visibility.Visible
 
@@ -815,7 +755,7 @@ Class MainWindow
             icn_network_send.Visibility = Visibility.Hidden
         End If
 
-        'received v2
+        'rx v2
         If netmon_speed_Rx > netmon_config_threshold Then
             icn_network_receive.Visibility = Visibility.Visible
 
@@ -868,7 +808,7 @@ Class MainWindow
     ReadOnly _weather_flyout As New wnd_flyout_weather
     Private Sub icn_weather_MouseUp(sender As Object, e As MouseButtonEventArgs) Handles grd_weather.MouseUp
         If media_widget_opened = 1 Then
-            media_newtrack = True
+            'media_newtrack = True
             flyout_media.Hide()
             media_widget_opened = 0
         End If
@@ -883,10 +823,10 @@ Class MainWindow
     Dim flyout_media As New wnd_flyout_media
 
     Private Sub lbl_spotify_MouseLeftButtonUp(sender As Object, e As MouseButtonEventArgs) Handles lbl_spotify.MouseLeftButtonUp, lbl_spotify_remaining.MouseLeftButtonUp
+        If sAPI_error = True Or sAPI_allowed = False Then Exit Sub
         If media_widget_opened = -1 Then flyout_media = New wnd_flyout_media
 
         If media_widget_opened = 1 Then
-            media_newtrack = True
             flyout_media.Hide()
             media_widget_opened = 0
         Else
@@ -901,7 +841,7 @@ Class MainWindow
     End Sub
 #End Region
 
-#Region "Animations"
+#Region "Animations & UI"
     Private Sub anim_grd_pos(ByVal e_grid As Grid, ByVal e_pos_left As Double)
         Application.Current.Dispatcher.Invoke(Threading.DispatcherPriority.Normal, New ThreadStart(Sub()
                                                                                                        Dim ta As ThicknessAnimation = New ThicknessAnimation With {
@@ -912,6 +852,36 @@ Class MainWindow
                                                                                                                              }
                                                                                                        e_grid.BeginAnimation(MarginProperty, ta)
                                                                                                    End Sub))
+    End Sub
+
+    Dim weather_width As Double = 0 'positioning labels - left
+    Private Sub lbl_weather_SizeChanged(sender As Object, e As SizeChangedEventArgs) Handles grd_weather.SizeChanged
+        If grd_weather.Visibility = Visibility.Visible Then
+            weather_width = grd_weather.ActualWidth
+
+            If media_playing = True Then
+                anim_grd_pos(grd_spotify, weather_width)
+                anim_grd_pos(grd_weather, 1.5)
+            Else
+
+            End If
+        Else
+            weather_width = 5
+            anim_grd_pos(grd_spotify, weather_width)
+        End If
+    End Sub
+
+    Private Sub grd_weather_IsVisibleChanged(sender As Object, e As DependencyPropertyChangedEventArgs) Handles grd_weather.IsVisibleChanged
+        If grd_weather.Visibility = Visibility.Visible Then
+            weather_width = grd_weather.ActualWidth
+            If media_playing = True Then
+                anim_grd_pos(grd_spotify, weather_width)
+                anim_grd_pos(grd_weather, 1.5)
+            End If
+        Else
+            weather_width = 5
+            anim_grd_pos(grd_spotify, weather_width)
+        End If
     End Sub
 #End Region
 
